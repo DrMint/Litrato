@@ -148,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         int histHeight = hist.getHeight() - 1;
+        int histWidth = hist.getWidth();
 
         int colorR;
         int colorG;
@@ -155,14 +156,14 @@ public class MainActivity extends AppCompatActivity {
 
         int index;
 
-        pixels = new int[bmp.getHeight() * bmp.getWidth()];
+        pixels = new int[hist.getHeight() * hist.getWidth()];
 
-        for (int x = 0; x < 255; x++) {
+        for (int x = 0; x < histWidth; x++) {
 
 
             for (int y = 0; y < histHeight; y++) {
 
-                index = x + ((histHeight - y) * 255);
+                index = x + ((histHeight - y) * histWidth);
 
                 colorR = 0;
                 colorG = 0;
@@ -175,9 +176,6 @@ public class MainActivity extends AppCompatActivity {
                 pixels[index] = Color.rgb(colorR, colorG, colorB);
 
             }
-
-
-            //hist.setPixel(i, value, Color.rgb(255,0,0));
         }
 
         hist.setPixels(pixels, 0, hist.getWidth(), 0, 0, hist.getWidth(), hist.getHeight());
@@ -298,9 +296,10 @@ public class MainActivity extends AppCompatActivity {
             imageView.setImageBitmap(mBitmap);
 
 
+            Bitmap immutableBmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
             ImageView hist = findViewById(R.id.histogram);
             Bitmap histogram = Bitmap.createBitmap(255, 200, Bitmap.Config.ARGB_8888);
-            histogramCalc(mBitmap, histogram);
+            histogramCalc(immutableBmp, histogram);
             hist.setImageBitmap(histogram);
 
 
