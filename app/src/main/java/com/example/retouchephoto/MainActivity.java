@@ -7,38 +7,38 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.provider.MediaStore;
+
 import android.view.View;
 import android.content.Intent;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Button;
 import android.graphics.Color;
-import java.util.Arrays;
 import java.io.IOException;
 
-import android.net.Uri;
-
-import static android.graphics.Color.HSVToColor;
 import static android.graphics.Color.blue;
 import static android.graphics.Color.green;
 import static android.graphics.Color.red;
+import android.content.Context;
+
+import com.divyanshu.colorseekbar.ColorSeekBar;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static Context context;
     private int PICK_IMAGE_REQUEST = 1;
     public Bitmap original_image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MainActivity.context = getApplicationContext();
+
         setContentView(R.layout.activity_main);
 
-        ImageView img = findViewById(R.id.imageView);
-
-        img.setOnClickListener(new View.OnClickListener() {
+        // When the user click on imageView, asks the user to choose an image
+        findViewById(R.id.imageView).setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
@@ -51,71 +51,88 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        Button b = findViewById(R.id.Originalbutton);
-        b.setOnClickListener(new View.OnClickListener(){
+        // When the user click on the reset button, put back the original image
+        findViewById(R.id.Originalbutton).setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                ImageView img = findViewById(R.id.imageView);
-                img.setImageBitmap(original_image);
-
-                Bitmap immutableBmp = ((BitmapDrawable) img.getDrawable()).getBitmap();
-                ImageView hist = findViewById(R.id.histogram);
-                Bitmap histogram = Bitmap.createBitmap(255, 200, Bitmap.Config.ARGB_8888);
-                histogramCalc(immutableBmp, histogram);
-                hist.setImageBitmap(histogram);
-
+                // If the user didn't choose an image yet, there is no image to return to.
+                if (original_image == null) return;
+                resetImage();
             }
 
         });
 
-
-        /*SPINNER*/
-
+        // Here are the elements shown in the spinner
         String[] arraySpinner = new String[] {
-                "", "Grey Filter", "Invert", "Invert luminosity", "Keep Reds", "Contrast+", "Test RGB HSV"
+                "",
+                "Grey Filter",
+                "Invert",
+                "Invert luminosity",
+                "Keep a color",
+                "Colorize",
+                "Change hue",
+                "Linear Constast Stretching",
+                "Histogram equalization",
+                "Test RGB HSV"
         };
-
         final Spinner sp = findViewById(R.id.spinner);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, arraySpinner);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp.setAdapter(adapter);
 
 
-
         sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
+            /**
+             * Handles when an item is selected in the spinner and
+             * applies the corresponding filter.
+             */
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Reset the spinner
                 sp.setSelection(0);
 
+                // If the user didn't choose an image yet, don't apply any filter.
                 if (original_image == null) return;
 
-                ImageView img = findViewById(R.id.imageView);
+                final ImageView imgViewer = findViewById(R.id.imageView);
+                final Bitmap immutableBmp = ((BitmapDrawable) imgViewer.getDrawable()).getBitmap();
 
-                Bitmap immutableBmp = ((BitmapDrawable) img.getDrawable()).getBitmap();
+                final int imageHeight = immutableBmp.getHeight();
+                final int imageWidth = immutableBmp.getWidth();
+
+                // Turns the image into a pixel array
                 Bitmap mutableBitmap = immutableBmp.copy(Bitmap.Config.ARGB_8888, true);
+                int[] imagePixels = new int[imageHeight * imageWidth];
+                mutableBitmap.getPixels(imagePixels, 0, imageWidth, 0, 0, imageWidth, imageHeight);
 
+                final ColorSeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
+                float[] tmp = new float[3];
+                Filter.rgb2hsv(colorSeekBar.getColor(), tmp);
+                int colorSeekHue = (int) tmp[0];
+
+
+                // Apply the filter corresponding to the selected element in the spinner
                 switch ((int) id) {
-                    case 1: toGray(mutableBitmap);break;
-                    case 2: invert(mutableBitmap);break;
-                    case 3: invertLuminosity(mutableBitmap);break;
-                    case 4: HSVFilter(mutableBitmap, 0);break;
-                    case 5: contrastPlusHSV(mutableBitmap);break;
-                    case 6: testHSVRGB(mutableBitmap);break;
+                    case 1: Filter.toGrayRS(imagePixels, imageWidth, imageHeight);break;
+                    case 2: Filter.invertRS(imagePixels, imageWidth, imageHeight);break;
+                    case 3: Filter.invertLuminosity(imagePixels, imageWidth, imageHeight);break;
+                    case 4: Filter.keepAColor(imagePixels, colorSeekHue);break;
+                    case 5: Filter.colorize(imagePixels, colorSeekHue);break;
+                    case 6: Filter.changeHue(imagePixels, colorSeekHue);break;
+                    case 7: Filter.linearContrastStretching(imagePixels);break;
+                    case 8: Filter.histogramEqualization(imagePixels);break;
+                    case 9: Filter.testHSVRGB(imagePixels);break;
                 }
 
+                // Turn the pixel array back into an image
+                mutableBitmap.setPixels(imagePixels, 0, imageWidth, 0, 0, imageWidth, imageHeight);
+                imgViewer.setImageBitmap(mutableBitmap);
 
-                ImageView hist = findViewById(R.id.histogram);
-                Bitmap histogram = Bitmap.createBitmap(255, 200, Bitmap.Config.ARGB_8888);
-                histogramCalc(immutableBmp, histogram);
-                hist.setImageBitmap(histogram);
-
-                img.setImageBitmap(mutableBitmap);
-
+                refreshHistogram(imagePixels);
             }
 
             @Override
@@ -124,28 +141,74 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void histogramCalc(Bitmap bmp, Bitmap hist) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // After the user as selected an image, loads it and stores it in this.original_image
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Bitmap mBitmap = null;
+            try {
+                mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.original_image = mBitmap;
+            resetImage();
+        }
+    }
+
+
+    /**
+     * Display the original image in "imageView" and refresh the histogram.
+     */
+    public void resetImage() {
+        // Finds the imageView and makes it display original_image
+        final ImageView imageView = findViewById(R.id.imageView);
+        imageView.setImageBitmap(original_image);
+
+        // Get the pixels into a pixel array and refresh the histogram.
+        Bitmap mutableBitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+        int[] imagePixels = new int[mutableBitmap.getHeight() * mutableBitmap.getWidth()];
+        mutableBitmap.getPixels(imagePixels, 0, mutableBitmap.getWidth(), 0, 0, mutableBitmap.getWidth(), mutableBitmap.getHeight());
+        refreshHistogram(imagePixels);
+    }
+
+    /**
+     *  Generates the histogram and displays it in "histogram"
+     *  @param pixels the pixels of the image to analyse
+     */
+    public void refreshHistogram(int[] pixels) {
+
+        final ImageView histogram = findViewById(R.id.histogram);
+        Bitmap hist = Bitmap.createBitmap(255, 200, Bitmap.Config.ARGB_8888);
+
+
         int[] Rvalues = new int[256];
         int[] Gvalues = new int[256];
         int[] Bvalues = new int[256];
 
-        int[] pixels = new int[bmp.getHeight() * bmp.getWidth()];
-
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        for (int i = 0; i < bmp.getHeight() * bmp.getWidth(); i++) {
-            Rvalues[red(pixels[i])] += 1;
-            Gvalues[green(pixels[i])] += 1;
-            Bvalues[blue(pixels[i])] += 1;
+        // Stores how many occurrences of all color intensities, for each channel.
+        for (int pixel : pixels) {
+            Rvalues[red(pixel)] += 1;
+            Gvalues[green(pixel)] += 1;
+            Bvalues[blue(pixel)] += 1;
         }
 
         int max = 0;
 
+        // Finds the intensity (in all three channels) with the maximum number of occurrences.
         for (int i = 0; i < 255; i++) {
             max = Math.max(max, Rvalues[i]);
             max = Math.max(max, Gvalues[i]);
             max = Math.max(max, Bvalues[i]);
         }
 
+        // If the image is blank, return with a black histogram.
+        if (max == 0) {
+            histogram.setImageBitmap(hist);
+            return;
+        }
 
         int histHeight = hist.getHeight() - 1;
         int histWidth = hist.getWidth();
@@ -154,16 +217,11 @@ public class MainActivity extends AppCompatActivity {
         int colorG;
         int colorB;
 
-        int index;
 
-        pixels = new int[hist.getHeight() * hist.getWidth()];
+        int[] histPixels = new int[hist.getHeight() * hist.getWidth()];
 
         for (int x = 0; x < histWidth; x++) {
-
-
             for (int y = 0; y < histHeight; y++) {
-
-                index = x + ((histHeight - y) * histWidth);
 
                 colorR = 0;
                 colorG = 0;
@@ -173,222 +231,25 @@ public class MainActivity extends AppCompatActivity {
                 if (Gvalues[x] * histHeight / max >= y) {colorG = 255;}
                 if (Bvalues[x] * histHeight / max >= y) {colorB = 255;}
 
-                pixels[index] = Color.rgb(colorR, colorG, colorB);
+                histPixels[x + ((histHeight - y) * histWidth)] = Color.rgb(colorR, colorG, colorB);
 
             }
         }
 
-        hist.setPixels(pixels, 0, hist.getWidth(), 0, 0, hist.getWidth(), hist.getHeight());
-
-
-    }
-
-    public void toGray(Bitmap bmp) {
-
-        int[] pixels = new int[bmp.getHeight() * bmp.getWidth()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        for (int i = 0; i < bmp.getHeight() * bmp.getWidth(); i++) {
-            int grey = (int) (red(pixels[i]) * 0.3 + Color.green(pixels[i]) * 0.59 + Color.blue(pixels[i]) * 0.11);
-            pixels[i]  = Color.rgb(grey, grey, grey);
-        }
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+        hist.setPixels(histPixels, 0, hist.getWidth(), 0, 0, hist.getWidth(), hist.getHeight());
+        histogram.setImageBitmap(hist);
 
     }
 
-    public void invert(Bitmap bmp) {
-
-        int[] pixels = new int[bmp.getHeight() * bmp.getWidth()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        for (int i = 0; i < bmp.getHeight() * bmp.getWidth(); i++) {
-            pixels[i] = (0xFFFFFF - pixels[i]) | 0xFF000000;
-        }
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-
+    /**
+     * Probably bad, put that's how I retrieve MainActivity's context
+     * that I need for RenderScript in the Filter class.
+     * @return MainActivity's context
+     */
+    public static Context getAppContext() {
+        return MainActivity.context;
     }
 
-    public void HSVFilter(Bitmap bmp, int deg) {
-
-        deg = 180 - deg;
-        int color_margin = 50;
-        int diff;
-        float[] hsv = new float[3];
-        float[] hsv2 = new float[3];
-
-        int[] pixels = new int[bmp.getHeight() * bmp.getWidth()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        for (int i = 0; i < bmp.getHeight() * bmp.getWidth(); i++) {
-            Color.colorToHSV(pixels[i], hsv);
-            //rgb2hsv(pixels[i], hsv);
-            diff = (int) Math.abs(((hsv[0] + deg) % 360) - 180);
-            hsv[1] = Math.min(hsv[1], 1f - 1f / color_margin * diff);
-            pixels[i] = Color.HSVToColor(hsv);
-            //pixels[i] = hsv2rgb(hsv);
-        }
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-
-    }
-
-    public void invertLuminosity(Bitmap bmp) {
-
-        invert(bmp);
-
-        int[] pixels = new int[bmp.getHeight() * bmp.getWidth()];
-        float[] hsv = new float[3];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        for (int i = 0; i < bmp.getHeight() * bmp.getWidth(); i++) {
-            rgb2hsv(pixels[i], hsv);
-            hsv[0] = (180 + hsv[0]) % 360;
-            pixels[i] = hsv2rgb(hsv);
-        }
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-    }
-
-    public void contrastPlusHSV(Bitmap bmp) {
-
-        int[] pixels = new int[bmp.getHeight() * bmp.getWidth()];
-        float minLuminosity = 1;
-        float maxLuminosity = 0;
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        float[] hsv = new float[3];
-
-        for (int i = 0; i < bmp.getHeight() * bmp.getWidth(); i++) {
-            rgb2hsv(pixels[i], hsv);
-            minLuminosity = Math.min(minLuminosity, hsv[2]);
-            maxLuminosity = Math.max(maxLuminosity, hsv[2]);
-        }
-
-        float diff = 1 / (maxLuminosity - minLuminosity);
-
-        for (int i = 0; i < bmp.getHeight() * bmp.getWidth(); i++) {
-            rgb2hsv(pixels[i], hsv);
-            hsv[2] = (hsv[2] - minLuminosity) * diff;
-            pixels[i] = hsv2rgb(hsv);
-        }
-
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-
-    }
-
-    public void testHSVRGB(Bitmap bmp) {
-        int[] pixels = new int[bmp.getHeight() * bmp.getWidth()];
-        float[] hsv = new float[3];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        for (int i = 0; i < bmp.getHeight() * bmp.getWidth(); i++) {
-            rgb2hsv(pixels[i], hsv);
-            pixels[i] = hsv2rgb(hsv);
-        }
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            ImageView imageView = findViewById(R.id.imageView);
-            Bitmap mBitmap = null;
-            try {
-                mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            imageView.setImageBitmap(mBitmap);
-
-
-            Bitmap immutableBmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-            ImageView hist = findViewById(R.id.histogram);
-            Bitmap histogram = Bitmap.createBitmap(255, 200, Bitmap.Config.ARGB_8888);
-            histogramCalc(immutableBmp, histogram);
-            hist.setImageBitmap(histogram);
-
-
-            this.original_image = mBitmap;
-        }
-    }
-
-    public int hsv2rgb (float[] color) {
-        float H = color[0];
-        float S = color[1];
-        float V = color[2];
-        
-        if (S < 0) {S = 0;}
-        if (S > 1) {S = 1;}
-        if (V < 0) {V = 0;}
-        if (V > 1) {V = 1;}
-
-        float C = V * S;
-        float X = C * (1 - Math.abs((H / 60f) % 2 - 1));
-        float m = V - C;
-
-        float R = 0;
-        float G = 0;
-        float B = 0;
-
-        int tmp = (int) (H / 60f);
-
-
-        switch (tmp) {
-            case 0: R = C; G = X; B = 0; break;
-            case 1: R = X; G = C; B = 0; break;
-            case 2: R = 0; G = C; B = X; break;
-            case 3: R = 0; G = X; B = C; break;
-            case 4: R = X; G = 0; B = C; break;
-            case 5: R = C; G = 0; B = X; break;
-        }
-
-        int r = (int) ((R + m) * 255);
-        int g = (int) ((G + m) * 255);
-        int b = (int) ((B + m) * 255);
-
-        return Color.rgb(r,g,b);
-
-
-    }
-
-    public void rgb2hsv (int color, float[] hsv) {
-
-
-        float R = (float) red(color) / 255;
-        float G = (float) green(color) / 255;
-        float B = (float) blue(color) / 255;
-
-        float minRGB = Math.min(R, Math.min(G, B));
-        float maxRGB = Math.max(R, Math.max(G, B));
-
-        float deltaRGB = maxRGB - minRGB;
-
-        float H;
-        float S;
-        float V;
-
-        if (deltaRGB == 0) {
-            H = 0;
-        } else if (maxRGB == R) {
-            H = 60 * ((G - B) / deltaRGB % 6);
-        } else if (maxRGB == G) {
-            H = 60 * ((B - R) / deltaRGB + 2);
-        } else {
-            H = 60 * ((R - G) / deltaRGB + 4);
-        }
-
-        if (maxRGB == 0) {
-            S = 0;
-        } else {
-            S = deltaRGB / maxRGB;
-        }
-
-        V = maxRGB;
-
-        if (H < 0.0) {
-            H += 360;
-        }
-
-        hsv[0] = H;
-        hsv[1] = S;
-        hsv[2] = V;
-
-    }
 }
 
 
