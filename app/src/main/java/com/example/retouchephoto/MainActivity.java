@@ -25,8 +25,16 @@ import android.content.Context;
 import com.divyanshu.colorseekbar.ColorSeekBar;
 
 
+/*
+    This is probably bad, but that's how the Filter class can access MainActivity's context
+    I need it for RenderScript.
+*/
+@SuppressWarnings("StaticFieldLeak")
+
+
 public class MainActivity extends AppCompatActivity {
-    private static Context context;
+
+    static Context context;
     private int PICK_IMAGE_REQUEST = 1;
     public Bitmap original_image;
 
@@ -65,14 +73,15 @@ public class MainActivity extends AppCompatActivity {
 
         // Here are the elements shown in the spinner
         String[] arraySpinner = new String[] {
-                "",
+                "Choose a filter...",
                 "Grey Filter",
                 "Invert",
                 "Invert luminosity",
                 "Keep a color",
                 "Colorize",
                 "Change hue",
-                "Linear Constast Stretching",
+                "Linear contrast stretching",
+                "Linear contrast compressing",
                 "Histogram equalization",
                 "Test RGB HSV"
         };
@@ -123,9 +132,10 @@ public class MainActivity extends AppCompatActivity {
                     case 4: Filter.keepAColor(imagePixels, colorSeekHue);break;
                     case 5: Filter.colorize(imagePixels, colorSeekHue);break;
                     case 6: Filter.changeHue(imagePixels, colorSeekHue);break;
-                    case 7: Filter.linearContrastStretching(imagePixels);break;
-                    case 8: Filter.histogramEqualization(imagePixels);break;
-                    case 9: Filter.testHSVRGB(imagePixels);break;
+                    case 7: Filter.linearContrastStretching(imagePixels, 0f, 1f);break;
+                    case 8: Filter.linearContrastStretching(imagePixels, 0.3f, 0.9f);break;
+                    case 9: Filter.histogramEqualization(imagePixels);break;
+                    case 10: Filter.testHSVRGB(imagePixels);break;
                 }
 
                 // Turn the pixel array back into an image
@@ -242,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Probably bad, put that's how I retrieve MainActivity's context
+     * Probably bad, but that's how I retrieve MainActivity's context
      * that I need for RenderScript in the Filter class.
      * @return MainActivity's context
      */

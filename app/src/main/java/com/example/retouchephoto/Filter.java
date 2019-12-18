@@ -13,7 +13,16 @@ import androidx.renderscript.Allocation;
 import com.android.retouchephoto.ScriptC_gray;
 import com.android.retouchephoto.ScriptC_invert;
 
-public class Filter {
+
+/*  The Android Studio seems to think my function aren't use in other classes inside
+    this package. It would like me to add "protected" to my function which would
+    prevent MainActivity to use those filter...
+    I will disable this warning for now.
+ */
+@SuppressWarnings("WeakerAccess")
+
+
+class Filter {
 
     /**
      *  A filter that convert the image to grayscale.
@@ -22,7 +31,7 @@ public class Filter {
      *  @param imageWidth the image's width
      *  @param imageHeight the image's height
      */
-    static public void toGrayRS(int[] pixels, int imageWidth, int imageHeight) {
+    static protected void toGrayRS(int[] pixels, int imageWidth, int imageHeight) {
 
         Bitmap bmp = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
         bmp.setPixels(pixels, 0, imageWidth, 0, 0, imageWidth, imageHeight);
@@ -51,7 +60,7 @@ public class Filter {
      *  @param imageWidth the image's width
      *  @param imageHeight the image's height
      */
-    static public void invertRS(int[] pixels, int imageWidth, int imageHeight) {
+    static protected void invertRS(int[] pixels, int imageWidth, int imageHeight) {
 
         Bitmap bmp = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
         bmp.setPixels(pixels, 0, imageWidth, 0, 0, imageWidth, imageHeight);
@@ -166,11 +175,12 @@ public class Filter {
 
 
     /**
-     *  A filter that increase the contrast by making sure the intensities
-     *  of the pixels are spread in between 0 and 255.
+     *  A filter that stretch or compress the current range of luminosity to a new target range.
      *  @param pixels the pixels of the image
+     *  @param targetMinLuminosity the luminosity of the darkest pixel after linear stretching (must be between 0f and 1f)
+     *  @param targetMaxLuminosity the luminosity of the brightest pixel after linear stretching (must be between 0f and 1f)
      */
-    static public void linearContrastStretching(int[] pixels) {
+    static public void linearContrastStretching(int[] pixels, float targetMinLuminosity, float targetMaxLuminosity) {
 
         float minLuminosity = 1;
         float maxLuminosity = 0;
@@ -183,18 +193,17 @@ public class Filter {
             maxLuminosity = Math.max(maxLuminosity, hsv[2]);
         }
 
-        float diff;
+        float stretching;
         if (maxLuminosity == minLuminosity) {
-            diff = 1;
+            stretching = (targetMaxLuminosity - targetMinLuminosity) / 255;
         } else {
-            diff = 1 / (maxLuminosity - minLuminosity);
+            stretching = (targetMaxLuminosity - targetMinLuminosity) / (maxLuminosity - minLuminosity);
         }
 
         float[] lut = new float[256];
         for(int i = 0; i < 256; i++){
-            lut[i] = ((float) 1 / 256 * i - minLuminosity) * diff;
+            lut[i] = ((float) 1 / 256 * i - minLuminosity) * stretching + targetMinLuminosity;
         }
-
 
         for (int i = 0; i < pixelsLength; i++) {
             rgb2hsv(pixels[i], hsv);

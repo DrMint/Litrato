@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">RetouchePhoto</string>
     <string name="action_settings">Settings</string>
+    <string name="saveButtonString">Save</string>
+    <string name="originalButtonString">Original</string>
+    <string name="imageViewDescription">It\'s the image that will be modified.</string>
+    <string name="histogramViewDescription">It\'s the image histogram.</string>
 </resources>

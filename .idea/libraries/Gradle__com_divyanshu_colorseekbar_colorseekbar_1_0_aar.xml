@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: com.divyanshu.colorseekbar:colorseekbar:1.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2a2c23dd2e205a78e89dbba9266423ff/colorseekbar-1.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2a2c23dd2e205a78e89dbba9266423ff/colorseekbar-1.0/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.divyanshu.colorseekbar/colorseekbar/1.0/fac6a4716fc60b6fa8dc203de4bdbeaee4b2bc2e/colorseekbar-1.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.divyanshu.colorseekbar/colorseekbar/1.0/867372a4ee410a36abe1a4afd8252ca5c8e6667e/colorseekbar-1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
