@@ -1,18 +1,25 @@
 package com.example.retouchephoto;
 
 import android.graphics.Bitmap;
+
+import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
 import android.graphics.Color;
 
-import static android.graphics.Color.blue;
-import static android.graphics.Color.green;
 import static android.graphics.Color.red;
+import static com.example.retouchephoto.Convolution.*;
+import static com.example.retouchephoto.ColorTools.*;
+import static com.example.retouchephoto.RenderScriptTools.*;
 
 import androidx.renderscript.Allocation;
+import androidx.renderscript.ScriptIntrinsicBlur;
 
 import com.android.retouchephoto.ScriptC_gray;
 import com.android.retouchephoto.ScriptC_invert;
-
+import com.android.retouchephoto.ScriptC_posterize;
+import com.android.retouchephoto.ScriptC_saturation;
+import com.android.retouchephoto.ScriptC_brightness;
+import com.android.retouchephoto.ScriptC_threshold;
 
 /*  The Android Studio seems to think my function aren't use in other classes inside
     this package. It would like me to add "protected" to my function which would
@@ -24,61 +31,74 @@ import com.android.retouchephoto.ScriptC_invert;
 
 class Filter {
 
-    /**
-     *  A filter that convert the image to grayscale.
-     *  This filter use RenderScript.
-     *  @param pixels the pixels of the image
-     *  @param imageWidth the image's width
-     *  @param imageHeight the image's height
-     */
-    static protected void toGrayRS(int[] pixels, int imageWidth, int imageHeight) {
+    int id;
+    String name;
+    int redirect;
+    boolean useRS;
 
-        Bitmap bmp = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
-        bmp.setPixels(pixels, 0, imageWidth, 0, 0, imageWidth, imageHeight);
+    boolean colorSeekBar;
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
-        Allocation input = Allocation.createFromBitmap(rs, bmp);
-        Allocation output = Allocation.createTyped(rs, input.getType());
+    boolean seekBar1;
+    int seekBar1Min;
+    int seekBar1Set;
+    int seekBar1Max;
+    String seekBar1Unit;
 
-        ScriptC_gray grayScript = new ScriptC_gray(rs);
-        grayScript.forEach_gray(input, output) ;
+    boolean seekBar2;
+    int seekBar2Min;
+    int seekBar2Set;
+    int seekBar2Max;
+    String seekBar2Unit;
 
-        output.copyTo(bmp);
 
-        input.destroy(); output.destroy();
-        grayScript.destroy() ; rs.destroy();
-
-        bmp.getPixels(pixels, 0, imageWidth, 0, 0, imageWidth, imageHeight);
-
+    public Filter(int id, String name, int redirect, boolean useRS, boolean colorSeekBar, boolean seekBar1, int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Unit, boolean seekBar2, int seekBar2Min, int seekBar2Set, int seekBar2Max, String seekBar2Unit) {
+        this.id = id;
+        this.name = name;
+        this.redirect = redirect;
+        this.useRS = useRS;
+        this.colorSeekBar = colorSeekBar;
+        this.seekBar1 = seekBar1;
+        this.seekBar1Min = seekBar1Min;
+        this.seekBar1Set = seekBar1Set;
+        this.seekBar1Max = seekBar1Max;
+        this.seekBar1Unit = seekBar1Unit;
+        this.seekBar2 = seekBar2;
+        this.seekBar2Min = seekBar2Min;
+        this.seekBar2Set = seekBar2Set;
+        this.seekBar2Max = seekBar2Max;
+        this.seekBar2Unit = seekBar2Unit;
     }
 
+    public Filter(int id, String name, boolean useRS, boolean colorSeekBar, boolean seekBar1, int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Unit, boolean seekBar2, int seekBar2Min, int seekBar2Set, int seekBar2Max, String seekBar2Unit) {
+        this(id, name, 0, useRS, colorSeekBar, seekBar1, seekBar1Min, seekBar1Set, seekBar1Max, seekBar1Unit, seekBar2, seekBar2Min, seekBar2Set, seekBar2Max, seekBar2Unit);
+    }
 
-    /**
-     *  A filter that invert the luminosity of the image.
-     *  This filter use RenderScript.
-     *  @param pixels the pixels of the image
-     *  @param imageWidth the image's width
-     *  @param imageHeight the image's height
-     */
-    static protected void invertRS(int[] pixels, int imageWidth, int imageHeight) {
+    public Filter(int id, String name, int redirect, boolean useRS, boolean colorSeekBar, boolean seekBar1, int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Unit) {
+        this(id, name, redirect, useRS, colorSeekBar, seekBar1, seekBar1Min, seekBar1Set, seekBar1Max, seekBar1Unit, false, 0, 0, 0, "");
+    }
 
-        Bitmap bmp = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
-        bmp.setPixels(pixels, 0, imageWidth, 0, 0, imageWidth, imageHeight);
+    public Filter(int id, String name, boolean useRS, boolean colorSeekBar, boolean seekBar1, int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Unit) {
+        this(id, name, 0, useRS, colorSeekBar, seekBar1, seekBar1Min, seekBar1Set, seekBar1Max, seekBar1Unit, false, 0, 0, 0, "");
+    }
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
-        Allocation input = Allocation.createFromBitmap(rs, bmp);
-        Allocation output = Allocation.createTyped(rs, input.getType());
+    public Filter(int id, String name, int redirect, boolean useRS, boolean colorSeekBar) {
+        this(id, name, redirect, useRS, colorSeekBar, false, 0, 0, 0, "");
+    }
 
-        ScriptC_invert invertScript = new ScriptC_invert(rs);
-        invertScript.forEach_invert(input, output) ;
+    public Filter(int id, String name, boolean useRS, boolean colorSeekBar) {
+        this(id, name, 0, useRS, colorSeekBar, false, 0, 0, 0, "");
+    }
 
-        output.copyTo(bmp);
+    public Filter(int id, String name, int redirect, boolean useRS) {
+        this(id, name, redirect, useRS, false);
+    }
 
-        input.destroy(); output.destroy();
-        invertScript.destroy() ; rs.destroy();
+    public Filter(int id, String name, boolean useRS) {
+        this(id, name, 0, useRS);
+    }
 
-        bmp.getPixels(pixels, 0, imageWidth, 0, 0, imageWidth, imageHeight);
-
+    public Filter(int id, String name) {
+        this(id, name, 0, false);
     }
 
 
@@ -88,30 +108,53 @@ class Filter {
      *  @param deg the hue that must be kept (must be between 0 and 360)
      *  @param colorMargin how large the range of color will be (must be between 0 and 360)
      */
-    static public void keepAColor(int[] pixels, int deg, int colorMargin) {
+    static void keepOrRemoveAColor(final int[] pixels, int deg, int colorMargin, final boolean keepColor) {
 
-        deg = 180 - deg;
-        int diff;
+        // Makes sure the values are in acceptable ranges.
+        // Note that deg = 0 cause some problem.
+        if (deg < 1) deg = 1;
+        if (deg >= 360) deg = 0;
+
+        if (colorMargin < 0) colorMargin = 0;
+        if (colorMargin > 360) colorMargin = 360;
+
+
         float[] hsv = new float[3];
         int pixelsLength = pixels.length;
 
-        for (int i = 0; i < pixelsLength; i++) {
-            rgb2hsv(pixels[i], hsv);
-            diff = (int) Math.abs(((hsv[0] + deg) % 360) - 180);
-            hsv[1] = Math.min(hsv[1], 1f - 1f / colorMargin * diff);
-            pixels[i] = hsv2rgb(hsv);
+        // Create a look up table for the distance in degrees between each possible hue and deg
+        int[] lut = new int[360];
+        int increment;
+
+        if (deg > 180) {
+            lut[0] = 360 - deg;
+            increment = 1;
+        } else {
+            lut[0] = deg;
+            increment = -1;
         }
-    }
 
+        for (int i = 1; i < 360; i++) {
+            lut[i] = lut[i - 1] + increment;
+            if (lut[i] == 180 || lut[i] == 0) {
+                increment = -increment;
+            }
+        }
 
-    /**
-     *  A filter that convert the image to grayscale, but keeps a shade of color intact.
-     *  @param pixels the pixels of the image
-     *  @param deg the hue that must be kept (must be between 0 and 360)
-     */
-    static public void keepAColor(int[] pixels, int deg) {
-        // I used 50 because it seems to be a good default value for the colorMargin.
-        keepAColor(pixels, deg, 50);
+        // For each pixel, change the saturation depending on the distance of the hue with deg.
+        if (keepColor) {
+            for (int i = 0; i < pixelsLength; i++) {
+                rgb2hsv(pixels[i], hsv);
+                hsv[1] = Math.min(hsv[1], 1f - 1f / colorMargin * lut[(int) hsv[0]]);
+                pixels[i] = hsv2rgb(hsv);
+            }
+        } else {
+            for (int i = 0; i < pixelsLength; i++) {
+                rgb2hsv(pixels[i], hsv);
+                hsv[1] = Math.min(hsv[1], 1f / colorMargin * lut[(int) hsv[0]]);
+                pixels[i] = hsv2rgb(hsv);
+            }
+        }
     }
 
 
@@ -120,17 +163,8 @@ class Filter {
      *  @param pixels the pixels of the image
      *  @param deg the hue that must will be apply (must be between 0 and 360)
      */
-    static public void colorize(int[] pixels, int deg) {
-
-        float[] hsv = new float[3];
-        int pixelsLength = pixels.length;
-
-        for (int i = 0; i < pixelsLength; i++) {
-            rgb2hsv(pixels[i], hsv);
-            hsv[0] = deg;
-            hsv[1] = 1;
-            pixels[i] = hsv2rgb(hsv);
-        }
+    static void colorize(final int[] pixels, final int deg, final float saturation) {
+        for (int i = 0; i < pixels.length; i++) pixels[i] = hsv2rgb(deg, saturation, rgb2v(pixels[i]));
     }
 
 
@@ -139,38 +173,8 @@ class Filter {
      *  @param pixels the pixels of the image
      *  @param deg the hue that must will be apply (must be between 0 and 360)
      */
-    static public void changeHue(int[] pixels, int deg) {
-
-        float[] hsv = new float[3];
-        int pixelsLength = pixels.length;
-
-        for (int i = 0; i < pixelsLength; i++) {
-            rgb2hsv(pixels[i], hsv);
-            hsv[0] = deg;
-            pixels[i] = hsv2rgb(hsv);
-        }
-    }
-
-
-    /**
-     *  A filter that invert the luminosity of the image, but keeps the hue intact.
-     *  This filter use RenderScript.
-     *  @param pixels the pixels of the image
-     *  @param imageWidth the image's width
-     *  @param imageHeight the image's height
-     */
-    static public void invertLuminosity(int[] pixels, int imageWidth, int imageHeight) {
-        // First, invert the image
-        invertRS(pixels, imageWidth, imageHeight);
-
-        //Then, for each pixel, apply a 180deg turn to the hue.
-        float[] hsv = new float[3];
-        int pixelsLength = pixels.length;
-        for (int i = 0; i < pixelsLength; i++) {
-            rgb2hsv(pixels[i], hsv);
-            hsv[0] = (180 + hsv[0]) % 360;
-            pixels[i] = hsv2rgb(hsv);
-        }
+    static void changeHue(final int[] pixels, final int deg) {
+        for (int i = 0; i < pixels.length; i++) pixels[i] = hsv2rgb(deg, rgb2s(pixels[i]), rgb2v(pixels[i]));
     }
 
 
@@ -180,24 +184,24 @@ class Filter {
      *  @param targetMinLuminosity the luminosity of the darkest pixel after linear stretching (must be between 0f and 1f)
      *  @param targetMaxLuminosity the luminosity of the brightest pixel after linear stretching (must be between 0f and 1f)
      */
-    static public void linearContrastStretching(int[] pixels, float targetMinLuminosity, float targetMaxLuminosity) {
-
+    static void linearContrastStretching(final int[] pixels, final float targetMinLuminosity, final float targetMaxLuminosity) {
         float minLuminosity = 1;
         float maxLuminosity = 0;
-        float[] hsv = new float[3];
+
         int pixelsLength = pixels.length;
 
         for (int pixel : pixels) {
-            rgb2hsv(pixel, hsv);
-            minLuminosity = Math.min(minLuminosity, hsv[2]);
-            maxLuminosity = Math.max(maxLuminosity, hsv[2]);
+
+            minLuminosity = Math.min(minLuminosity, rgb2v(pixel));
+            maxLuminosity = Math.max(maxLuminosity, rgb2v(pixel));
         }
 
-        float stretching;
+
+        float stretching = (targetMaxLuminosity - targetMinLuminosity);
         if (maxLuminosity == minLuminosity) {
-            stretching = (targetMaxLuminosity - targetMinLuminosity) / 255;
+            stretching /= 255;
         } else {
-            stretching = (targetMaxLuminosity - targetMinLuminosity) / (maxLuminosity - minLuminosity);
+            stretching /= (maxLuminosity - minLuminosity);
         }
 
         float[] lut = new float[256];
@@ -205,6 +209,7 @@ class Filter {
             lut[i] = ((float) 1 / 256 * i - minLuminosity) * stretching + targetMinLuminosity;
         }
 
+        float[] hsv = new float[3];
         for (int i = 0; i < pixelsLength; i++) {
             rgb2hsv(pixels[i], hsv);
             hsv[2] = lut[(int) (hsv[2] * 255)];
@@ -218,7 +223,7 @@ class Filter {
      *  the intensities on the histogram.
      *  @param pixels the pixels of the image
      */
-    static public void histogramEqualization(int[] pixels) {
+    static void histogramEqualization(final int[] pixels) {
         int pixelsLength = pixels.length;
         int[] histogram = new int[256];
         float[] hsv = new float[3];
@@ -244,112 +249,305 @@ class Filter {
             hsv[2] = lut[(int) (hsv[2] * 255)];
             pixels[i] = hsv2rgb(hsv);
         }
-
     }
 
-
     /**
-     *  A filter used in debugging to test the rgb2hsv and hsv2rgb functions.
+     *  Shift all the hue of all pixels by a certain value.
+     *  @param pixels the pixels of the image
+     *  @param shift the value to shift the hue with.
      */
-    static public void testHSVRGB(int[] pixels) {
+    static void hueShift(final int[] pixels, final int shift) {
+
         float[] hsv = new float[3];
         int pixelsLength = pixels.length;
+
         for (int i = 0; i < pixelsLength; i++) {
             rgb2hsv(pixels[i], hsv);
+            hsv[0] += shift;
+            if (hsv[0] < 0) {
+                hsv[0] += 360;
+            } else if (hsv[0] >= 360) {
+                hsv[0] -= 360;
+            }
             pixels[i] = hsv2rgb(hsv);
         }
     }
 
-
     /**
-     *  Converts an HSV color into a RGB color.
-     * @param color the HSV color to be converted
-     * @return the color in RGB
+     *  Apply gaussian then Laplacian filter.
+     *  @param pixels the pixels of the image
+     *  @param imageWidth the image's width
+     *  @param imageHeight the image's height
      */
-    static public int hsv2rgb (float[] color) {
-        float H = color[0];
-        float S = color[1];
-        float V = color[2];
+    static void laplacienEdgeDetection(final int[] pixels, final int imageWidth, final int imageHeight, final int blur) {
 
-        if (S < 0) {S = 0;}
-        if (S > 1) {S = 1;}
-        if (V < 0) {V = 0;}
-        if (V > 1) {V = 1;}
+        //toGrayRS(pixels, imageWidth, imageHeight);
+        gaussianBlur(pixels, imageWidth, imageHeight, blur, true);
 
-        float C = V * S;
-        float X = C * (1 - Math.abs((H / 60f) % 2 - 1));
-        float m = V - C;
-
-        float R = 0;
-        float G = 0;
-        float B = 0;
-
-        int tmp = (int) (H / 60f);
-
-
-        switch (tmp) {
-            case 0: R = C; G = X; B = 0; break;
-            case 1: R = X; G = C; B = 0; break;
-            case 2: R = 0; G = C; B = X; break;
-            case 3: R = 0; G = X; B = C; break;
-            case 4: R = X; G = 0; B = C; break;
-            case 5: R = C; G = 0; B = X; break;
+        // Convert all RGB values into luminosity
+        for (int i = 0; i < imageWidth * imageHeight; i++) {
+            pixels[i] = red(pixels[i]);
         }
 
-        int r = (int) ((R + m) * 255);
-        int g = (int) ((G + m) * 255);
-        int b = (int) ((B + m) * 255);
+        int[] kernel = {
+                1, 1, 1,
+                1, -8, 1,
+                1, 1, 1
+        };
 
-        return Color.rgb(r,g,b);
+        int kernelSize = 3;
+
+        convulution2D(pixels, imageWidth, imageHeight, kernel, kernelSize, kernelSize);
+
+        // Saves the new values as colors
+        int outputGrey;
+        for (int i = 0; i < imageWidth * imageHeight; i++) {
+            outputGrey = pixels[i];
+            pixels[i] = Color.rgb(outputGrey, outputGrey, outputGrey);
+        }
+        histogramEqualization(pixels);
+    }
+
+    /**
+     *  Each pixel becomes the average of size * size pixels around it.
+     *  @param pixels the pixels of the image
+     *  @param imageWidth the image's width
+     *  @param imageHeight the image's height
+     *  @param size size of the kernel
+     */
+    static void averageBlur(final int[] pixels, final int imageWidth, final int imageHeight, final int size) {
+
+        //toGrayRS(pixels, imageWidth, imageHeight);
+
+        final int newSize = size + 1 + size;
+
+        // Convert all RGB values into luminosity
+        for (int i = 0; i < imageWidth * imageHeight; i++) {
+            pixels[i] = red(pixels[i]);
+        }
+
+        convulution2DUniform(pixels, imageWidth, imageHeight, newSize, newSize);
+
+        // Saves the new values as colors
+        int outputGrey;
+        for (int i = 0; i < imageWidth * imageHeight; i++) {
+            outputGrey = pixels[i];
+            pixels[i] = Color.rgb(outputGrey, outputGrey, outputGrey);
+        }
+    }
+
+    /**
+     *  Apply a gaussian blur filter. This takes advantage of the Gaussian blur’s separable property by dividing the process into two passes.
+     *  In the first pass, a one-dimensional kernel is used to blur the image in only the horizontal or vertical direction.
+     *  In the second pass, the same one-dimensional kernel is used to blur in the remaining direction.
+     *  The resulting effect is the same as convolving with a two-dimensional kernel in a single pass, but requires fewer calculations.
+     *  (Text taken from the Wikipedia article Gaussian blur: https://en.wikipedia.org/wiki/Gaussian_blur)
+     *  @param pixels the pixels of the image
+     *  @param imageWidth the image's width
+     *  @param imageHeight the image's height
+     *  @param size size of the kernel
+     */
+    static void gaussianBlur(final int[] pixels, final int imageWidth, final int imageHeight, final int size, final boolean correctBorders) {
+
+        // Let's calculate the gaussian kernel
+        final double sigma = size / 3.0;
+        final double tmp = Math.exp(-(size * size / (2 * sigma * sigma)));
+        final int floatToIntCoef = (int) (1 / tmp);
+
+        final int[] gaussianKernel = new int[size + 1 + size];
+        for (int i = -size; i <= size ; i++) {
+            gaussianKernel[i + size] = (int) (Math.exp(-(i * i / (2 * sigma * sigma))) * floatToIntCoef);
+        }
+
+        // Convert all RGB values into luminosity
+        for (int i = 0; i < imageWidth * imageHeight; i++) {
+            pixels[i] = red(pixels[i]);
+        }
+
+        // Apply the gaussian kernel to the image, the first time horizontally, then vertically
+        convulution1D(pixels, imageWidth, imageHeight, gaussianKernel, true, correctBorders);
+        convulution1D(pixels, imageWidth, imageHeight, gaussianKernel, false, correctBorders);
+
+        // Saves the new values as colors
+        int outputGrey;
+        for (int i = 0; i < imageWidth * imageHeight; i++) {
+            outputGrey = pixels[i];
+            pixels[i] = Color.rgb(outputGrey, outputGrey, outputGrey);
+        }
     }
 
 
     /**
-     *  Converts an RGB color into a HSV color.
-     * @param color the RGB color to be converted
-     * @param hsv the float[] in which to store the result
+     *  A filter that change the saturation of the image.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param saturation the amount of saturation (must be between 0 and +inf)
      */
-    static public void rgb2hsv (int color, float[] hsv) {
+    static void saturationRS(final Bitmap bmp, final float saturation) {
+
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_saturation script = new ScriptC_saturation(rs);
+
+        // Set global variable in RS
+        script.set_saturationValue(saturation);
+
+        script.forEach_saturation(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+    /**
+     *  A filter that convert the image to grayscale.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     */
+    static void toGrayRS(final Bitmap bmp) {
+
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_gray script = new ScriptC_gray(rs);
+        script.forEach_grayscale(input, output) ;
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
 
 
-        float R = (float) red(color) / 255;
-        float G = (float) green(color) / 255;
-        float B = (float) blue(color) / 255;
+    /**
+     *  A filter that invert the luminosity of the image.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     */
+    static void invertRS(final Bitmap bmp) {
 
-        float minRGB = Math.min(R, Math.min(G, B));
-        float maxRGB = Math.max(R, Math.max(G, B));
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
 
-        float deltaRGB = maxRGB - minRGB;
+        ScriptC_invert script = new ScriptC_invert(rs);
+        script.forEach_invert(input, output) ;
 
-        float H;
-        float S;
-        float V;
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
 
-        if (deltaRGB == 0) {
-            H = 0;
-        } else if (maxRGB == R) {
-            H = 60 * ((G - B) / deltaRGB % 6);
-        } else if (maxRGB == G) {
-            H = 60 * ((B - R) / deltaRGB + 2);
-        } else {
-            H = 60 * ((R - G) / deltaRGB + 4);
-        }
+    /**
+     *  A filter that invert the luminosity of the image.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param exposure the exposure to use (should be between -inf and 255)
+     */
+    static void brightnessRS(final Bitmap bmp, final float exposure) {
 
-        if (maxRGB == 0) {
-            S = 0;
-        } else {
-            S = deltaRGB / maxRGB;
-        }
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
 
-        V = maxRGB;
+        ScriptC_brightness script = new ScriptC_brightness(rs);
 
-        if (H < 0) {
-            H += 360;
-        }
+        script.invoke_setBright(exposure);
+        script.forEach_brightness(input, output);
 
-        hsv[0] = H;
-        hsv[1] = S;
-        hsv[2] = V;
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+    /**
+     *  Reduces the number of discrete luminance values.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param steps numbers of luminance values.
+     *  @param toGray if true, also turns the image gray.
+     */
+    static void posterizeRS(final Bitmap bmp, final int steps, boolean toGray) {
+
+        if (toGray) toGrayRS(bmp);
+
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_posterize script = new ScriptC_posterize(rs);
+
+        script.invoke_setSteps((short) steps);
+        script.forEach_posterize(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+
+    }
+
+    /**
+     *  A filter that add a gaussian blur to the image.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param radius size of the blur (must be between 0 and 25)
+     */
+    static void gaussianRS(final Bitmap bmp, final float radius) {
+
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        script.setInput(input);
+        script.setRadius(radius);
+        script.forEach(output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+    protected static void laplacianRS(final Bitmap bmp, final float amount) {
+
+        if (amount > 0) gaussianRS(bmp, amount);
+
+        float v = amount + 1;
+        float[] kernel = {
+                -v, -v, -v,
+                -v, 8 * v, -v,
+                -v, -v, -v
+        };
+        applyConvolution3x3RS(bmp, kernel);
+    }
+
+
+    static void sharpenRS(final Bitmap bmp, final float amount) {
+        float[] kernel = {
+                0f, -amount, 0f,
+                -amount, 1 + 4 * amount, -amount,
+                0f, -amount, 0f
+        };
+        applyConvolution3x3RS(bmp, kernel);
+    }
+
+    /**
+     *  Reduces the number of discrete luminance values.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param level numbers of luminance values.
+     */
+    static void thresholdRS(final Bitmap bmp, final float level) {
+
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_threshold script = new ScriptC_threshold(rs);
+
+        script.invoke_setLevel(level);
+        script.forEach_threshold(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+
     }
 
 }
