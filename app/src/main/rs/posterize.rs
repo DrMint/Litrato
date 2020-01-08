@@ -11,8 +11,8 @@ void setSteps(uchar v) {
 
 uchar4 RS_KERNEL posterize(const uchar4 in) {
      uchar4 out = in;
-     out.r = (in.r / steps) * range;
-     out.g = (in.g / steps) * range;
-     out.b = (in.b / steps) * range;
+     out.r = clamp((in.r / steps) * range, 0, 255);
+     out.g = clamp((in.g / steps) * range, 0, 255);
+     out.b = clamp((in.b / steps) * range, 0, 255);
      return out;
 }

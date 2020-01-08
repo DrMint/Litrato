@@ -622,7 +622,7 @@ class Filter {
     static void sharpenRS(final Bitmap bmp, final float amount) {
         float[] kernel = {
                 0f, -amount, 0f,
-                -amount, 1 + 4 * amount, -amount,
+                -amount, 1f + 4f * amount, -amount,
                 0f, -amount, 0f
         };
         applyConvolution3x3RS(bmp, kernel);
