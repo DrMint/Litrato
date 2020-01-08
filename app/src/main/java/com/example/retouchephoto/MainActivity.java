@@ -131,38 +131,28 @@ public class MainActivity extends AppCompatActivity {
         // without having to worry about which function will be launch. The function to used is linked with the ID not the filter's index in the list.
         // Also, filters with redirection will still work even if the name of the target filter is changed.
         filters.add(new Filter(407, "Select a filter..."));
-        filters.add(new Filter(802,"Grayscale", 320, false, false, true, 0, 0, 200, "%"));
-        filters.add(new Filter(930,"Invert RS", true));
+        filters.add(new Filter(927,"Brightness", true, false, true, -100, 0, 100, "%"));
+        filters.add(new Filter(320,"Saturation", true, false, true, 0, 100, 200, "%"));
+        filters.add(new Filter(558,"Temperature", true, false, true, -100, 0, 100, "%"));
+        filters.add(new Filter(168,"Tint", true, false, true, -100, 0, 100, "%"));
+        filters.add(new Filter(447,"Sharpening", true, false, true, -100, 0, 100, "%"));
+        filters.add(new Filter(751,"Colorize", false, true, true, 0, 100, 100, "%"));
+        filters.add(new Filter(174,"Change hue", false, true));
+        filters.add(new Filter(196,"Hue shift", false, false, true, -180, 0, 180, "deg"));
+        filters.add(new Filter(930,"Invert", true));
         filters.add(new Filter(785,"Invert luminance", 461, false, false, true, 0, 255, 255, "", true, 0, 0, 255, ""));
         filters.add(new Filter(288,"Keep a color", false, true, true, 1, 50, 360, "deg"));
         filters.add(new Filter(569,"Remove a color", false, true, true, 1, 50, 360, "deg"));
-        filters.add(new Filter(751,"Colorize", false, true, true, 0, 100, 100, "%"));
-        filters.add(new Filter(174,"Change hue", false, true));
+        filters.add(new Filter(736,"Posterize", true, false, true, 2, 10, 32, "steps", true, 0, 0, 1, ""));
+        filters.add(new Filter(398,"Threshold", true, false, true, 0, 128, 256, ""));
+        filters.add(new Filter(928,"Add noise", true, false, true, 0, 0, 255, "", true, 0, 0, 1, ""));
         filters.add(new Filter(461,"Linear contrast stretching", false, false, true, 0, 0, 255, "", true, 0, 255, 255, ""));
         filters.add(new Filter(639,"Histogram equalization"));
-        filters.add(new Filter(320,"Saturation RS", true, false, true, 0, 100, 200, "%"));
-        filters.add(new Filter(736,"Posterize RS", true, false, true, 2, 10, 32, "steps", true, 0, 0, 1, ""));
-        filters.add(new Filter(196,"Hue shift", false, false, true, -180, 0, 180, "deg"));
         filters.add(new Filter(485,"Average blur", false, false, true, 1, 2, 19, "px"));
-        filters.add(new Filter(851,"Gaussian blur", false, false, true, 1, 2, 50, "px", true, 0, 1, 1, ""));
+        filters.add(new Filter(851,"Gaussian blur", false, false, true, 1, 2, 50, "px"));
         filters.add(new Filter(160,"Gaussian blur RS", true, false, true, 1, 2, 25, "px"));
-        filters.add(new Filter(426,"Laplacian edge detection", false, false, true, 1, 2, 15, "px"));
-        filters.add(new Filter(269,"Laplacian RS", true, false, true, 0, 0, 14, "px"));
-        filters.add(new Filter(447,"Sharpen RS", true, false, true, -100, 0, 100, "%"));
-        filters.add(new Filter(927,"Exposure RS", true, false, true, -100, 0, 100, "%"));
-        filters.add(new Filter(398,"Threshold RS", true, false, true, 0, 128, 256, ""));
-
-        // Makes sure no two filter have the same id.
-        int id;
-        for (int i = 0; i < filters.size(); i++) {
-            id = filters.get(i).id;
-            for (int j = 0; j < filters.size(); j++) {
-                if (i != j && id == filters.get(j).id) {
-                    System.out.println("Error: two filters have the same ID!");
-                    System.exit(1);
-                }
-            }
-        }
+        filters.add(new Filter(426,"Laplacian", false, false, true, 1, 2, 20, "px"));
+        filters.add(new Filter(269,"Laplacian RS", true, false, true, 0, 2, 20, "px"));
 
         // Adds all filter names in a array that will be used by the spinner
         String[] arraySpinner = new String[filters.size()];
@@ -231,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                     seekBarValue1.setVisibility(seekBar1.getVisibility());
                     seekBarValue2.setVisibility(seekBar2.getVisibility());
                     seekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar1.getProgress(), seekBar1ValueUnit));
-                    seekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar2.getProgress(), seekBar1ValueUnit));
+                    seekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar2.getProgress(), seekBar2ValueUnit));
 
                     // If the filter is a redirection, find the appropriate filter and select it in the spinner.
                     // executeOnItemSelected is used to avoid resetting the values because where are
@@ -290,7 +280,13 @@ public class MainActivity extends AppCompatActivity {
             Bitmap mBitmap;
             try {
                 mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+
+                /* Puts the spinner back to the default position */
+                final Spinner sp = findViewById(R.id.spinner);
+                sp.setSelection(0);
+
                 loadBitmap(mBitmap);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -326,44 +322,23 @@ public class MainActivity extends AppCompatActivity {
      */
     public void applyCorrectFilter() {
 
-        final ColorSeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
-        final SeekBar seekBar = findViewById(R.id.seekBar1);
-        final SeekBar seekBar2 = findViewById(R.id.seekBar2);
-        final int colorSeekHue = ColorTools.rgb2h(colorSeekBar.getColor());
         final Spinner sp = findViewById(R.id.spinner);
-
         // If the spinner has yet to be initialize, aborts.
         if (sp.getSelectedItemPosition() == -1) return;
 
-        beforeLastFilterImage.getPixels(beforeLastFilterPixels, 0, originalWidth, 0, 0, originalWidth, originalHeight);
-        Bitmap beforeLastFilterImageCopy = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
 
-        // Apply the filter corresponding to the selected element in the spinner
-        switch (filters.get(sp.getSelectedItemPosition()).id) {
-            case 930: Filter.invertRS(beforeLastFilterImageCopy); break;
-            case 288: Filter.keepOrRemoveAColor(beforeLastFilterPixels, colorSeekHue, seekBar.getProgress(), true); break;
-            case 569: Filter.keepOrRemoveAColor(beforeLastFilterPixels, colorSeekHue, seekBar.getProgress(), false); break;
-            case 751: Filter.colorize(beforeLastFilterPixels, colorSeekHue, seekBar.getProgress() / 100f); break;
-            case 174: Filter.changeHue(beforeLastFilterPixels, colorSeekHue); break;
-            case 461: Filter.linearContrastStretching(beforeLastFilterPixels, seekBar.getProgress() / 255f, seekBar2.getProgress() / 255f); break;
-            case 639: Filter.histogramEqualization(beforeLastFilterPixels); break;
-            case 320: Filter.saturationRS(beforeLastFilterImageCopy, seekBar.getProgress() / 100f); break;
-            case 736: Filter.posterizeRS(beforeLastFilterImageCopy, seekBar.getProgress(), seekBar2.getProgress() > 0); break;
-            case 196: Filter.hueShift(beforeLastFilterPixels, seekBar.getProgress()); break;
-            case 485: Filter.averageBlur(beforeLastFilterPixels, originalWidth, originalHeight, seekBar.getProgress()); break;
-            case 851: Filter.gaussianBlur(beforeLastFilterPixels, originalWidth, originalHeight, seekBar.getProgress(), seekBar2.getProgress() > 0); break;
-            case 160: Filter.gaussianRS(beforeLastFilterImageCopy, seekBar.getProgress()); break;
-            case 426: Filter.laplacienEdgeDetection(beforeLastFilterPixels, originalWidth, originalHeight, seekBar.getProgress()); break;
-            case 269: Filter.laplacianRS(beforeLastFilterImageCopy, seekBar.getProgress()); break;
-            case 447: Filter.sharpenRS(beforeLastFilterImageCopy, seekBar.getProgress() / 200f); break;
-            case 927: Filter.brightnessRS(beforeLastFilterImageCopy, seekBar.getProgress() * 2.55f); break;
-            case 398: Filter.thresholdRS(beforeLastFilterImageCopy, seekBar.getProgress() / 256f); break;
-        }
+        final ColorSeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
+        final SeekBar seekBar = findViewById(R.id.seekBar1);
+        final SeekBar seekBar2 = findViewById(R.id.seekBar2);
 
-        // If we used a RS filter, let's turn beforeLastFilterImageCopy back into a pixel array.
-        if (filters.get(sp.getSelectedItemPosition()).useRS) {
-            beforeLastFilterImageCopy.getPixels(beforeLastFilterPixels, 0, originalWidth, 0, 0, originalWidth, originalHeight);
-        }
+
+        // Stores the color from the color seek bar make sure the value is between [0; 359]
+        int colorSeekHue = ColorTools.rgb2h(colorSeekBar.getColor());
+        if (colorSeekHue < 0) colorSeekHue = 0;
+        if (colorSeekHue >= 360) colorSeekHue = 0;
+
+        // Otherwise, applies the filter selected in the spinner.
+        filters.get(sp.getSelectedItemPosition()).apply(beforeLastFilterImage, originalWidth, originalHeight, beforeLastFilterPixels, colorSeekHue, seekBar.getProgress(), seekBar2.getProgress());
 
         // Refresh the image viewer and the histogram.
         refreshImageView(beforeLastFilterPixels, originalWidth, originalHeight);
@@ -413,10 +388,6 @@ public class MainActivity extends AppCompatActivity {
      */
     public void refreshHistogram(final int[] pixels) {
 
-        final ImageView histogram = findViewById(R.id.histogram);
-        Bitmap hist = Bitmap.createBitmap(255, 200, Bitmap.Config.ARGB_8888);
-
-
         int[] Rvalues = new int[256];
         int[] Gvalues = new int[256];
         int[] Bvalues = new int[256];
@@ -437,6 +408,7 @@ public class MainActivity extends AppCompatActivity {
             max = Math.max(max, Bvalues[i]);
         }
 
+        Bitmap hist = Bitmap.createBitmap(255, 200, Bitmap.Config.ARGB_8888);
         int histHeight = hist.getHeight() - 1;
         int histWidth = hist.getWidth();
 
@@ -474,6 +446,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         hist.setPixels(histPixels, 0, hist.getWidth(), 0, 0, hist.getWidth(), hist.getHeight());
+        final ImageView histogram = findViewById(R.id.histogram);
         histogram.setImageBitmap(hist);
 
     }

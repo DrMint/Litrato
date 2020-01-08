@@ -1,6 +1,8 @@
 package com.example.retouchephoto;
 
-class Convolution {
+import android.graphics.Color;
+
+class ConvolutionTools {
 
     /**
      *  Apply the convolution kernel to the image.
@@ -192,6 +194,21 @@ class Convolution {
         // Save the new values to pixels
         for (int i = 0; i < input.length; i++) {
             input[i] = (output[i] + 255 * sumNegativeKernel) / (sumNegativeKernel + sumPositiveKernel);
+        }
+    }
+
+    /**
+     *  Takes an array of greyscale values (between 0 and 255) and convert
+     *  that array in a pixel array.
+     *  @param pixels the pixel to be converted to color
+     */
+    static void convertGreyToColor(final int[] pixels) {
+        // Saves the new values as colors
+        int outputGrey;
+        int pixelLength = pixels.length;
+        for (int i = 0; i < pixelLength; i++) {
+            outputGrey = pixels[i];
+            pixels[i] = Color.rgb(outputGrey, outputGrey, outputGrey);
         }
     }
 

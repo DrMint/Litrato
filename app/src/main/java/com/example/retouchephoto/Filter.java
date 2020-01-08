@@ -7,16 +7,18 @@ import androidx.renderscript.RenderScript;
 import android.graphics.Color;
 
 import static android.graphics.Color.red;
-import static com.example.retouchephoto.Convolution.*;
+import static com.example.retouchephoto.ConvolutionTools.*;
 import static com.example.retouchephoto.ColorTools.*;
 import static com.example.retouchephoto.RenderScriptTools.*;
 
 import androidx.renderscript.Allocation;
 import androidx.renderscript.ScriptIntrinsicBlur;
 
+import com.android.retouchephoto.ScriptC_addNoise;
 import com.android.retouchephoto.ScriptC_gray;
 import com.android.retouchephoto.ScriptC_invert;
 import com.android.retouchephoto.ScriptC_posterize;
+import com.android.retouchephoto.ScriptC_rgbWeights;
 import com.android.retouchephoto.ScriptC_saturation;
 import com.android.retouchephoto.ScriptC_brightness;
 import com.android.retouchephoto.ScriptC_threshold;
@@ -103,6 +105,60 @@ class Filter {
 
 
     /**
+     *  Start the correct filter function for that specific filter instance.
+     *  Because RenderScript uses Bitmap as input and other filters use an array of pixel, we have to
+     *  create both
+     *  @param bmp the image the filter will be apply to.
+     *  @param bmpWidth the image's width.
+     *  @param bmpHeight the image's height.
+     *  @param pixels the pixels of the image.
+     *  @param colorSeekHue the value of colorSeekBar.
+     *  @param seekBar the value of seekBar1.
+     *  @param seekBar2 the value of seeBar2.
+     */
+    public void apply(Bitmap bmp, int bmpWidth, int bmpHeight, int[] pixels, int colorSeekHue, float seekBar, float seekBar2) {
+
+        // If we used a RS filter, create a copy of bmp and called it bmpCopy.
+        if (this.useRS) {
+            Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
+
+            switch (this.id) {
+                case 930: invertRS(bmpCopy); break;
+                case 320: saturationRS(bmpCopy, seekBar / 100f); break;
+                case 736: posterizeRS(bmpCopy, (int) seekBar, seekBar2 > 0); break;
+                case 160: gaussianRS(bmpCopy, seekBar); break;
+                case 269: laplacianRS(bmpCopy, seekBar); break;
+                case 447: sharpenRS(bmpCopy, seekBar / 200f); break;
+                case 927: brightnessRS(bmpCopy, seekBar * 2.55f); break;
+                case 398: thresholdRS(bmpCopy, seekBar / 256f); break;
+                case 558: temperatureRS(bmpCopy, seekBar / 10f); break;
+                case 168: tintRS(bmpCopy, seekBar / 10f); break;
+                case 928: noiseRS(bmpCopy, (int) seekBar, seekBar2 > 0); break;
+            }
+            // The copy has been modified, now let's turn it back into pixels array.
+            bmpCopy.getPixels(pixels, 0, bmpWidth, 0, 0, bmpWidth, bmpHeight);
+
+        // Otherwise for filters that don't use RenderScript.
+        } else {
+
+            bmp.getPixels(pixels, 0, bmpWidth, 0, 0, bmpWidth, bmpHeight);
+            switch (this.id) {
+                case 288: keepOrRemoveAColor(pixels, colorSeekHue, (int) seekBar, true); break;
+                case 569: keepOrRemoveAColor(pixels, colorSeekHue, (int) seekBar, false); break;
+                case 751: colorize(pixels, colorSeekHue, seekBar / 100f); break;
+                case 174: changeHue(pixels, colorSeekHue); break;
+                case 461: linearContrastStretching(pixels, seekBar / 255f, seekBar2 / 255f); break;
+                case 639: histogramEqualization(pixels); break;
+                case 196: hueShift(pixels, (int) seekBar); break;
+                case 485: averageBlur(pixels, bmpWidth, bmpHeight, (int) seekBar); break;
+                case 851: gaussianBlur(pixels, bmpWidth, bmpHeight, (int) seekBar, true); break;
+                case 426: laplacienEdgeDetection(pixels, bmpWidth, bmpHeight, (int) seekBar); break;
+            }
+        }
+    }
+
+
+    /**
      *  A filter that convert the image to grayscale, but keeps a shade of color intact.
      *  @param pixels the pixels of the image
      *  @param deg the hue that must be kept (must be between 0 and 360)
@@ -112,7 +168,7 @@ class Filter {
 
         // Makes sure the values are in acceptable ranges.
         // Note that deg = 0 cause some problem.
-        if (deg < 1) deg = 1;
+        if (deg < 0) deg = 0;
         if (deg >= 360) deg = 0;
 
         if (colorMargin < 0) colorMargin = 0;
@@ -128,6 +184,9 @@ class Filter {
 
         if (deg > 180) {
             lut[0] = 360 - deg;
+            increment = 1;
+        } else if (deg == 0) {
+            lut[0] = 0;
             increment = 1;
         } else {
             lut[0] = deg;
@@ -191,11 +250,9 @@ class Filter {
         int pixelsLength = pixels.length;
 
         for (int pixel : pixels) {
-
             minLuminosity = Math.min(minLuminosity, rgb2v(pixel));
             maxLuminosity = Math.max(maxLuminosity, rgb2v(pixel));
         }
-
 
         float stretching = (targetMaxLuminosity - targetMinLuminosity);
         if (maxLuminosity == minLuminosity) {
@@ -226,11 +283,9 @@ class Filter {
     static void histogramEqualization(final int[] pixels) {
         int pixelsLength = pixels.length;
         int[] histogram = new int[256];
-        float[] hsv = new float[3];
 
         for (int pixel : pixels) {
-            rgb2hsv(pixel, hsv);
-            histogram[(int) (hsv[2] * 255)]++;
+            histogram[(int) (rgb2v(pixel) * 255)]++;
         }
 
         int[] cdf = new int[256];
@@ -244,6 +299,7 @@ class Filter {
             lut[i] = cdf[i] / (float) pixelsLength;
         }
 
+        float[] hsv = new float[3];
         for (int i = 0; i < pixelsLength; i++) {
             rgb2hsv(pixels[i], hsv);
             hsv[2] = lut[(int) (hsv[2] * 255)];
@@ -261,14 +317,20 @@ class Filter {
         float[] hsv = new float[3];
         int pixelsLength = pixels.length;
 
+        int[] lut = new int[360];
+
+        for (int i = 0; i < lut.length; i++) {
+            lut[i] = i + shift;
+            if (lut[i] < 0) {
+                lut[i] += 360;
+            } else if (lut[i] >= 360) {
+                lut[i] -= 360;
+            }
+        }
+
         for (int i = 0; i < pixelsLength; i++) {
             rgb2hsv(pixels[i], hsv);
-            hsv[0] += shift;
-            if (hsv[0] < 0) {
-                hsv[0] += 360;
-            } else if (hsv[0] >= 360) {
-                hsv[0] -= 360;
-            }
+            hsv[0] = lut[(int) hsv[0]];
             pixels[i] = hsv2rgb(hsv);
         }
     }
@@ -281,8 +343,7 @@ class Filter {
      */
     static void laplacienEdgeDetection(final int[] pixels, final int imageWidth, final int imageHeight, final int blur) {
 
-        //toGrayRS(pixels, imageWidth, imageHeight);
-        gaussianBlur(pixels, imageWidth, imageHeight, blur, true);
+        if (blur > 0) gaussianBlur(pixels, imageWidth, imageHeight, blur, true);
 
         // Convert all RGB values into luminosity
         for (int i = 0; i < imageWidth * imageHeight; i++) {
@@ -298,13 +359,7 @@ class Filter {
         int kernelSize = 3;
 
         convulution2D(pixels, imageWidth, imageHeight, kernel, kernelSize, kernelSize);
-
-        // Saves the new values as colors
-        int outputGrey;
-        for (int i = 0; i < imageWidth * imageHeight; i++) {
-            outputGrey = pixels[i];
-            pixels[i] = Color.rgb(outputGrey, outputGrey, outputGrey);
-        }
+        convertGreyToColor(pixels);
         histogramEqualization(pixels);
     }
 
@@ -327,13 +382,7 @@ class Filter {
         }
 
         convulution2DUniform(pixels, imageWidth, imageHeight, newSize, newSize);
-
-        // Saves the new values as colors
-        int outputGrey;
-        for (int i = 0; i < imageWidth * imageHeight; i++) {
-            outputGrey = pixels[i];
-            pixels[i] = Color.rgb(outputGrey, outputGrey, outputGrey);
-        }
+        convertGreyToColor(pixels);
     }
 
     /**
@@ -349,6 +398,8 @@ class Filter {
      */
     static void gaussianBlur(final int[] pixels, final int imageWidth, final int imageHeight, final int size, final boolean correctBorders) {
 
+        if (size < 1) return;
+
         // Let's calculate the gaussian kernel
         final double sigma = size / 3.0;
         final double tmp = Math.exp(-(size * size / (2 * sigma * sigma)));
@@ -361,21 +412,15 @@ class Filter {
 
         // Convert all RGB values into luminosity
         for (int i = 0; i < imageWidth * imageHeight; i++) {
-            pixels[i] = red(pixels[i]);
+            // equivalent to pixels[i] = Red(pixels[i]);
+            pixels[i] = (pixels[i] >> 16) & 0x000000FF;
         }
 
         // Apply the gaussian kernel to the image, the first time horizontally, then vertically
         convulution1D(pixels, imageWidth, imageHeight, gaussianKernel, true, correctBorders);
         convulution1D(pixels, imageWidth, imageHeight, gaussianKernel, false, correctBorders);
-
-        // Saves the new values as colors
-        int outputGrey;
-        for (int i = 0; i < imageWidth * imageHeight; i++) {
-            outputGrey = pixels[i];
-            pixels[i] = Color.rgb(outputGrey, outputGrey, outputGrey);
-        }
+        convertGreyToColor(pixels);
     }
-
 
     /**
      *  A filter that change the saturation of the image.
@@ -438,7 +483,7 @@ class Filter {
     }
 
     /**
-     *  A filter that invert the luminosity of the image.
+     *  A filter that change the luminosity of the image.
      *  This filter use RenderScript.
      *  @param bmp the image
      *  @param exposure the exposure to use (should be between -inf and 255)
@@ -484,7 +529,7 @@ class Filter {
     }
 
     /**
-     *  A filter that add a gaussian blur to the image.
+     *  Highlights the contour of an image.
      *  This filter use RenderScript.
      *  @param bmp the image
      *  @param radius size of the blur (must be between 0 and 25)
@@ -505,6 +550,12 @@ class Filter {
         cleanRenderScript(script, rs, input, output);
     }
 
+    /**
+     *  Highlights the contour of an image.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param amount size of the blur (must be between 0 and 25)
+     */
     protected static void laplacianRS(final Bitmap bmp, final float amount) {
 
         if (amount > 0) gaussianRS(bmp, amount);
@@ -518,7 +569,13 @@ class Filter {
         applyConvolution3x3RS(bmp, kernel);
     }
 
-
+    /**
+     *  Enhanced the image sharpness.
+     *  It a negetive number is used for amount, turns the image, blurs the image slightly.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param amount amount of sharpness.
+     */
     static void sharpenRS(final Bitmap bmp, final float amount) {
         float[] kernel = {
                 0f, -amount, 0f,
@@ -547,7 +604,85 @@ class Filter {
 
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
+    }
 
+    /**
+     *  Makes the image warmer or colder.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param level how powerful is the effect.
+     */
+    static void temperatureRS(final Bitmap bmp, final float level) {
+
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_rgbWeights script = new ScriptC_rgbWeights(rs);
+
+        // Slightly different weights for warming and colling filter.
+        if (level >= 0) {
+            script.invoke_setWeights(4 * level, 1 * level, -5 * level);
+        } else {
+            script.invoke_setWeights(2 * level, 1 * level, -3 * level);
+        }
+
+        script.forEach_applyWeights(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+    /**
+     *  Change the tint of the image.
+     *  The tint is a slight green or magenta coloration.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param level how much tint to apply.
+     */
+    static void tintRS(final Bitmap bmp, final float level) {
+
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_rgbWeights script = new ScriptC_rgbWeights(rs);
+
+        script.invoke_setWeights(2 * level, -4 * level, 2 * level);
+        script.forEach_applyWeights(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+    /**
+     *  Adds noise to the image.
+     *  Noise is created by adding to each channel a random number between [-level; level].
+     *  If colorNoise is true, different random number are used for each channel.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param level numbers of luminance values.
+     *  @param colorNoise turns the noise colored.
+     */
+    static void noiseRS(final Bitmap bmp, final int level, final boolean colorNoise) {
+
+        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_addNoise script = new ScriptC_addNoise(rs);
+
+        script.invoke_setIntensity(level);
+
+        if (colorNoise) {
+            script.forEach_applyNoise(input, output);
+        } else {
+            script.forEach_applyNoiseBW(input, output);
+        }
+
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
     }
 
 }
