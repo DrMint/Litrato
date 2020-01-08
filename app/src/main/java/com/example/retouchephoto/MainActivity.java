@@ -28,22 +28,65 @@ import android.widget.TextView;
 
 import com.divyanshu.colorseekbar.ColorSeekBar;
 
-
+/**
+ * This apps is an image processing app for android.
+ * It can load an image, apply some filter and, eventually, it will be able to save that image.
+ * Please read the README file for more information.
+ *
+ * @author Thomas Barillot
+ * @version 1.0
+ * @since   2019-01-08
+ */
 public class MainActivity extends AppCompatActivity {
 
     static Context context;
     private int PICK_IMAGE_REQUEST = 1;
+
+    /**
+     * This is the image as it was before applying any filter.
+     */
     public Bitmap originalImage;
+
+    /**
+     * This is the originalImage's width
+     */
     int originalWidth;
+
+    /**
+     * This is the originalImage's height
+     */
     int originalHeight;
 
+    /**
+     * This is the image as it was after the last apply button click.
+     * This is the image filter are applied to.
+     */
     public Bitmap beforeLastFilterImage;
+
+    /**
+     * This is beforeLastFilterImage's pixels
+     */
     int[] beforeLastFilterPixels;
 
+    /**
+     * This is beforeLastFilterImage's pixels
+     */
     public String seekBar1ValueUnit = "";
+
+    /**
+     * This is beforeLastFilterImage's pixels
+     */
     public String seekBar2ValueUnit = "";
+
+    /**
+     * A boolean to avoid applying filter because the listener have been triggered when modifying
+     * the seeks bars minimum, progress, or maximum value.
+     */
     public boolean inputsReady = false;
 
+    /**
+     * A list of all filters. The order is the same as shown by the spinner.
+     */
     public final List<Filter> filters = new ArrayList<>();
 
     @Override
@@ -157,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         // Adds all filter names in a array that will be used by the spinner
         String[] arraySpinner = new String[filters.size()];
         for (int i = 0; i < filters.size(); i++) {
-            arraySpinner[i] = filters.get(i).name;
+            arraySpinner[i] = filters.get(i).getName();
         }
 
         final Spinner sp = findViewById(R.id.spinner);
@@ -226,10 +269,10 @@ public class MainActivity extends AppCompatActivity {
                     // If the filter is a redirection, find the appropriate filter and select it in the spinner.
                     // executeOnItemSelected is used to avoid resetting the values because where are
                     // modifying the spinner selected item, which would call this function a second time.
-                    if (selectedFilter.redirect != 0) {
+                    if (selectedFilter.getRedirection() != 0) {
                         executeOnItemSelected = false;
                         for (int i = 0; i < filters.size(); i++) {
-                            if (filters.get(i).id == selectedFilter.redirect) {
+                            if (filters.get(i).getId() == selectedFilter.getRedirection()) {
                                 sp.setSelection(i);
                                 break;
                             }

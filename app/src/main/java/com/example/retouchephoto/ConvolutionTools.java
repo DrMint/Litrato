@@ -2,6 +2,15 @@ package com.example.retouchephoto;
 
 import android.graphics.Color;
 
+
+/**
+ * This class implements tools used by any filter that uses convolution without RenderScript.
+ * This class will be deprecated as soon as all convolution is done through RS.
+ *
+ * @author Thomas Barillot
+ * @version 1.0
+ * @since   2019-01-08
+ */
 class ConvolutionTools {
 
     /**
@@ -36,7 +45,6 @@ class ConvolutionTools {
         normalizeOutput(pixels, output, kernel);
     }
 
-
     /**
      *  Apply the convolution kernel to the image.
      *  This function is only for uniform kernels (where all the weights are the same).
@@ -67,7 +75,6 @@ class ConvolutionTools {
         }
         normalizeOutput(pixels, output, 0, kernelWidth * kernelHeight);
     }
-
 
     /**
      *  Apply the convolution kernel to the image. It only does it in one direction. If correctBorders is true,
@@ -158,7 +165,6 @@ class ConvolutionTools {
         }
         normalizeOutput(pixels, output, kernel);
     }
-
 
     /**
      *  Takes the values in input and copies them to output after normalizing them to 0-255.

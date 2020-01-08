@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
-import android.graphics.Color;
 
 import static android.graphics.Color.red;
 import static com.example.retouchephoto.ConvolutionTools.*;
@@ -23,6 +22,18 @@ import com.android.retouchephoto.ScriptC_saturation;
 import com.android.retouchephoto.ScriptC_brightness;
 import com.android.retouchephoto.ScriptC_threshold;
 
+
+
+/**
+ * This class implements all Filter functions.
+ * A instance of this class has many properties such as what kind of inputs (colorSeekBar and seekBars)
+ * should be available to the user. A filter can also be a redirection towards another filter.
+ *
+ * @author Thomas Barillot
+ * @version 1.0
+ * @since   2019-01-08
+ */
+
 /*  The Android Studio seems to think my function aren't use in other classes inside
     this package. It would like me to add "protected" to my function which would
     prevent MainActivity to use those filter...
@@ -30,22 +41,48 @@ import com.android.retouchephoto.ScriptC_threshold;
  */
 @SuppressWarnings("WeakerAccess")
 
-
 class Filter {
 
-    int id;
-    String name;
-    int redirect;
-    boolean useRS;
+    /**
+     * This id is used by the apply method to call the appropriate filter function.
+     * If there is a way to set a different apply function for each Filter instance
+     * (such as when we set a listener) then we could get rid of this ID.
+     */
+    private int id;
 
+    /**
+     * The name displayed in the spinner.
+     */
+    private String name;
+
+    /**
+     * Some filters are actually just redirection towards another more general filter.
+     * If this is the case, redirection is set to be the ID of that target filter.
+     */
+    private int redirect;
+
+    /**
+     * Indicates if the filter uses RS
+     */
+    private boolean usesRS;
+
+    /**
+     * Does this filter utilize the colorSeekBar.
+     */
     boolean colorSeekBar;
 
+    /**
+     * Does this filter utilize the first seekBar.
+     */
     boolean seekBar1;
     int seekBar1Min;
     int seekBar1Set;
     int seekBar1Max;
     String seekBar1Unit;
 
+    /**
+     * Does this filter utilize the second seekBar.
+     */
     boolean seekBar2;
     int seekBar2Min;
     int seekBar2Set;
@@ -57,7 +94,7 @@ class Filter {
         this.id = id;
         this.name = name;
         this.redirect = redirect;
-        this.useRS = useRS;
+        this.usesRS = useRS;
         this.colorSeekBar = colorSeekBar;
         this.seekBar1 = seekBar1;
         this.seekBar1Min = seekBar1Min;
@@ -104,6 +141,12 @@ class Filter {
     }
 
 
+    //Getters and Setters
+    public String getName() {return this.name;}
+    public int getRedirection() {return this.redirect;}
+    public int getId() {return this.id;}
+
+
     /**
      *  Start the correct filter function for that specific filter instance.
      *  Because RenderScript uses Bitmap as input and other filters use an array of pixel, we have to
@@ -119,7 +162,7 @@ class Filter {
     public void apply(Bitmap bmp, int bmpWidth, int bmpHeight, int[] pixels, int colorSeekHue, float seekBar, float seekBar2) {
 
         // If we used a RS filter, create a copy of bmp and called it bmpCopy.
-        if (this.useRS) {
+        if (this.usesRS) {
             Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
 
             switch (this.id) {

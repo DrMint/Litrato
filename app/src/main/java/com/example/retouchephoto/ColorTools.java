@@ -2,6 +2,14 @@ package com.example.retouchephoto;
 
 import android.graphics.Color;
 
+
+/**
+ * This class implements all the functions necessary for conversions between RGB and HSV.
+ *
+ * @author Thomas Barillot
+ * @version 1.0
+ * @since   2019-01-08
+ */
 class ColorTools {
 
 

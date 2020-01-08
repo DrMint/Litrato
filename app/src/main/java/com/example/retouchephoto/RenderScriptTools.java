@@ -8,6 +8,14 @@ import androidx.renderscript.RenderScript;
 import androidx.renderscript.Script;
 import androidx.renderscript.ScriptIntrinsicConvolve3x3;
 
+
+/**
+ * This class implements tools useful for functions that use RS.
+ *
+ * @author Thomas Barillot
+ * @version 1.0
+ * @since   2019-01-08
+ */
 class RenderScriptTools {
 
     /**
@@ -31,6 +39,13 @@ class RenderScriptTools {
         cleanRenderScript(script, rs, input, output);
     }
 
+    /**
+     * Can be called after any RS function to destroy the different object used.
+     * @param script the Script object to destroy.
+     * @param rs the RenderScript object to destroy.
+     * @param input the Allocation object to destroy.
+     * @param output the Allocation object to destroy.
+     */
     static void cleanRenderScript(Script script, RenderScript rs, Allocation input, Allocation output) {
         script.destroy();
         input.destroy();
