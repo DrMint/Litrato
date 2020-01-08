@@ -437,27 +437,23 @@ public class MainActivity extends AppCompatActivity {
 
         // Stores how many occurrences of all color intensities, for each channel.
         for (int pixel : pixels) {
-            Rvalues[red(pixel)] += 1;
-            Gvalues[green(pixel)] += 1;
-            Bvalues[blue(pixel)] += 1;
+            Rvalues[(pixel >> 16) & 0x000000FF] += 1;
+            Gvalues[(pixel >>8 ) & 0x000000FF] += 1;
+            Bvalues[(pixel) & 0x000000FF] += 1;
         }
 
         int max = 0;
 
         // Finds the intensity (in all three channels) with the maximum number of occurrences.
-        for (int i = 0; i < 255; i++) {
+        for (int i = 0; i < 256; i++) {
             max = Math.max(max, Rvalues[i]);
             max = Math.max(max, Gvalues[i]);
             max = Math.max(max, Bvalues[i]);
         }
 
-        Bitmap hist = Bitmap.createBitmap(255, 200, Bitmap.Config.ARGB_8888);
+        Bitmap hist = Bitmap.createBitmap(256, 200, Bitmap.Config.ARGB_8888);
         int histHeight = hist.getHeight() - 1;
         int histWidth = hist.getWidth();
-
-        int colorR;
-        int colorG;
-        int colorB;
 
         int[] histPixels = new int[hist.getHeight() * hist.getWidth()];
 
@@ -471,6 +467,10 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
 
+            int colorR;
+            int colorG;
+            int colorB;
+
             for (int x = 0; x < histWidth; x++) {
                 for (int y = 0; y < histHeight; y++) {
 
@@ -478,9 +478,9 @@ public class MainActivity extends AppCompatActivity {
                     colorG = 0;
                     colorB = 0;
 
-                    if (Rvalues[x] * histHeight / max >= y) {colorR = 255;}
-                    if (Gvalues[x] * histHeight / max >= y) {colorG = 255;}
-                    if (Bvalues[x] * histHeight / max >= y) {colorB = 255;}
+                    if (Math.sqrt(Rvalues[x] * histHeight / max) * 14 >= y) {colorR = 255;}
+                    if (Math.sqrt(Gvalues[x] * histHeight / max) * 14 >= y) {colorG = 255;}
+                    if (Math.sqrt(Bvalues[x] * histHeight / max) * 14 >= y) {colorB = 255;}
 
                     histPixels[x + ((histHeight - y) * histWidth)] = Color.rgb(colorR, colorG, colorB);
 
