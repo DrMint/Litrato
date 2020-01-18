@@ -1,5 +1,6 @@
 package com.example.retouchephoto;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 import androidx.renderscript.Allocation;
@@ -23,9 +24,9 @@ class RenderScriptTools {
      * @param bmp the image to load
      * @param kernel the kernel to use for convolution
      */
-    static void applyConvolution3x3RS(final Bitmap bmp, final float[] kernel) {
+    static void applyConvolution3x3RS(final Bitmap bmp, final Context context, final float[] kernel) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         ScriptIntrinsicConvolve3x3 script = ScriptIntrinsicConvolve3x3.create(rs, Element.U8_4(rs));
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -46,7 +47,7 @@ class RenderScriptTools {
      * @param input the Allocation object to destroy.
      * @param output the Allocation object to destroy.
      */
-    static void cleanRenderScript(Script script, RenderScript rs, Allocation input, Allocation output) {
+    static void cleanRenderScript(final Script script, final RenderScript rs, final Allocation input, final Allocation output) {
         script.destroy();
         input.destroy();
         output.destroy();

@@ -1,5 +1,6 @@
 package com.example.retouchephoto;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 /**
@@ -12,5 +13,5 @@ import android.graphics.Bitmap;
  * @since   2019-01-08
  */
 public interface FilterInterface {
-    void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2);
+    void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2);
 }

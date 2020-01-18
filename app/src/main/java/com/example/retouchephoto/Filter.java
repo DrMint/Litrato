@@ -1,5 +1,6 @@
 package com.example.retouchephoto;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 
@@ -77,7 +78,7 @@ class Filter {
         this.colorSeekBar = true;
     }
 
-    public void setFilterFunction(FilterInterface newInterface) {
+    public void setFilterFunction(final FilterInterface newInterface) {
         this.myInterface = newInterface;
     }
 
@@ -90,8 +91,8 @@ class Filter {
      *  @param seekBar the value of seekBar1.
      *  @param seekBar2 the value of seeBar2.
      */
-    public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-        if (myInterface != null) myInterface.apply(bmp, colorSeekHue, seekBar, seekBar2);
+    public void apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2) {
+        if (myInterface != null) myInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2);
     }
 }
 

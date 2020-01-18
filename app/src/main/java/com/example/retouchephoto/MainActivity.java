@@ -1,5 +1,6 @@
 package com.example.retouchephoto;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import android.content.Context;
 import android.widget.TextView;
 
 import com.divyanshu.colorseekbar.ColorSeekBar;
@@ -37,7 +37,6 @@ import com.divyanshu.colorseekbar.ColorSeekBar;
  */
 public class MainActivity extends AppCompatActivity {
 
-    static Context context;
     private int PICK_IMAGE_REQUEST = 1;
 
     /**
@@ -76,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        MainActivity.context = getApplicationContext();
+
 
         setContentView(R.layout.activity_main);
 
@@ -163,8 +162,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(-100, 0, 100, "%");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.brightnessRS(bmp, seekBar * 2.55f);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.brightnessRS(bmp, context, seekBar * 2.55f);
             }
         });
         filters.add(newFilter);
@@ -173,8 +172,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(0, 100, 200, "%");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.saturationRS(bmp, seekBar / 100f);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.saturationRS(bmp, context,seekBar / 100f);
             }
         });
         filters.add(newFilter);
@@ -183,8 +182,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(-100, 0, 100, "%");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.temperatureRS(bmp, seekBar / 10f);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.temperatureRS(bmp, context, seekBar / 10f);
             }
         });
         filters.add(newFilter);
@@ -193,8 +192,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(-100, 0, 100, "%");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.tintRS(bmp, seekBar / 10f);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.tintRS(bmp, context, seekBar / 10f);
             }
         });
         filters.add(newFilter);
@@ -203,8 +202,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(-100, 0, 100, "%");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.sharpenRS(bmp, seekBar / 200f);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.sharpenRS(bmp, context, seekBar / 200f);
             }
         });
         filters.add(newFilter);
@@ -214,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(0, 100, 100, "%");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.colorize(bmp, colorSeekHue, seekBar / 100f);
             }
         });
@@ -224,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setColorSeekBar();
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.changeHue(bmp, colorSeekHue);
             }
         });
@@ -234,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(-180, 0, 180, "deg");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.hueShift(bmp, (int) seekBar);
             }
         });
@@ -243,8 +242,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Invert");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.invertRS(bmp);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.invertRS(bmp, context);
             }
         });
         filters.add(newFilter);
@@ -254,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(1, 50, 360, "deg");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.keepOrRemoveAColor(bmp, colorSeekHue, (int) seekBar, true);
             }
         });
@@ -265,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(1, 50, 360, "deg");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.keepOrRemoveAColor(bmp, colorSeekHue, (int) seekBar, false);
             }
         });
@@ -276,8 +275,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar2(0, 0, 1, "");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.posterizeRS(bmp, (int) seekBar, seekBar2 > 0);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.posterizeRS(bmp, context, (int) seekBar, seekBar2 > 0);
             }
         });
         filters.add(newFilter);
@@ -286,8 +285,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(0, 128, 256, "");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.thresholdRS(bmp, seekBar / 256f);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.thresholdRS(bmp, context, seekBar / 256f);
             }
         });
         filters.add(newFilter);
@@ -297,8 +296,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar2(0, 0, 1, "");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.noiseRS(bmp, (int) seekBar, seekBar2 > 0);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.noiseRS(bmp, context, (int) seekBar, seekBar2 > 0);
             }
         });
         filters.add(newFilter);
@@ -308,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar2(0, 255, 255, "");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.linearContrastStretching(bmp, seekBar / 255f, seekBar2 / 255f);
             }
         });
@@ -317,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Histogram equalization");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.histogramEqualization(bmp);
             }
         });
@@ -327,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(1, 2, 19, "px");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.averageBlur(bmp, (int) seekBar);
             }
         });
@@ -337,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(1, 2, 50, "px");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.gaussianBlur(bmp, (int) seekBar, true);
             }
         });
@@ -347,8 +346,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(1, 2, 25, "px");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.gaussianRS(bmp, seekBar);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.gaussianRS(bmp, context, seekBar);
             }
         });
         filters.add(newFilter);
@@ -357,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(1, 2, 20, "px");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
                 FilterFunctions.laplacienEdgeDetection(bmp, (int) seekBar);
             }
         });
@@ -367,8 +366,8 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(0, 2, 14, "px");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
-            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
-                FilterFunctions.laplacianRS(bmp, seekBar);
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.laplacianRS(bmp, context, seekBar);
             }
         });
         filters.add(newFilter);
@@ -535,7 +534,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Otherwise, applies the filter selected in the spinner.
         Bitmap bmpCopy = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
-        filters.get(sp.getSelectedItemPosition()).apply(bmpCopy, colorSeekHue, seekBar.getProgress(), seekBar2.getProgress());
+        filters.get(sp.getSelectedItemPosition()).apply(bmpCopy, getApplicationContext(), colorSeekHue, seekBar.getProgress(), seekBar2.getProgress());
 
         // Refresh the image viewer and the histogram.
         refreshImageView(bmpCopy);
@@ -637,16 +636,6 @@ public class MainActivity extends AppCompatActivity {
         histogram.setImageBitmap(hist);
 
     }
-
-    /**
-     * Probably bad, but that's how I retrieve MainActivity's context
-     * that I need for RenderScript in the Filter class.
-     * @return MainActivity's context
-     */
-    public static Context getAppContext() {
-        return MainActivity.context;
-    }
-
 }
 
 

@@ -1,5 +1,6 @@
 package com.example.retouchephoto;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 import androidx.renderscript.Element;
@@ -31,7 +32,7 @@ class FilterFunctions {
      *  @param colorMargin how large the range of color will be (must be between 0 and 360)
      *  @param keepColor indicates if the color must be kept or removed
      */
-    static void keepOrRemoveAColor(Bitmap bmp, int deg, int colorMargin, final boolean keepColor) {
+    static void keepOrRemoveAColor(final Bitmap bmp, int deg, int colorMargin, final boolean keepColor) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
 
@@ -93,7 +94,7 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param deg the hue that must will be apply (must be between 0 and 360)
      */
-    static void colorize(Bitmap bmp, final int deg, final float saturation) {
+    static void colorize(final Bitmap bmp, final int deg, final float saturation) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
         for (int i = 0; i < pixels.length; i++) pixels[i] = hsv2rgb(deg, saturation, rgb2v(pixels[i]));
@@ -106,7 +107,7 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param deg the hue that must will be apply (must be between 0 and 360)
      */
-    static void changeHue(Bitmap bmp, final int deg) {
+    static void changeHue(final Bitmap bmp, final int deg) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
         for (int i = 0; i < pixels.length; i++) pixels[i] = hsv2rgb(deg, rgb2s(pixels[i]), rgb2v(pixels[i]));
@@ -120,7 +121,7 @@ class FilterFunctions {
      *  @param targetMinLuminosity the luminosity of the darkest pixel after linear stretching (must be between 0f and 1f)
      *  @param targetMaxLuminosity the luminosity of the brightest pixel after linear stretching (must be between 0f and 1f)
      */
-    static void linearContrastStretching(Bitmap bmp, final float targetMinLuminosity, final float targetMaxLuminosity) {
+    static void linearContrastStretching(final Bitmap bmp, final float targetMinLuminosity, final float targetMaxLuminosity) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
 
@@ -162,7 +163,7 @@ class FilterFunctions {
      *  the intensities on the histogram.
      *  @param bmp the image
      */
-    static void histogramEqualization(Bitmap bmp) {
+    static void histogramEqualization(final Bitmap bmp) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
 
@@ -199,7 +200,7 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param shift the value to shift the hue with.
      */
-    static void hueShift(Bitmap bmp, final int shift) {
+    static void hueShift(final Bitmap bmp, final int shift) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
 
@@ -230,7 +231,7 @@ class FilterFunctions {
      *  Apply gaussian then Laplacian filter.
      *  @param bmp the image
      */
-    static void laplacienEdgeDetection(Bitmap bmp, final int blur) {
+    static void laplacienEdgeDetection(final Bitmap bmp, final int blur) {
         if (blur > 0) gaussianBlur(bmp, blur, true);
 
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
@@ -262,7 +263,7 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param size size of the kernel
      */
-    static void averageBlur(Bitmap bmp, final int size) {
+    static void averageBlur(final Bitmap bmp, final int size) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
 
@@ -289,7 +290,7 @@ class FilterFunctions {
      *  @param size size of the kernel
      *  @param correctBorders corrects the borders if true, otherwise doesn't
      */
-    static void gaussianBlur(Bitmap bmp, final int size, final boolean correctBorders) {
+    static void gaussianBlur(final Bitmap bmp, final int size, final boolean correctBorders) {
 
         if (size < 1) return;
 
@@ -326,9 +327,9 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param saturation the amount of saturation (must be between 0 and +inf)
      */
-    static void saturationRS(final Bitmap bmp, final float saturation) {
+    static void saturationRS(final Bitmap bmp, final Context context, final float saturation) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -348,9 +349,9 @@ class FilterFunctions {
      *  This filter use RenderScript.
      *  @param bmp the image
      */
-    static void toGrayRS(final Bitmap bmp) {
+    private static void toGrayRS(final Bitmap bmp, final Context context) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -367,9 +368,9 @@ class FilterFunctions {
      *  This filter use RenderScript.
      *  @param bmp the image
      */
-    static void invertRS(final Bitmap bmp) {
+    static void invertRS(final Bitmap bmp, final Context context) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -386,9 +387,9 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param exposure the exposure to use (should be between -inf and 255)
      */
-    static void brightnessRS(final Bitmap bmp, final float exposure) {
+    static void brightnessRS(final Bitmap bmp, final Context context, final float exposure) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -408,11 +409,11 @@ class FilterFunctions {
      *  @param steps numbers of luminance values.
      *  @param toGray if true, also turns the image gray.
      */
-    static void posterizeRS(final Bitmap bmp, final int steps, boolean toGray) {
+    static void posterizeRS(final Bitmap bmp, final Context context, final int steps, boolean toGray) {
 
-        if (toGray) toGrayRS(bmp);
+        if (toGray) toGrayRS(bmp, context);
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -432,9 +433,9 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param radius size of the blur (must be between 0 and 25)
      */
-    static void gaussianRS(final Bitmap bmp, final float radius) {
+    static void gaussianRS(final Bitmap bmp, final Context context, final float radius) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -454,9 +455,9 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void laplacianRS(final Bitmap bmp, final float amount) {
+    static void laplacianRS(final Bitmap bmp, final Context context, final float amount) {
 
-        if (amount > 0) gaussianRS(bmp, amount);
+        if (amount > 0) gaussianRS(bmp, context, amount);
 
         float v = amount + 1;
         float[] kernel = {
@@ -464,7 +465,7 @@ class FilterFunctions {
                 -v, 8 * v, -v,
                 -v, -v, -v
         };
-        applyConvolution3x3RS(bmp, kernel);
+        applyConvolution3x3RS(bmp, context, kernel);
     }
 
     /**
@@ -474,13 +475,13 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param amount amount of sharpness.
      */
-    static void sharpenRS(final Bitmap bmp, final float amount) {
+    static void sharpenRS(final Bitmap bmp, final Context context, final float amount) {
         float[] kernel = {
                 0f, -amount, 0f,
                 -amount, 1f + 4f * amount, -amount,
                 0f, -amount, 0f
         };
-        applyConvolution3x3RS(bmp, kernel);
+        applyConvolution3x3RS(bmp, context, kernel);
     }
 
     /**
@@ -489,9 +490,9 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param level numbers of luminance values.
      */
-    static void thresholdRS(final Bitmap bmp, final float level) {
+    static void thresholdRS(final Bitmap bmp, final Context context, final float level) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -510,9 +511,9 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param level how powerful is the effect.
      */
-    static void temperatureRS(final Bitmap bmp, final float level) {
+    static void temperatureRS(final Bitmap bmp, final Context context, final float level) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -538,9 +539,9 @@ class FilterFunctions {
      *  @param bmp the image
      *  @param level how much tint to apply.
      */
-    static void tintRS(final Bitmap bmp, final float level) {
+    static void tintRS(final Bitmap bmp, final Context context, final float level) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -562,9 +563,9 @@ class FilterFunctions {
      *  @param level numbers of luminance values.
      *  @param colorNoise turns the noise colored.
      */
-    static void noiseRS(final Bitmap bmp, final int level, final boolean colorNoise) {
+    static void noiseRS(final Bitmap bmp, final Context context, final int level, final boolean colorNoise) {
 
-        RenderScript rs = RenderScript.create(MainActivity.getAppContext());
+        RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
