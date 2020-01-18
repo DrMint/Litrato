@@ -22,6 +22,7 @@ class RenderScriptTools {
     /**
      * Does all the job of setting the convolution, renderscript stuff and then clean the mess.
      * @param bmp the image to load
+     * @param context the app context
      * @param kernel the kernel to use for convolution
      */
     static void applyConvolution3x3RS(final Bitmap bmp, final Context context, final float[] kernel) {

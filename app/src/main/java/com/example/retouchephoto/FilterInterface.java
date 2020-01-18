@@ -13,5 +13,14 @@ import android.graphics.Bitmap;
  * @since   2019-01-08
  */
 interface FilterInterface {
+
+    /**
+     * Calls the correct function to apply the filter
+     * @param bmp the image
+     * @param context the app context
+     * @param colorSeekHue the state of colorSeekBar
+     * @param seekBar the state of seekBar1
+     * @param seekBar2 the state of seekBar2
+     */
     void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2);
 }

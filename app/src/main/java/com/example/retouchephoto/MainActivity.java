@@ -1,30 +1,44 @@
 package com.example.retouchephoto;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.os.Environment;
 import android.provider.MediaStore;
 
+import android.util.Log;
 import android.view.View;
 import android.content.Intent;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.graphics.Color;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import android.widget.TextView;
 
 import com.divyanshu.colorseekbar.ColorSeekBar;
+import com.google.android.material.snackbar.Snackbar;
 
 /**
  * This apps is an image processing app for android.
@@ -38,6 +52,8 @@ import com.divyanshu.colorseekbar.ColorSeekBar;
 public class MainActivity extends AppCompatActivity {
 
     private final int PICK_IMAGE_REQUEST = 1;
+    private final int REQUEST_IMAGE_CAPTURE = 2;
+    private PackageManager pm;
 
     /**
      * This is the image as it was before applying any filter.
@@ -76,8 +92,8 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-
         setContentView(R.layout.activity_main);
+        pm = getApplicationContext().getPackageManager();
 
         // Adds listener for the first seek bar
         final SeekBar seekBar = findViewById(R.id.seekBar1);
@@ -127,21 +143,43 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
-                // Shows only images, no videos or anything else
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+
+                // Makes sure the phone has a camera module.
+                if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+                    final CharSequence[] items = {"Take Photo", "Choose from Library"};
+                    android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Select a photo...");
+                    builder.setItems(items, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int item) {
+
+                            if (items[item].equals("Take Photo")) {
+                                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+                            } else if (items[item].equals("Choose from Library")) {
+                                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(intent,PICK_IMAGE_REQUEST);
+                            }
+                        }
+                    });
+                    builder.show();
+
+                // Else if the phone has no camera
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(intent,PICK_IMAGE_REQUEST);
+                }
             }
         });
 
         // When the user clicks on the reset button, puts back the original image
-        findViewById(R.id.OriginalButton).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.originalButton).setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 // If the user didn't choose an image yet, there is no image to return to.
                 if (originalImage == null) return;
+                v.setEnabled(false);
                 resetImage();
 
                 /* Puts the spinner back to the default position */
@@ -403,8 +441,17 @@ public class MainActivity extends AppCompatActivity {
                 final SeekBar seekBar2 = findViewById(R.id.seekBar2);
                 final TextView seekBarValue1 = findViewById(R.id.seekBarValue1);
                 final TextView seekBarValue2 = findViewById(R.id.seekBarValue2);
+                final Button applyButton = findViewById(R.id.applyButton);
+                final Button originalButton = findViewById(R.id.originalButton);
 
-                Filter selectedFilter = filters.get(sp.getSelectedItemPosition());
+                Filter selectedFilter = filters.get(position);
+
+                if (position != 0) {
+                    applyButton.setText(getResources().getString(R.string.applyButtonString));
+                    applyButton.setEnabled(true);
+                    originalButton.setEnabled(true);
+                }
+
 
                 if (selectedFilter.colorSeekBar) {
                     colorSeekBar.setVisibility(View.VISIBLE);
@@ -459,14 +506,57 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (originalImage != null) {
-                    // Finds the imageView and makes it display original_image
-                    final ImageView imageView = findViewById(R.id.imageView);
-                    Bitmap bmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-                    beforeLastFilterImage = bmp.copy(bmp.getConfig(), true);
-
-                    /* Put the spinner back to the default position */
                     final Spinner sp = findViewById(R.id.spinner);
-                    sp.setSelection(0);
+
+                    // If the spinner has no filter selected, it is a save button
+                    if (sp.getSelectedItemPosition() == 0) {
+
+                        String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + getString(R.string.app_name) + "/";
+                        int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
+                        Snackbar sb = Snackbar.make(v, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT);
+
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+                        try {
+                            File dir = new File(fullPath);
+                            if (!dir.exists()) {
+                                dir.mkdirs();
+                            }
+
+                            OutputStream fOut;
+                            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                            File file = new File(fullPath, timeStamp + ".jpg");
+                            file.createNewFile();
+                            fOut = new FileOutputStream(file);
+
+                            // 100 means no compression, the lower you go, the stronger the compression
+                            final ImageView imageView = findViewById(R.id.imageView);
+                            Bitmap bmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+                            bmp.compress(Bitmap.CompressFormat.JPEG, 90, fOut);
+                            fOut.flush();
+                            fOut.close();
+
+                            // This asks the MediaStore to add this image to the gallery. This seems to duplicate the file in the Picture folder.
+                            //MediaStore.Images.Media.insertImage(MainActivity.this.getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
+
+                            v.setEnabled(false);
+                            sb.show();
+
+                        } catch (Exception e) {
+                            Log.e("saveToExternalStorage()", e.getMessage());
+                        }
+
+                    // Else it is an apply button
+                    } else {
+                        // Finds the imageView and makes it display original_image
+                        final ImageView imageView = findViewById(R.id.imageView);
+                        Bitmap bmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+                        beforeLastFilterImage = bmp.copy(bmp.getConfig(), true);
+
+                        /* Put the spinner back to the default position */
+                        sp.setSelection(0);
+                        ((Button)v).setText(getResources().getString(R.string.saveButtonString));
+                    }
                 }
             }
         });
@@ -492,6 +582,19 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap mBitmap;
+            if (extras != null) {
+                mBitmap = (Bitmap) extras.get("data");
+                if (mBitmap != null) {
+                    loadBitmap(mBitmap);
+                }
+            }
+
+        }
+
     }
 
 

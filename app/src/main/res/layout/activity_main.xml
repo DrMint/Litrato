@@ -9,17 +9,19 @@
 
     <Button
         android:id="@+id/applyButton"
+        android:enabled="false"
         style="@style/Widget.AppCompat.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/applyButtonString"
+        android:text="@string/saveButtonString"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/OriginalButton" />
+        app:layout_constraintTop_toBottomOf="@+id/originalButton" />
 
     <Button
-        android:id="@+id/OriginalButton"
+        android:id="@+id/originalButton"
+        android:enabled="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -46,7 +48,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toStartOf="@+id/OriginalButton"
+        app:layout_constraintEnd_toStartOf="@+id/originalButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 

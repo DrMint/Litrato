@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Litrato</string>
     <string name="applyButtonString">Apply</string>
+    <string name="saveButtonString">Save</string>
+    <string name="savingMessage">Image saved!</string>
     <string name="originalButtonString">Original</string>
     <string name="imageViewDescription">It\'s the image that will be modified.</string>
     <string name="histogramViewDescription">It\'s the image histogram.</string>
