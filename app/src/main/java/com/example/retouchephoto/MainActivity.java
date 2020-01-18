@@ -2,6 +2,7 @@ package com.example.retouchephoto;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,9 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static android.graphics.Color.blue;
-import static android.graphics.Color.green;
-import static android.graphics.Color.red;
 import android.content.Context;
 import android.widget.TextView;
 
@@ -48,25 +46,10 @@ public class MainActivity extends AppCompatActivity {
     public Bitmap originalImage;
 
     /**
-     * This is the originalImage's width
-     */
-    int originalWidth;
-
-    /**
-     * This is the originalImage's height
-     */
-    int originalHeight;
-
-    /**
      * This is the image as it was after the last apply button click.
      * This is the image filter are applied to.
      */
     public Bitmap beforeLastFilterImage;
-
-    /**
-     * This is beforeLastFilterImage's pixels
-     */
-    int[] beforeLastFilterPixels;
 
     /**
      * This is beforeLastFilterImage's pixels
@@ -169,33 +152,227 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+
         // Creates the filters
-        // The reason they have weird random id number is because that way you can order them however you want in the list
-        // without having to worry about which function will be launch. The function to used is linked with the ID not the filter's index in the list.
-        // Also, filters with redirection will still work even if the name of the target filter is changed.
-        filters.add(new Filter(407, "Select a filter..."));
-        filters.add(new Filter(927,"Brightness", true, false, true, -100, 0, 100, "%"));
-        filters.add(new Filter(320,"Saturation", true, false, true, 0, 100, 200, "%"));
-        filters.add(new Filter(558,"Temperature", true, false, true, -100, 0, 100, "%"));
-        filters.add(new Filter(168,"Tint", true, false, true, -100, 0, 100, "%"));
-        filters.add(new Filter(447,"Sharpening", true, false, true, -100, 0, 100, "%"));
-        filters.add(new Filter(751,"Colorize", false, true, true, 0, 100, 100, "%"));
-        filters.add(new Filter(174,"Change hue", false, true));
-        filters.add(new Filter(196,"Hue shift", false, false, true, -180, 0, 180, "deg"));
-        filters.add(new Filter(930,"Invert", true));
-        filters.add(new Filter(785,"Invert luminance", 461, false, false, true, 0, 255, 255, "", true, 0, 0, 255, ""));
-        filters.add(new Filter(288,"Keep a color", false, true, true, 1, 50, 360, "deg"));
-        filters.add(new Filter(569,"Remove a color", false, true, true, 1, 50, 360, "deg"));
-        filters.add(new Filter(736,"Posterize", true, false, true, 2, 10, 32, "steps", true, 0, 0, 1, ""));
-        filters.add(new Filter(398,"Threshold", true, false, true, 0, 128, 256, ""));
-        filters.add(new Filter(928,"Add noise", true, false, true, 0, 0, 255, "", true, 0, 0, 1, ""));
-        filters.add(new Filter(461,"Linear contrast stretching", false, false, true, 0, 0, 255, "", true, 0, 255, 255, ""));
-        filters.add(new Filter(639,"Histogram equalization"));
-        filters.add(new Filter(485,"Average blur", false, false, true, 1, 2, 19, "px"));
-        filters.add(new Filter(851,"Gaussian blur", false, false, true, 1, 2, 50, "px"));
-        filters.add(new Filter(160,"Gaussian blur RS", true, false, true, 1, 2, 25, "px"));
-        filters.add(new Filter(426,"Laplacian", false, false, true, 1, 2, 20, "px"));
-        filters.add(new Filter(269,"Laplacian RS", true, false, true, 0, 2, 20, "px"));
+
+
+        Filter newFilter = new Filter("Select a filter...");
+        filters.add(newFilter);
+
+        newFilter = new Filter("Brightness");
+        newFilter.setSeekBar1(-100, 0, 100, "%");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.brightnessRS(bmp, seekBar * 2.55f);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Saturation");
+        newFilter.setSeekBar1(0, 100, 200, "%");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.saturationRS(bmp, seekBar / 100f);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Temperature");
+        newFilter.setSeekBar1(-100, 0, 100, "%");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.temperatureRS(bmp, seekBar / 10f);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Tint");
+        newFilter.setSeekBar1(-100, 0, 100, "%");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.tintRS(bmp, seekBar / 10f);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Sharpening");
+        newFilter.setSeekBar1(-100, 0, 100, "%");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.sharpenRS(bmp, seekBar / 200f);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Colorize");
+        newFilter.setColorSeekBar();
+        newFilter.setSeekBar1(0, 100, 100, "%");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.colorize(bmp, colorSeekHue, seekBar / 100f);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Change hue");
+        newFilter.setColorSeekBar();
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.changeHue(bmp, colorSeekHue);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Hue shift");
+        newFilter.setSeekBar1(-180, 0, 180, "deg");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.hueShift(bmp, (int) seekBar);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Invert");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.invertRS(bmp);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Keep a color");
+        newFilter.setColorSeekBar();
+        newFilter.setSeekBar1(1, 50, 360, "deg");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.keepOrRemoveAColor(bmp, colorSeekHue, (int) seekBar, true);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Remove a color");
+        newFilter.setColorSeekBar();
+        newFilter.setSeekBar1(1, 50, 360, "deg");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.keepOrRemoveAColor(bmp, colorSeekHue, (int) seekBar, false);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Posterize");
+        newFilter.setSeekBar1(2, 10, 32, "steps");
+        newFilter.setSeekBar2(0, 0, 1, "");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.posterizeRS(bmp, (int) seekBar, seekBar2 > 0);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Threshold");
+        newFilter.setSeekBar1(0, 128, 256, "");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.thresholdRS(bmp, seekBar / 256f);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Add noise");
+        newFilter.setSeekBar1(0, 0, 255, "");
+        newFilter.setSeekBar2(0, 0, 1, "");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.noiseRS(bmp, (int) seekBar, seekBar2 > 0);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Linear contrast stretching");
+        newFilter.setSeekBar1(0, 0, 255, "");
+        newFilter.setSeekBar2(0, 255, 255, "");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.linearContrastStretching(bmp, seekBar / 255f, seekBar2 / 255f);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Histogram equalization");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.histogramEqualization(bmp);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Average blur");
+        newFilter.setSeekBar1(1, 2, 19, "px");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.averageBlur(bmp, (int) seekBar);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Gaussian blur");
+        newFilter.setSeekBar1(1, 2, 50, "px");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.gaussianBlur(bmp, (int) seekBar, true);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Gaussian blur RS");
+        newFilter.setSeekBar1(1, 2, 25, "px");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.gaussianRS(bmp, seekBar);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Laplacian");
+        newFilter.setSeekBar1(1, 2, 20, "px");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.laplacienEdgeDetection(bmp, (int) seekBar);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Laplacian RS");
+        newFilter.setSeekBar1(0, 2, 14, "px");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, int colorSeekHue, float seekBar, float seekBar2) {
+                FilterFunctions.laplacianRS(bmp, seekBar);
+            }
+        });
+        filters.add(newFilter);
+
 
         // Adds all filter names in a array that will be used by the spinner
         String[] arraySpinner = new String[filters.size()];
@@ -211,89 +388,67 @@ public class MainActivity extends AppCompatActivity {
 
         sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
-            boolean executeOnItemSelected = true;
-
             /**
              * Handles when an item is selected in the spinner.
              */
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                if (executeOnItemSelected) {
+                // This values is used to avoid applying filters while the seek bar are modified.
+                // Changing the seek bar minimum, progress or maximum values would normally call the
+                // seek bar listener, which would apply the filter 3 time for no reason.
+                inputsReady = false;
 
-                    // This values is used to avoid applying filters while the seek bar are modified.
-                    // Changing the seek bar minimum, progress or maximum values would normally call the
-                    // seek bar listener, which would apply the filter 3 time for no reason.
-                    inputsReady = false;
+                final ColorSeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
+                final SeekBar seekBar1 = findViewById(R.id.seekBar1);
+                final SeekBar seekBar2 = findViewById(R.id.seekBar2);
+                final TextView seekBarValue1 = findViewById(R.id.seekBarValue1);
+                final TextView seekBarValue2 = findViewById(R.id.seekBarValue2);
 
-                    final ColorSeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
-                    final SeekBar seekBar1 = findViewById(R.id.seekBar1);
-                    final SeekBar seekBar2 = findViewById(R.id.seekBar2);
-                    final TextView seekBarValue1 = findViewById(R.id.seekBarValue1);
-                    final TextView seekBarValue2 = findViewById(R.id.seekBarValue2);
+                Filter selectedFilter = filters.get(sp.getSelectedItemPosition());
 
-                    Filter selectedFilter = filters.get(sp.getSelectedItemPosition());
-
-                    if (selectedFilter.colorSeekBar) {
-                        colorSeekBar.setVisibility(View.VISIBLE);
-                    } else {
-                        colorSeekBar.setVisibility(View.INVISIBLE);
-                    }
-
-                    if (selectedFilter.seekBar1) {
-                        seekBar1.setVisibility(View.VISIBLE);
-                        seekBar1.setMin(selectedFilter.seekBar1Min);
-                        seekBar1.setMax(selectedFilter.seekBar1Max);
-                        seekBar1.setProgress(selectedFilter.seekBar1Set);
-                        seekBar1ValueUnit = selectedFilter.seekBar1Unit;
-                    } else {
-                        seekBar1.setVisibility(View.INVISIBLE);
-                    }
-
-                    if (selectedFilter.seekBar2) {
-                        seekBar2.setVisibility(View.VISIBLE);
-                        seekBar2.setMin(selectedFilter.seekBar2Min);
-                        seekBar2.setMax(selectedFilter.seekBar2Max);
-                        seekBar2.setProgress(selectedFilter.seekBar2Set);
-                        seekBar2ValueUnit = selectedFilter.seekBar2Unit;
-                    } else {
-                        seekBar2.setVisibility(View.INVISIBLE);
-                    }
-
-                    // Only shows the seekBarValues when the seekBars are visible.
-                    seekBarValue1.setVisibility(seekBar1.getVisibility());
-                    seekBarValue2.setVisibility(seekBar2.getVisibility());
-                    seekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar1.getProgress(), seekBar1ValueUnit));
-                    seekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar2.getProgress(), seekBar2ValueUnit));
-
-                    // If the filter is a redirection, find the appropriate filter and select it in the spinner.
-                    // executeOnItemSelected is used to avoid resetting the values because where are
-                    // modifying the spinner selected item, which would call this function a second time.
-                    if (selectedFilter.getRedirection() != 0) {
-                        executeOnItemSelected = false;
-                        for (int i = 0; i < filters.size(); i++) {
-                            if (filters.get(i).getId() == selectedFilter.getRedirection()) {
-                                sp.setSelection(i);
-                                break;
-                            }
-                        }
-                    }
-
-                    // Finds the imageView and makes it display beforeLastFilterImage
-                    if (originalImage != null) {
-                        final ImageView imageView = findViewById(R.id.imageView);
-                        imageView.setImageBitmap(beforeLastFilterImage);
-                        applyCorrectFilter();
-                    }
-
-                    // The seek bars listener can be triggered again.
-                    inputsReady = true;
-
+                if (selectedFilter.colorSeekBar) {
+                    colorSeekBar.setVisibility(View.VISIBLE);
                 } else {
-                    // If the filter was a redirection this will avoid modifying the values a second time
-                    // and putting the wrong default values for this filter.
-                    executeOnItemSelected = true;
+                    colorSeekBar.setVisibility(View.INVISIBLE);
                 }
+
+                if (selectedFilter.seekBar1) {
+                    seekBar1.setVisibility(View.VISIBLE);
+                    seekBar1.setMin(selectedFilter.seekBar1Min);
+                    seekBar1.setMax(selectedFilter.seekBar1Max);
+                    seekBar1.setProgress(selectedFilter.seekBar1Set);
+                    seekBar1ValueUnit = selectedFilter.seekBar1Unit;
+                } else {
+                    seekBar1.setVisibility(View.INVISIBLE);
+                }
+
+                if (selectedFilter.seekBar2) {
+                    seekBar2.setVisibility(View.VISIBLE);
+                    seekBar2.setMin(selectedFilter.seekBar2Min);
+                    seekBar2.setMax(selectedFilter.seekBar2Max);
+                    seekBar2.setProgress(selectedFilter.seekBar2Set);
+                    seekBar2ValueUnit = selectedFilter.seekBar2Unit;
+                } else {
+                    seekBar2.setVisibility(View.INVISIBLE);
+                }
+
+                // Only shows the seekBarValues when the seekBars are visible.
+                seekBarValue1.setVisibility(seekBar1.getVisibility());
+                seekBarValue2.setVisibility(seekBar2.getVisibility());
+                seekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar1.getProgress(), seekBar1ValueUnit));
+                seekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar2.getProgress(), seekBar2ValueUnit));
+
+                // Finds the imageView and makes it display beforeLastFilterImage
+                if (originalImage != null) {
+                    final ImageView imageView = findViewById(R.id.imageView);
+                    imageView.setImageBitmap(beforeLastFilterImage);
+                    applyCorrectFilter();
+                }
+
+                // The seek bars listener can be triggered again.
+                inputsReady = true;
+
             }
 
             public void onNothingSelected(AdapterView<?> parent) {}
@@ -305,7 +460,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (originalImage != null) {
-                    beforeLastFilterImage.setPixels(beforeLastFilterPixels, 0, originalWidth, 0, 0, originalWidth, originalHeight);
+                    // Finds the imageView and makes it display original_image
+                    final ImageView imageView = findViewById(R.id.imageView);
+                    Bitmap bmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+                    beforeLastFilterImage = bmp.copy(bmp.getConfig(), true);
+
                     /* Put the spinner back to the default position */
                     final Spinner sp = findViewById(R.id.spinner);
                     sp.setSelection(0);
@@ -345,14 +504,10 @@ public class MainActivity extends AppCompatActivity {
         // Store this image in originalImage, generate all the useful values
         this.originalImage = bmp;
         this.beforeLastFilterImage = bmp.copy(bmp.getConfig(), true);
-        this.originalWidth = bmp.getWidth();
-        this.originalHeight = bmp.getHeight();
-        this.beforeLastFilterPixels = new int[originalWidth * originalHeight];
-        this.beforeLastFilterImage.getPixels(beforeLastFilterPixels, 0, originalWidth, 0, 0, originalWidth, originalHeight);
 
         // Display the image characteristics on imageInformation
         final TextView imageInfo = findViewById(R.id.imageInformation);
-        final String infoString = String.format(Locale.ENGLISH,"%s%d  |  %s%d", getResources().getString(R.string.width), originalWidth, getResources().getString(R.string.height), originalHeight);
+        final String infoString = String.format(Locale.ENGLISH,"%s%d  |  %s%d", getResources().getString(R.string.width), bmp.getWidth(), getResources().getString(R.string.height), bmp.getHeight());
         imageInfo.setText(infoString);
 
         // Apply filter which also refresh the imageViewer and histogram
@@ -369,11 +524,9 @@ public class MainActivity extends AppCompatActivity {
         // If the spinner has yet to be initialize, aborts.
         if (sp.getSelectedItemPosition() == -1) return;
 
-
         final ColorSeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
         final SeekBar seekBar = findViewById(R.id.seekBar1);
         final SeekBar seekBar2 = findViewById(R.id.seekBar2);
-
 
         // Stores the color from the color seek bar make sure the value is between [0; 359]
         int colorSeekHue = ColorTools.rgb2h(colorSeekBar.getColor());
@@ -381,24 +534,13 @@ public class MainActivity extends AppCompatActivity {
         if (colorSeekHue >= 360) colorSeekHue = 0;
 
         // Otherwise, applies the filter selected in the spinner.
-        filters.get(sp.getSelectedItemPosition()).apply(beforeLastFilterImage, originalWidth, originalHeight, beforeLastFilterPixels, colorSeekHue, seekBar.getProgress(), seekBar2.getProgress());
+        Bitmap bmpCopy = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
+        filters.get(sp.getSelectedItemPosition()).apply(bmpCopy, colorSeekHue, seekBar.getProgress(), seekBar2.getProgress());
 
         // Refresh the image viewer and the histogram.
-        refreshImageView(beforeLastFilterPixels, originalWidth, originalHeight);
-        refreshHistogram(beforeLastFilterPixels);
+        refreshImageView(bmpCopy);
+        refreshHistogram(bmpCopy);
 
-    }
-
-    /**
-     * Takes a pixel array, generate a bitmap and displays it on imageView.
-     * @param imagePixels the image pixels
-     * @param imageWidth the image width
-     * @param imageHeight the image height
-     */
-    public void refreshImageView(final int[] imagePixels, final int imageWidth, final int imageHeight) {
-        Bitmap mutableBitmap = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
-        mutableBitmap.setPixels(imagePixels, 0, imageWidth, 0, 0, imageWidth, imageHeight);
-        refreshImageView(mutableBitmap);
     }
 
     /**
@@ -420,16 +562,18 @@ public class MainActivity extends AppCompatActivity {
         beforeLastFilterImage = originalImage.copy(originalImage.getConfig(), true);
 
         // Get the pixels into a pixel array and refresh the histogram.
-        beforeLastFilterImage.getPixels(beforeLastFilterPixels, 0, originalWidth, 0, 0, originalWidth, originalHeight);
-        refreshHistogram(beforeLastFilterPixels);
+        refreshHistogram(beforeLastFilterImage);
     }
 
 
     /**
      *  Generates the histogram and displays it in "histogram"
-     *  @param pixels the pixels of the image to analyse
+     *  @param bmp the image to analyse
      */
-    public void refreshHistogram(final int[] pixels) {
+    public void refreshHistogram(Bitmap bmp) {
+
+        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
+        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
 
         int[] Rvalues = new int[256];
         int[] Gvalues = new int[256];

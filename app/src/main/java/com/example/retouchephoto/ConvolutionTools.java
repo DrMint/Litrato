@@ -1,8 +1,5 @@
 package com.example.retouchephoto;
 
-import android.graphics.Color;
-
-
 /**
  * This class implements tools used by any filter that uses convolution without RenderScript.
  * This class will be deprecated as soon as all convolution is done through RS.
@@ -214,7 +211,7 @@ class ConvolutionTools {
         int pixelLength = pixels.length;
         for (int i = 0; i < pixelLength; i++) {
             outputGrey = pixels[i];
-            pixels[i] = Color.rgb(outputGrey, outputGrey, outputGrey);
+            pixels[i] = android.graphics.Color.rgb(outputGrey, outputGrey, outputGrey);
         }
     }
 
