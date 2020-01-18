@@ -12,6 +12,6 @@ import android.graphics.Bitmap;
  * @version 1.0
  * @since   2019-01-08
  */
-public interface FilterInterface {
+interface FilterInterface {
     void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2);
 }

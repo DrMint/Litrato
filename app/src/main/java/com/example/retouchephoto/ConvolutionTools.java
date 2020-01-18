@@ -21,7 +21,7 @@ class ConvolutionTools {
      *  @param kernelWidth the kernel width
      *  @param kernelHeight the kernel height
      */
-    static void convulution2D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final int kernelWidth, final int kernelHeight) {
+    static void convolution2D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final int kernelWidth, final int kernelHeight) {
         int[] output = new int[imageWidth * imageHeight];
 
         final int sizeX = (kernelWidth - 1) / 2;
@@ -52,7 +52,7 @@ class ConvolutionTools {
      *  @param kernelWidth the kernel width
      *  @param kernelHeight the kernel height
      */
-    static void convulution2DUniform(final int[] pixels, final int imageWidth, final int imageHeight, final int kernelWidth, final int kernelHeight) {
+    static void convolution2DUniform(final int[] pixels, final int imageWidth, final int imageHeight, final int kernelWidth, final int kernelHeight) {
         int[] output = new int[imageWidth * imageHeight];
 
         final int sizeX = (kernelWidth - 1) / 2;
@@ -82,7 +82,7 @@ class ConvolutionTools {
      *  @param horizontal will apply the convolution horizontally if true, otherwise vertically.
      *  @param correctBorders will apply the convolution even on the borders, otherwise not.
      */
-    static void convulution1D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final boolean horizontal, final boolean correctBorders) {
+    static void convolution1D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final boolean horizontal, final boolean correctBorders) {
         int[] output = new int[imageWidth * imageHeight];
 
         final int size = (kernel.length - 1) / 2;

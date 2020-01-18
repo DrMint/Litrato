@@ -16,7 +16,7 @@ import androidx.renderscript.ScriptIntrinsicBlur;
 import com.android.retouchephoto.ScriptC_addNoise;
 import com.android.retouchephoto.ScriptC_gray;
 import com.android.retouchephoto.ScriptC_invert;
-import com.android.retouchephoto.ScriptC_posterize;
+import com.android.retouchephoto.ScriptC_posterizing;
 import com.android.retouchephoto.ScriptC_rgbWeights;
 import com.android.retouchephoto.ScriptC_saturation;
 import com.android.retouchephoto.ScriptC_brightness;
@@ -250,7 +250,7 @@ class FilterFunctions {
 
         int kernelSize = 3;
 
-        convulution2D(pixels, bmp.getWidth(), bmp.getHeight(), kernel, kernelSize, kernelSize);
+        convolution2D(pixels, bmp.getWidth(), bmp.getHeight(), kernel, kernelSize, kernelSize);
         convertGreyToColor(pixels);
 
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
@@ -274,7 +274,7 @@ class FilterFunctions {
             pixels[i] = (pixels[i]) & 0x000000FF;
         }
 
-        convulution2DUniform(pixels, bmp.getWidth(), bmp.getHeight(), newSize, newSize);
+        convolution2DUniform(pixels, bmp.getWidth(), bmp.getHeight(), newSize, newSize);
         convertGreyToColor(pixels);
 
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
@@ -314,8 +314,8 @@ class FilterFunctions {
         }
 
         // Apply the gaussian kernel to the image, the first time horizontally, then vertically
-        convulution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, true, correctBorders);
-        convulution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, false, correctBorders);
+        convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, true, correctBorders);
+        convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, false, correctBorders);
         convertGreyToColor(pixels);
 
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
@@ -417,7 +417,7 @@ class FilterFunctions {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
-        ScriptC_posterize script = new ScriptC_posterize(rs);
+        ScriptC_posterizing script = new ScriptC_posterizing(rs);
 
         script.invoke_setSteps((short) steps);
         script.forEach_posterize(input, output);

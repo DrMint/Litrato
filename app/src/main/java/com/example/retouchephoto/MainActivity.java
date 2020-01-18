@@ -37,39 +37,39 @@ import com.divyanshu.colorseekbar.ColorSeekBar;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private int PICK_IMAGE_REQUEST = 1;
+    private final int PICK_IMAGE_REQUEST = 1;
 
     /**
      * This is the image as it was before applying any filter.
      */
-    public Bitmap originalImage;
+    private Bitmap originalImage;
 
     /**
      * This is the image as it was after the last apply button click.
      * This is the image filter are applied to.
      */
-    public Bitmap beforeLastFilterImage;
+    private Bitmap beforeLastFilterImage;
 
     /**
      * This is beforeLastFilterImage's pixels
      */
-    public String seekBar1ValueUnit = "";
+    private String seekBar1ValueUnit = "";
 
     /**
      * This is beforeLastFilterImage's pixels
      */
-    public String seekBar2ValueUnit = "";
+    private String seekBar2ValueUnit = "";
 
     /**
      * A boolean to avoid applying filter because the listener have been triggered when modifying
      * the seeks bars minimum, progress, or maximum value.
      */
-    public boolean inputsReady = false;
+    private boolean inputsReady = false;
 
     /**
      * A list of all filters. The order is the same as shown by the spinner.
      */
-    public final List<Filter> filters = new ArrayList<>();
+    private final List<Filter> filters = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // When the user clicks on the reset button, puts back the original image
-        findViewById(R.id.Originalbutton).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.OriginalButton).setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -499,7 +499,7 @@ public class MainActivity extends AppCompatActivity {
      * Function called when a new image is loaded by the program.
      * @param bmp the image to load
      */
-    public void loadBitmap(final Bitmap bmp) {
+    private void loadBitmap(final Bitmap bmp) {
         // Store this image in originalImage, generate all the useful values
         this.originalImage = bmp;
         this.beforeLastFilterImage = bmp.copy(bmp.getConfig(), true);
@@ -517,7 +517,7 @@ public class MainActivity extends AppCompatActivity {
      * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
      * seek bars and color bar. Refreshes the histogram and imageViewer after.
      */
-    public void applyCorrectFilter() {
+    private void applyCorrectFilter() {
 
         final Spinner sp = findViewById(R.id.spinner);
         // If the spinner has yet to be initialize, aborts.
@@ -546,7 +546,7 @@ public class MainActivity extends AppCompatActivity {
      * Takes a bitmap and displays it on imageView.
      * @param bmp the image to display
      */
-    public void refreshImageView(final Bitmap bmp) {
+    private void refreshImageView(final Bitmap bmp) {
         final ImageView imgViewer = findViewById(R.id.imageView);
         imgViewer.setImageBitmap(bmp);
     }
@@ -554,7 +554,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Display the original image in "imageView" and refresh the histogram.
      */
-    public void resetImage() {
+    private void resetImage() {
         // Finds the imageView and makes it display original_image
         final ImageView imageView = findViewById(R.id.imageView);
         imageView.setImageBitmap(originalImage);
@@ -569,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
      *  Generates the histogram and displays it in "histogram"
      *  @param bmp the image to analyse
      */
-    public void refreshHistogram(Bitmap bmp) {
+    private void refreshHistogram(Bitmap bmp) {
 
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());

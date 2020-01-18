@@ -3,7 +3,6 @@ package com.example.retouchephoto;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-
 /**
  * A instance of this class has many properties such as what kind of inputs (colorSeekBar and seekBars) should be available to the user.
  *
@@ -17,14 +16,13 @@ import android.graphics.Bitmap;
     prevent MainActivity to use those filter...
     I will disable this warning for now.
  */
-@SuppressWarnings("WeakerAccess")
 
 class Filter {
 
     /**
      * The name displayed in the spinner.
      */
-    private String name;
+    private final String name;
 
     /**
      * Does this filter utilize the colorSeekBar.
@@ -51,14 +49,14 @@ class Filter {
 
     private FilterInterface myInterface;
 
-    public Filter(String name) {
+    Filter(String name) {
         this.name = name;
     }
 
     //Getters and Setters
-    public String getName() {return this.name;}
+    String getName() {return this.name;}
 
-    public void setSeekBar1(int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Unit) {
+    void setSeekBar1(int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Unit) {
         this.seekBar1 = true;
         this.seekBar1Min = seekBar1Min;
         this.seekBar1Set = seekBar1Set;
@@ -66,7 +64,7 @@ class Filter {
         this.seekBar1Unit = seekBar1Unit;
     }
 
-    public void setSeekBar2(int seekBar2Min, int seekBar2Set, int seekBar2Max, String seekBar2Unit) {
+    void setSeekBar2(int seekBar2Min, int seekBar2Set, int seekBar2Max, String seekBar2Unit) {
         this.seekBar2 = true;
         this.seekBar2Min = seekBar2Min;
         this.seekBar2Set = seekBar2Set;
@@ -74,11 +72,11 @@ class Filter {
         this.seekBar2Unit = seekBar2Unit;
     }
 
-    public void setColorSeekBar() {
+    void setColorSeekBar() {
         this.colorSeekBar = true;
     }
 
-    public void setFilterFunction(final FilterInterface newInterface) {
+    void setFilterFunction(final FilterInterface newInterface) {
         this.myInterface = newInterface;
     }
 
@@ -91,7 +89,7 @@ class Filter {
      *  @param seekBar the value of seekBar1.
      *  @param seekBar2 the value of seeBar2.
      */
-    public void apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2) {
+    void apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2) {
         if (myInterface != null) myInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2);
     }
 }
