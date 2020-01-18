@@ -1,4 +1,17 @@
 # IMAGE PROCESSING ON ANDROID
+
+## DESCRIPTION
+The goal of this project is to create an Android app capable of editing photos and saving those changes to the gallery.
+Here a list of the features:
+- Multiple image sources: images can be obtained from the gallery, or directly from the camera.
+- **Zoom and move**: when the image is loaded, it is possible to zoom on it using two fingers, and then move around with one finger.
+- Numerous filters: the app allows the user to apply a vast array of filters.
+- **Highly optimized**: all filters are using the latest technologies (such as RenderScript) to offer the best user experience.
+- Reset and save: the user can always undo all filters applied by clicking the Original button. They can also save the image.
+- User friendly interface: the UI is simple and intuitive.
+
+_Features in **bold** are not yet implemented, or are not yet refined enough._
+
 ## FILTERS
 ### Brightness
 ![](https://www.r-entries.com/etuliens/img/PT/1.jpg)
@@ -27,13 +40,13 @@ Changes the tint of an image. Makes the images more magenta or green.
 ### Sharpening
 ![](https://www.r-entries.com/etuliens/img/PT/5.jpg)
 
-Makes the image look sharpen or blurrier.
+Makes the image look sharper or blurrier.
 - `Seek bar`: the image’s sharpness (between -100% and 100%).
 
 ### Colorize
 ![](https://www.r-entries.com/etuliens/img/PT/6.jpg)
 
-Makes the image look sharpen or blurrier.
+Apply one color and saturation to the entire image.
 - `Color seek bar`: the color you which to use.
 - `Seek bar`: the color’s saturation (between 0% and 100%).
 
@@ -51,8 +64,8 @@ The luminance and colors are inverted: whites become blacks and reds become blue
 ### Keep a color
 ![](https://www.r-entries.com/etuliens/img/PT/10.jpg)
 
-Turns everything grayscale except for a color.
-- `Color seek bar`: the color you which to kept.
+Turns everything grayscales except for a specific color.
+- `Color seek bar`: the color you which to keep.
 - `Seek bar`: how far off the color can be before turning grey (in degrees).
 
 ### Remove a color
@@ -114,7 +127,7 @@ Used to highlight all the image’s contours.
 
 ## FUNCTIONS
 ### ColorTools Class
-This class implements all the functions necessary for conversions between RGB and HSV. None of those functions currently utilize RenderScript (abbreviated to RS from now on), but this should come along eventually. HSV is used by many filters, and because of that, it has been refined a little bit since the first version. First of all, each value (the hue, the saturation and the luminosity) can now be converted separately. This has improved the performance substantially in some functions such as colorize (-40% in runtime when using rgb2v instead of rgb2hsv). Furthermore, we can reduce the runtime by another 10% by using integers instead of floats in rgb2s. Finally, by using some bit-level trickery such as using (color >> 16) & 0x000000FF instead of Color.red(color), we can expect another 14% improvement. Also being able to call hsv2rgb with H, S, and V as three separate parameters is a huge improvement. This doesn’t apply when you call rgb2hsv and keep the HSV values in their float array.
+This class implements all the functions necessary for conversions between RGB and HSV. None of those functions currently utilize RenderScript (abbreviated to RS from now on), but this should come along eventually. HSV is used by many filters, and because of that, it has been refined a little bit since the first version. First of all, each value (the hue, the saturation, and the luminosity) can now be converted separately. This has improved the performance substantially in some functions such as colorize (-40% in runtime when using rgb2v instead of rgb2hsv). Furthermore, we can reduce the runtime by another 10% by using integers instead of floats in rgb2s. Finally, by using some bit-level trickery such as using (color >> 16) & 0x000000FF instead of Color.red(color), we can expect another 14% improvement. Also being able to call hsv2rgb with H, S, and V as three separate parameters is a huge improvement. This doesn’t apply when you call rgb2hsv and keep the HSV values in their float array.
 
 ### RenderScriptTools Class
 The RenderScriptTools implements tools useful for functions that use RS. The applyConvolution3x3RS function applies any 3x3 kernel to any image. It uses ScriptIntrinsicConvolve3x3. The cleanRenderScript function can be called after any RS function to destroy the Script, RenderScript, and the two Allocation for input and output.
@@ -125,29 +138,46 @@ This class implements tools used by any filter that uses convolution without Ren
 After every convolution algorithm, we want to make sure the values are still between 0 and 255. For that, we can use the normalizeOutput function. This function will make sure that even in the worst cases, the resulting values are kept between this range.
 This is also the correctedPixelGet which isn’t used right now. This function corrects the pixel coordinates when the kernel is asking for a pixel outside the image. This is essentially what convulution1D is using but in a 2D context. However, I would advise against using it. Some properties can be used to correct pixel coordinates more efficiently when done directly in the loops.
 
-### Filter Class
-The filter class is where all filters are born. A filter as few properties: 
-Each filter instance is created in the MainActivity when the program launches. There is no link between a Filter instance and its corresponding filter function. In order to create that connection, each Filter instance is created with a unique ID which is then used by its apply method. The apply method will read the ID and call the appropriate filter function. If there is a way to set a different apply function for each Filter instance (such as when we set a listener) then we could get rid of this ID.
+### FilterFunction Class
+This class is where all filters are born. A filter function is a static method of this class. It will always takes in parameter a Bitmap (the image to modify) and returns nothing. Most of the times, a filter can also be tuned by some parameters. Lastly, those that use RenderScript will be given a Context in parameter.
 
-The filters that use RenderScript are given images in the form of Bitmaps, whereas the other filters are using pixels arrays. Why not using only one kind of parameter for all filters? It comes without saying that we want to limit the number of unnecessary conversions between the two types of data structure. Because some filter calls each other (i.e. Gaussian Blur which call the toGray filter), I wanted for all filters to utilize pixels array. That way, we have one conversion happening before applying any filter, and one at the end of the process regardless of the number of filters called in between. However, I have been unable to make RS works with pixels array, only with Bitmap. This is why this hybrid system is currently used. Fortunately, this hasn’t increased the number of conversions, however, this means that non-RS filter cannot call RS ones. When all filters will be rewritten in RS, we will be able to use only Bitmaps. 
-
-A Filter instance has various instance variables:
-
-- A unique ID (an integer between 100 and 999).
-- A name which is then displayed in the spinner.
-- A redirection. Some filters are actually just redirection towards another—more general—filter. If this is the case, redirection is set to be the ID of that target filter.
-- A Boolean that indicates if the filter uses RS.
-- Does this filter use ColorSeekBar?
-- Does this filter use the first SeekBar? If so, what its minimum, set, and maximum values should be, along with the unit displayed?
-- Same thing for the second SeekBar.
-
-### Details on some filter function
 keepOrRemoveAColor is the filter function for the Keep a color and Remove a color filters. It takes a target hue as a parameter. Then, for each pixel, a pixel turns progressively greyer depending on the distance in degrees between its hue and the target hue. In order the accelerate the process, a lookup table (abbreviated to LUT from now on) has been used.
 Other functions also use LUTs such as linearContrastStretching, histogramEqualization, and hueShift.
 gaussianBlur was a difficult function to write. The Gaussian blur operation “can be applied to a two-dimensional image as two independent one-dimensional calculations” (taken from Wikipedia). Thanks to this property, we will be using a one-dimensional kernel.
 I chose to scale the sigma with the size of the kernel. That way, the Gaussian kernel with always “look the same” but its resolution will increase with its size. In fact, the kernel will always have values between 1 and 90.
 
 Not too much to talk about the other function, except that my implementation of histogramEqualization has to call rgb2v and rgb2hsv over all the pixels. I could have used a float array to store all the values but decided to preserve some memory instead.
+
+### Filter Class
+A Filter is an object that describes which input (colorSeekBar, seekBars, etc...) the user has access to. It also has an apply method that will call the appropriate FilterFunction. Each Filter instance is created in the MainActivity when the program launches. At first, there is no link between a Filter instance and its corresponding FilterFunction. In order to create that connection, each Filter instance is given a new FilterInterface object. This interface is used to declare which FilterFunction should be called when applying the filter.
+
+A Filter instance has various instance variables:
+
+- A name which is then displayed in the spinner.
+- Does this filter use ColorSeekBar?
+- Does this filter use the first SeekBar? If so, what its minimum, set, and maximum values should be, along with the unit displayed?
+- Same thing for the second SeekBar.
+- An interface used to launch the right FilterFunction.
+
+### MainActivity Class
+This is the core of the app. 
+Here is how the Colorize filter is declared:
+
+```
+Filter newFilter = new Filter("Colorize");   // We starts by creating a new Filter object with a given name.
+newFilter.setColorSeekBar();                 // This filter will use the ColorSeekBar
+newFilter.setSeekBar1(0, 100, 100, "%");     // It will also use the first SeekBar and the minimum, set, maximum value and unit is given.
+newFilter.setFilterFunction(new FilterInterface() {
+    @Override                                // We override its apply method to redirect towards the appropriate FilterFunction.
+    public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2) {
+        FilterFunctions.colorize(bmp, colorSeekHue, seekBar / 100f);
+    }
+});
+filters.add(newFilter);                     // Finally, we add this new Filter to filters (an array of Filter instances).
+```
+
+Then we populate the spinner with the names of filters in our array of filter. The order they are displayed in the spinner follows the order they were added.
+
 
 ## PERFORMANCES
 The following test has been performed on a Samsung SM-A105FN, a low spec phone from released in February 2019. This phone has an AnTuTu score of 88.710, 2 GB of RAM, and uses a Samsung Exynos 7 Octa 7884 processor.
@@ -195,7 +225,5 @@ Most bugs/limitations have been fixed already. A few subsisted:
 - The implementation of Laplacian edge detection using ScriptIntrinsicConvolve3x3 has a problem when using an amount parameter above 14. The image turns very bright. I suspect the problem to be caused by kernel weights above 128 (the center weight is equal to 8 * (amount + 1) which is superior or equal to 128 when amount is above 14). As using this filter with that much blur isn’t very useful, I decided to simply limit the user seek bar to values between 0 and 14. However, for this particular release, I left the possibility to go up to 20 for testing purposes.
 
 - ScriptIntrinsicBlur isn’t able to handle blur radius above 25, this is not a limitation from this program, but from this library.
-
-- In order to create a RenderScript instance, you need to provide a Context instance. I may have missed how to create one, but right now the program is using the Context from MainActivity. Because of this, it was necessary to make the Context static and accessible through a static method called getAppContext. This is a memory leak according to Android Studio. There is surely a better way of doing this, but I am not currently aware of it.
 
 - When loading images, the resulting image is sometimes misoriented (turned 90 degrees in one direction). This is probably due to the fact that some system saves the image rotation has a property and not directly apply it on the image. A rotation filter will be added eventually, and therefore, this problem will be fixed.
