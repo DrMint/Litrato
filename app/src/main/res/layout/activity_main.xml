@@ -9,36 +9,40 @@
 
     <Button
         android:id="@+id/applyButton"
-        android:enabled="false"
         style="@style/Widget.AppCompat.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginBottom="10dp"
+        android:enabled="false"
         android:text="@string/saveButtonString"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/originalButton" />
+        app:layout_constraintBottom_toTopOf="@+id/histogram"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
         android:id="@+id/originalButton"
-        android:enabled="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/originalButtonString"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        android:layout_marginBottom="7dp"
+        android:text="@string/loadButtonString"
+        app:layout_constraintBottom_toTopOf="@+id/applyButton"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
-        android:layout_height="410dp"
-        android:adjustViewBounds="true"
+        android:layout_height="0dp"
+        android:layout_marginBottom="10dp"
+        android:adjustViewBounds="false"
         android:contentDescription="@string/imageViewDescription"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toTopOf="@+id/spinner"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/default_image" />
 
     <Spinner
@@ -46,35 +50,33 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="7dp"
+        app:layout_constraintBottom_toTopOf="@+id/colorSeekBar"
         app:layout_constraintEnd_toStartOf="@+id/originalButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/histogram"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="24dp"
+        android:layout_height="180dp"
         android:contentDescription="@string/histogramViewDescription"
         android:scaleType="fitXY"
         app:layout_constraintBottom_toTopOf="@+id/imageInformation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/applyButton" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.divyanshu.colorseekbar.ColorSeekBar
         android:id="@+id/colorSeekBar"
         android:layout_width="0dp"
         android:layout_height="23dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="7dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="7dp"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar1"
         app:layout_constraintEnd_toStartOf="@+id/applyButton"
         app:layout_constraintHorizontal_bias="0.731"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/imageInformation"
@@ -90,22 +92,22 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="7dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="7dp"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar2"
         app:layout_constraintEnd_toStartOf="@+id/seekBarValue1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/colorSeekBar" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <SeekBar
         android:id="@+id/seekBar2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="7dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/histogram"
         app:layout_constraintEnd_toStartOf="@+id/seekBarValue2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar1" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/seekBarValue1"

@@ -23,7 +23,7 @@ import com.android.retouchephoto.ScriptC_brightness;
 import com.android.retouchephoto.ScriptC_threshold;
 
 
-class FilterFunctions {
+class FilterFunction {
 
     /**
      *  A filter that convert the image to grayscale, but keeps a shade of color intact.
