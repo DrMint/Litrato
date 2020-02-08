@@ -12,14 +12,24 @@ import static com.example.retouchephoto.RenderScriptTools.*;
 import androidx.renderscript.Allocation;
 import androidx.renderscript.ScriptIntrinsicBlur;
 
-
+/**
+ * This class implements all the filter function.
+ * This class uses Intrinsic functions such as ScriptIntrinsicConvolve3x3.
+ * All filters should have the following signature:
+ * static void FilterName(final Bitmap bmp, final Context context, ... other parameters that can influence the result)
+ *
+ * @author Thomas Barillot
+ * @version 1.0
+ * @since   2020-02-08
+ */
 class FilterFunctionIntrinsic {
 
     /**
-     *  Highlights the contour of an image.
-     *  This filter use RenderScript.
-     *  @param bmp the image
-     *  @param radius size of the blur (must be between 0 and 25)
+     * Make the image blurry.
+     * @param bmp the image.
+     * @param context the context.
+     * @param radius how blurry the image should be (the size of the kernel).
+     *               Cannot be more than 25. because of Intrinsic's implementation limitations.
      */
     static void gaussianRS(final Bitmap bmp, final Context context, final float radius) {
 
