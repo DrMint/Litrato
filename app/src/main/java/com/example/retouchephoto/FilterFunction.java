@@ -11,7 +11,6 @@ import static com.example.retouchephoto.ColorTools.*;
 import static com.example.retouchephoto.RenderScriptTools.*;
 
 import androidx.renderscript.Allocation;
-import androidx.renderscript.ScriptIntrinsicBlur;
 
 import com.android.retouchephoto.ScriptC_addNoise;
 import com.android.retouchephoto.ScriptC_gray;
@@ -21,7 +20,11 @@ import com.android.retouchephoto.ScriptC_rgbWeights;
 import com.android.retouchephoto.ScriptC_saturation;
 import com.android.retouchephoto.ScriptC_brightness;
 import com.android.retouchephoto.ScriptC_threshold;
-
+import com.android.retouchephoto.ScriptC_colorize;
+import com.android.retouchephoto.ScriptC_keepAColor;
+import com.android.retouchephoto.ScriptC_histogram;
+import com.android.retouchephoto.ScriptC_constrastExtension;
+import com.android.retouchephoto.ScriptC_convolution;
 
 class FilterFunction {
 
@@ -228,37 +231,6 @@ class FilterFunction {
     }
 
     /**
-     *  Apply gaussian then Laplacian filter.
-     *  @param bmp the image
-     */
-    static void laplacienEdgeDetection(final Bitmap bmp, final int blur) {
-        if (blur > 0) gaussianBlur(bmp, blur, true);
-
-        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-
-        // Convert all RGB values into luminosity
-        for (int i = 0; i < bmp.getWidth() * bmp.getHeight(); i++) {
-            pixels[i] = (pixels[i]) & 0x000000FF;
-        }
-
-        int[] kernel = {
-                1, 1, 1,
-                1, -8, 1,
-                1, 1, 1
-        };
-
-        int kernelSize = 3;
-
-        convolution2D(pixels, bmp.getWidth(), bmp.getHeight(), kernel, kernelSize, kernelSize);
-        convertGreyToColor(pixels);
-
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-
-        histogramEqualization(bmp);
-    }
-
-    /**
      *  Each pixel becomes the average of size * size pixels around it.
      *  @param bmp the image
      *  @param size size of the kernel
@@ -289,6 +261,7 @@ class FilterFunction {
      *  @param bmp the pixels of the image
      *  @param size size of the kernel
      *  @param correctBorders corrects the borders if true, otherwise doesn't
+     *  @deprecated
      */
     static void gaussianBlur(final Bitmap bmp, final int size, final boolean correctBorders) {
 
@@ -428,63 +401,6 @@ class FilterFunction {
     }
 
     /**
-     *  Highlights the contour of an image.
-     *  This filter use RenderScript.
-     *  @param bmp the image
-     *  @param radius size of the blur (must be between 0 and 25)
-     */
-    static void gaussianRS(final Bitmap bmp, final Context context, final float radius) {
-
-        RenderScript rs = RenderScript.create(context);
-        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-
-        Allocation input = Allocation.createFromBitmap(rs, bmp);
-        Allocation output = Allocation.createTyped(rs, input.getType());
-
-        script.setInput(input);
-        script.setRadius(radius);
-        script.forEach(output);
-
-        output.copyTo(bmp);
-        cleanRenderScript(script, rs, input, output);
-    }
-
-    /**
-     *  Highlights the contour of an image.
-     *  This filter use RenderScript.
-     *  @param bmp the image
-     *  @param amount size of the blur (must be between 0 and 25)
-     */
-    static void laplacianRS(final Bitmap bmp, final Context context, final float amount) {
-
-        if (amount > 0) gaussianRS(bmp, context, amount);
-
-        float v = amount + 1;
-        float[] kernel = {
-                -v, -v, -v,
-                -v, 8 * v, -v,
-                -v, -v, -v
-        };
-        applyConvolution3x3RS(bmp, context, kernel);
-    }
-
-    /**
-     *  Enhanced the image sharpness.
-     *  It a negetive number is used for amount, turns the image, blurs the image slightly.
-     *  This filter use RenderScript.
-     *  @param bmp the image
-     *  @param amount amount of sharpness.
-     */
-    static void sharpenRS(final Bitmap bmp, final Context context, final float amount) {
-        float[] kernel = {
-                0f, -amount, 0f,
-                -amount, 1f + 4f * amount, -amount,
-                0f, -amount, 0f
-        };
-        applyConvolution3x3RS(bmp, context, kernel);
-    }
-
-    /**
      *  Reduces the number of discrete luminance values.
      *  This filter use RenderScript.
      *  @param bmp the image
@@ -580,6 +496,290 @@ class FilterFunction {
         }
 
 
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+
+    static void colorizeRS(Bitmap bmp, final Context context, final int deg, final float saturation, boolean changeSaturation) {
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+        ScriptC_colorize colorizeScript = new ScriptC_colorize(rs);
+        colorizeScript.set_t(deg);
+        if (changeSaturation) {
+            colorizeScript.set_saturation(deg);
+        }
+        colorizeScript.forEach_colorize(input, output);
+        output.copyTo(bmp);
+        cleanRenderScript(colorizeScript, rs, input, output);
+    }
+
+
+    static void keepAColorRS(Bitmap bmp, final Context context, final int deg) {
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+        ScriptC_keepAColor script = new ScriptC_keepAColor(rs);
+        script.set_choosedColor((float) deg);
+        script.forEach_keepAColor(input, output);
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+
+    }
+
+    static void histogramEqualizationRS(Bitmap bmp, final Context context){
+        Bitmap res = bmp.copy(bmp.getConfig(), true);
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, res);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+        ScriptC_histogram script = new ScriptC_histogram(rs);
+        script.set_size(bmp.getWidth() * bmp.getHeight());
+        script.forEach_root(input, output);
+        script.invoke_createRemapArray();
+        script.forEach_remaptoRGB(output, input);
+        input.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+
+    static void toExtDyn(Bitmap bmp, Context context){
+        Allocation mInAllocation;
+        Allocation mOutAllocation;
+        Allocation histoR;
+        Allocation histoG;
+        Allocation histoB;
+        Allocation LUTr;
+        Allocation LUTg;
+        Allocation LUTb;
+        RenderScript mRS = RenderScript.create(context);
+        mInAllocation = Allocation.createFromBitmap(mRS, bmp);
+        mOutAllocation = Allocation.createFromBitmap(mRS, bmp);
+        histoR = Allocation.createSized(mRS, Element.U32(mRS), 256);
+        histoG = Allocation.createSized(mRS, Element.U32(mRS), 256);
+        histoB = Allocation.createSized(mRS, Element.U32(mRS), 256);
+        LUTr = Allocation.createSized(mRS, Element.U32(mRS), 256);
+        LUTg = Allocation.createSized(mRS, Element.U32(mRS), 256);
+        LUTb = Allocation.createSized(mRS, Element.U32(mRS), 256);
+        ScriptC_constrastExtension mScript = new ScriptC_constrastExtension(mRS);
+        mScript.bind_histogramR(histoR);
+        mScript.bind_histogramG(histoG);
+        mScript.bind_histogramB(histoB);
+        mScript.forEach_compute_histogram(mInAllocation);
+        int []histogramR = new int[256];
+        int []histogramG = new int[256];
+        int []histogramB = new int[256];
+        histoR.copyTo(histogramR);
+        histoB.copyTo(histogramG);
+        histoG.copyTo(histogramB);
+        int mymaxr = maxArray(histogramR);
+        int myminr = minArray(histogramR);
+        int mymaxg = maxArray(histogramG);
+        int myming = minArray(histogramG);
+        int mymaxb = maxArray(histogramB);
+        int myminb = minArray(histogramB);
+        int[] lutr = new int[256];
+        int[] lutg = new int[256];
+        int[] lutb = new int[256];
+        for ( int i=0; i < 256; i++ ){
+            lutr[i]=(255*(i-myminr))/(mymaxr-myminr);
+            lutg[i]=(255*(i-myming))/(mymaxg-myming);
+            lutb[i]=(255*(i-myminb))/(mymaxb-myminb);
+        }
+        LUTr.copyFrom(lutr);
+        LUTg.copyFrom(lutg);
+        LUTb.copyFrom(lutb);
+        mScript.bind_LUTr(LUTr);
+        mScript.bind_LUTg(LUTg);
+        mScript.bind_LUTb(LUTb);
+        mScript.forEach_apply_histogram(mInAllocation, mOutAllocation);
+        histoR.destroy();
+        histoB.destroy();
+        histoG.destroy();
+        LUTb.destroy();
+        LUTg.destroy();
+        LUTr.destroy();
+        mOutAllocation.copyTo(bmp);
+        mInAllocation.destroy();
+        mOutAllocation.destroy();
+        mScript.destroy();
+        mRS.destroy();
+    }
+
+
+    static void directionalBlur(Bitmap bmp,Context context, int size, boolean vertical) {
+
+        if (size < 1) return;
+
+        // Let's calculate the gaussian kernel
+        final double sigma = size / 3.0;
+        final double tmp = Math.exp(-(size * size / (2 * sigma * sigma)));
+        final int floatToIntCoef = (int) (1 / tmp);
+        int kernelWeight = 0;
+
+        final float[] gaussianKernel = new float[size + 1 + size];
+        for (int i = -size; i <= size ; i++) {
+            gaussianKernel[i + size] = (int) (Math.exp(-(i * i / (2 * sigma * sigma))) * floatToIntCoef);
+            kernelWeight += gaussianKernel[i + size];
+        }
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+        ScriptC_convolution script = new ScriptC_convolution(rs);
+        script.bind_pixels(input);
+        Allocation fGauss = Allocation.createSized(rs, Element.F32(rs), size + 1 + size);
+        script.bind_filtre(fGauss);
+        fGauss.copyFrom(gaussianKernel);
+        script.set_sizeConvolution(size);
+        script.set_kernelWeight(kernelWeight);
+        script.set_width(bmp.getWidth());
+        script.set_height(bmp.getHeight());
+        if (vertical) {
+            script.forEach_toConvolutionVertical(input, output);
+        } else {
+            script.forEach_toConvolutionHorizontal(input, output);
+        }
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+    static void gaussianRS(Bitmap bmp,Context context, int size) {
+        directionalBlur(bmp, context, size, false);
+        directionalBlur(bmp, context, size, true);
+    }
+
+
+    /**
+     *  Highlights the contour of an image.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param amount size of the blur (must be between 0 and 25)
+     */
+    static void laplacianRS(final Bitmap bmp, final Context context, final float amount) {
+
+        if (amount > 0) gaussianRS(bmp, context, (int) amount);
+
+        float v = amount + 1;
+        float[] kernel = {
+                v, v, v,
+                v, -8 * v, v,
+                v, v, v
+        };
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+        ScriptC_convolution script = new ScriptC_convolution(rs);
+        script.bind_pixels(input);
+        Allocation fGauss = Allocation.createSized(rs, Element.F32(rs), 9);
+        script.bind_filtre(fGauss);
+        fGauss.copyFrom(kernel);
+        script.set_sizeConvolution(1);
+        script.set_width(bmp.getWidth());
+        script.set_height(bmp.getHeight());
+        script.forEach_toConvolution(input, output);
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+    /**
+     *  Highlights the contour of an image.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param amount size of the blur (must be between 0 and 25)
+     */
+    static void sharpenRS(final Bitmap bmp, final Context context, final float amount) {
+
+        float[] kernel = {
+                0f, -amount, 0f,
+                -amount, 1f + 4f * amount, -amount,
+                0f, -amount, 0f
+        };
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+        ScriptC_convolution script = new ScriptC_convolution(rs);
+        script.bind_pixels(input);
+        Allocation fGauss = Allocation.createSized(rs, Element.F32(rs), 9);
+        script.bind_filtre(fGauss);
+        fGauss.copyFrom(kernel);
+        script.set_sizeConvolution(1);
+        script.set_width(bmp.getWidth());
+        script.set_height(bmp.getHeight());
+        script.forEach_toConvolution(input, output);
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+
+    /**
+     *  Highlights the contour of an image.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     *  @param amount size of the blur (must be between 0 and 25)
+     */
+    static void sobelRS(final Bitmap bmp, final Context context, final float amount, boolean vertical) {
+
+        if (amount > 0) gaussianRS(bmp, context, (int) amount);
+
+        float v = amount + 1;
+
+        float[] kernelVertical = {
+                -v, 0, v,
+                -2 * v, 0, 2 * v,
+                -v, 0, v
+        };
+
+        float[] kernelHorizontal = {
+                -v, -2 * v, -v,
+                0, 0, 0,
+                v, 2 * v, v
+        };
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+        ScriptC_convolution script = new ScriptC_convolution(rs);
+        script.bind_pixels(input);
+        Allocation fGauss = Allocation.createSized(rs, Element.F32(rs), 9);
+        script.bind_filtre(fGauss);
+
+        if (vertical) {
+            fGauss.copyFrom(kernelVertical);
+        } else {
+            fGauss.copyFrom(kernelHorizontal);
+        }
+
+        script.set_sizeConvolution(1);
+        script.set_width(bmp.getWidth());
+        script.set_height(bmp.getHeight());
+        script.forEach_toConvolution(input, output);
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+    /**
+     *  Each pixel becomes the average of size * size pixels around it.
+     *  @param bmp the image
+     *  @param size size of the kernel
+     */
+    static void averageBlurRS(final Bitmap bmp, Context context, final int size) {
+        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
+        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+        ScriptC_convolution script = new ScriptC_convolution(rs);
+        script.bind_pixels(input);
+        script.set_sizeConvolution(size);
+        script.set_kernelWeight((size + 1 + size) * (size + 1 + size));
+        script.set_width(bmp.getWidth());
+        script.set_height(bmp.getHeight());
+        script.forEach_toConvolutionUniform(input, output);
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
     }

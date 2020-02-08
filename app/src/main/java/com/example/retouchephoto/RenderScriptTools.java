@@ -9,9 +9,8 @@ import androidx.renderscript.RenderScript;
 import androidx.renderscript.Script;
 import androidx.renderscript.ScriptIntrinsicConvolve3x3;
 
-
 /**
- * This class implements tools useful for functions that use RS.
+ * This class implements useful tools for functions that use RS.
  *
  * @author Thomas Barillot
  * @version 1.0

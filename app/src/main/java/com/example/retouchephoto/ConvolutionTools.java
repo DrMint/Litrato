@@ -186,17 +186,17 @@ class ConvolutionTools {
     }
 
     /**
-     *  Takes the values in input and copies them to output after normalizing them to 0-255.
-     *  The values in input can be in between sumNegativeKernel * 255 and sumPositiveKernel * 255.
-     *  @param input the pixel to be normalized
-     *  @param output where the result will be stored.
+     *  Takes the values in output and copies them to pixels after normalizing them to 0-255.
+     *  The values in output should be in between sumNegativeKernel * 255 and sumPositiveKernel * 255.
+     *  @param pixels where the result will be stored.
+     *  @param output the pixel to be normalized.
      *  @param sumNegativeKernel sum of all negative values in the kernel.
      *  @param sumPositiveKernel sum of all positive values in the kernel.
      */
-    private static void normalizeOutput(final int[] input, final int[] output, final int sumNegativeKernel, final int sumPositiveKernel) {
+    private static void normalizeOutput(final int[] pixels, final int[] output, final int sumNegativeKernel, final int sumPositiveKernel) {
         // Save the new values to pixels
-        for (int i = 0; i < input.length; i++) {
-            input[i] = (output[i] + 255 * sumNegativeKernel) / (sumNegativeKernel + sumPositiveKernel);
+        for (int i = 0; i < pixels.length; i++) {
+            pixels[i] = (output[i] + 255 * sumNegativeKernel) / (sumNegativeKernel + sumPositiveKernel);
         }
     }
 
@@ -242,6 +242,23 @@ class ConvolutionTools {
         }
 
         return pixels[newX + newY * imageWidth];
+    }
+
+
+    static int minArray(int[] array) {
+        int i = 0;
+        while (array[i] == 0) {
+            i++;
+        }
+        return i;
+    }
+
+    static int maxArray(int[] array) {
+        int i = (array.length) - 1;
+        while (array[i] == 0) {
+            i--;
+        }
+        return i;
     }
 
 

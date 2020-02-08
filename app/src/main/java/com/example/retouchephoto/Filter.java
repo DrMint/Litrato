@@ -47,6 +47,14 @@ class Filter {
     int seekBar2Max;
     String seekBar2Unit;
 
+    /**
+     * Does this filter utilize the first switch.
+     */
+    boolean switch1;
+    boolean switch1Default;
+    String switch1UnitFalse;
+    String switch1UnitTrue;
+
     private FilterInterface myInterface;
 
     Filter(String name) {
@@ -72,6 +80,13 @@ class Filter {
         this.seekBar2Unit = seekBar2Unit;
     }
 
+    void setSwitch1(boolean switch1Default, String switch1UnitFalse, String switch1UnitTrue) {
+        this.switch1 = true;
+        this.switch1Default = switch1Default;
+        this.switch1UnitFalse = switch1UnitFalse;
+        this.switch1UnitTrue = switch1UnitTrue;
+    }
+
     void setColorSeekBar() {
         this.colorSeekBar = true;
     }
@@ -89,8 +104,8 @@ class Filter {
      *  @param seekBar the value of seekBar1.
      *  @param seekBar2 the value of seeBar2.
      */
-    void apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2) {
-        if (myInterface != null) myInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2);
+    void apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
+        if (myInterface != null) myInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
     }
 }
 

@@ -1,10 +1,11 @@
 package com.example.retouchephoto;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 
 
 /**
- * This class implements all the functions necessary for conversions between RGB and HSV.
+ * This class implements all the functions necessary for conversions between RGB and HSV, among others.
  *
  * @author Thomas Barillot
  * @version 1.0
@@ -27,47 +28,13 @@ class ColorTools {
         }
     }
 
-
     /**
      * Converts an HSV color into a RGB color.
      * @param color the HSV color to be converted
      * @return the color in RGB
      */
     static int hsv2rgb (final float[] color) {
-        float H = color[0];
-        float S = color[1];
-        float V = color[2];
-
-        if (S < 0) {S = 0;}
-        if (S > 1) {S = 1;}
-        if (V < 0) {V = 0;}
-        if (V > 1) {V = 1;}
-
-        float C = V * S;
-        float X = C * (1 - Math.abs((H / 60f) % 2 - 1));
-        float m = V - C;
-
-        float R = 0;
-        float G = 0;
-        float B = 0;
-
-        int tmp = (int) (H / 60f);
-
-
-        switch (tmp) {
-            case 0: R = C; G = X; B = 0; break;
-            case 1: R = X; G = C; B = 0; break;
-            case 2: R = 0; G = C; B = X; break;
-            case 3: R = 0; G = X; B = C; break;
-            case 4: R = X; G = 0; B = C; break;
-            case 5: R = C; G = 0; B = X; break;
-        }
-
-        int r = (int) ((R + m) * 255);
-        int g = (int) ((G + m) * 255);
-        int b = (int) ((B + m) * 255);
-
-        return Color.rgb(r,g,b);
+        return hsv2rgb((int) color[0], color[1], color[2]);
     }
 
     /**
@@ -220,4 +187,22 @@ class ColorTools {
         int B = (color) & 0x000000FF;
         return (float) Math.max(R, Math.max(G, B)) / 255;
     }
+
+    /**
+     * For all pixels, set the alpha value to 255.
+     * @param bmp the image to modify.
+     */
+    static void removeAlpha (final Bitmap bmp) {
+
+        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
+        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+
+        for (int i = 0; i < bmp.getWidth() * bmp.getWidth(); i++) {
+            // Set alpha value to 255;
+            pixels[i] = (pixels[i] | 0xFF000000);
+        }
+
+        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+    }
+
 }
