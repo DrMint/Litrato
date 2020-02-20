@@ -738,22 +738,5 @@ class FilterFunction {
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
     }
-    static void testBlurRS(final Bitmap bmp, final Context context, final int size) {
-        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        RenderScript rs = RenderScript.create(context);
-        Allocation input = Allocation.createFromBitmap(rs, bmp);
-        Allocation output = Allocation.createTyped(rs,input.getType());
-        ScriptC_convolution script = new ScriptC_convolution(rs);
-        script.bind_pixels(input);
-        script.set_kernelWidth(size);
-        script.set_kernelHeight(size);
-        script.set_kernelWeight((size + 1 + size) * (size + 1 + size));
-        script.set_width(bmp.getWidth());
-        script.set_height(bmp.getHeight());
-        script.forEach_toConvolution(input, output);
-        output.copyTo(bmp);
-        cleanRenderScript(script, rs, input, output);
-    }
 
 }
