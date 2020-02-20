@@ -581,7 +581,6 @@ class FilterFunction {
         script.forEach_compute_histogramr(input);
         script.forEach_compute_histogramg(input);
         script.forEach_compute_histogramb(input);
-        Log.i(" max","oops");
         script.invoke_maxArrayB();
         script.invoke_maxArrayG();
         script.invoke_minArrayR();
