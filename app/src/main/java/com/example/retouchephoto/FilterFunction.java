@@ -2,13 +2,19 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.util.Log;
 
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
 
+import static android.graphics.Color.blue;
+import static android.graphics.Color.green;
+import static android.graphics.Color.red;
 import static com.example.retouchephoto.ConvolutionTools.*;
 import static com.example.retouchephoto.ColorTools.*;
 import static com.example.retouchephoto.RenderScriptTools.*;
+import static java.lang.Math.abs;
 
 import androidx.renderscript.Allocation;
 
@@ -531,6 +537,20 @@ class FilterFunction {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
         ScriptC_keepAColor script = new ScriptC_keepAColor(rs);
+        script.set_keep(true);
+        script.set_choosedColor((float) deg);
+        script.forEach_keepAColor(input, output);
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+
+    }
+    static void removeAColorRS(final Bitmap bmp, final Context context, final int deg) {
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+        ScriptC_keepAColor script = new ScriptC_keepAColor(rs);
+        script.set_keep(false);
         script.set_choosedColor((float) deg);
         script.forEach_keepAColor(input, output);
         output.copyTo(bmp);
@@ -553,63 +573,25 @@ class FilterFunction {
     }
 
 
-    static void toExtDyn(final Bitmap bmp, final Context context){
+    static void toExtDyn(final Bitmap bmp, final Context context, final int targetMinLuminosity, final int targetMaxLuminosity){
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createFromBitmap(rs, bmp);
-        Allocation histoR = Allocation.createSized(rs, Element.U32(rs), 256);
-        Allocation histoG = Allocation.createSized(rs, Element.U32(rs), 256);
-        Allocation histoB = Allocation.createSized(rs, Element.U32(rs), 256);
-        Allocation lutR = Allocation.createSized(rs, Element.U32(rs), 256);
-        Allocation lutG = Allocation.createSized(rs, Element.U32(rs), 256);
-        Allocation lutB = Allocation.createSized(rs, Element.U32(rs), 256);
-
         ScriptC_constrastExtension script = new ScriptC_constrastExtension(rs);
-
-        script.bind_histogramR(histoR);
-        script.bind_histogramG(histoG);
-        script.bind_histogramB(histoB);
-
-        script.forEach_compute_histogram(input);
-
-        int []histogramR = new int[256];
-        int []histogramG = new int[256];
-        int []histogramB = new int[256];
-
-        histoR.copyTo(histogramR);
-        histoB.copyTo(histogramG);
-        histoG.copyTo(histogramB);
-
-        int mymaxr = maxArray(histogramR);
-        int myminr = minArray(histogramR);
-        int mymaxg = maxArray(histogramG);
-        int myming = minArray(histogramG);
-        int mymaxb = maxArray(histogramB);
-        int myminb = minArray(histogramB);
-
-        int[] lutr = new int[256];
-        int[] lutg = new int[256];
-        int[] lutb = new int[256];
-
-        for ( int i=0; i < 256; i++ ){
-            lutr[i]=(255*(i-myminr))/(mymaxr-myminr);
-            lutg[i]=(255*(i-myming))/(mymaxg-myming);
-            lutb[i]=(255*(i-myminb))/(mymaxb-myminb);
-        }
-
-        lutR.copyFrom(lutr);
-        lutG.copyFrom(lutg);
-        lutB.copyFrom(lutb);
-
-        script.bind_LUTr(lutR);
-        script.bind_LUTg(lutG);
-        script.bind_LUTb(lutB);
-
+        script.forEach_compute_histogramr(input);
+        script.forEach_compute_histogramg(input);
+        script.forEach_compute_histogramb(input);
+        Log.i(" max","oops");
+        script.invoke_maxArrayB();
+        script.invoke_maxArrayG();
+        script.invoke_minArrayR();
+        script.invoke_minArrayB();
+        script.invoke_maxArrayR();
+        script.invoke_minArrayG();
+        script.invoke_createRemapArray();
         script.forEach_apply_histogram(input, output);
-
         output.copyTo(bmp);
-
-        Allocation[] allocations = {histoR, histoB, histoG, lutR, lutG, lutB, input, output};
+        Allocation[] allocations = {input, output};
         cleanRenderScript(script, rs, allocations);
     }
 
@@ -743,7 +725,6 @@ class FilterFunction {
     static void averageBlurRS(final Bitmap bmp, final Context context, final int size) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs,input.getType());
@@ -758,4 +739,22 @@ class FilterFunction {
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
     }
+    static void testBlurRS(final Bitmap bmp, final Context context, final int size) {
+        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
+        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+        ScriptC_convolution script = new ScriptC_convolution(rs);
+        script.bind_pixels(input);
+        script.set_kernelWidth(size);
+        script.set_kernelHeight(size);
+        script.set_kernelWeight((size + 1 + size) * (size + 1 + size));
+        script.set_width(bmp.getWidth());
+        script.set_height(bmp.getHeight());
+        script.forEach_toConvolution(input, output);
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
 }

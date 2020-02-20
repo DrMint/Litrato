@@ -254,7 +254,7 @@ class ConvolutionTools {
     }
 
     static int maxArray(int[] array) {
-        int i = (array.length) - 1;
+        int i = 255;
         while (array[i] == 0) {
             i--;
         }

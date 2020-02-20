@@ -3,47 +3,102 @@
 #pragma rs java_package_name(com.android.retouchephoto)
 
 
-int32_t *histogramR;
-int32_t *histogramG;
-int32_t *histogramB;
-int32_t *histogramR2;
-int32_t *histogramG2;
-int32_t *histogramB2;
-int32_t *LUTr;
-int32_t *LUTg;
-int32_t *LUTb;
-int32_t *LUTr2;
-int32_t *LUTg2;
-int32_t *LUTb2;
-void __attribute__((kernel)) compute_histogram(uchar4 in)
+int32_t histogramR[256];
+int32_t histogramG[256];
+int32_t histogramB[256];
+int r;
+int g;
+int b;
+int minr;
+int ming;
+int minb;
+int maxr;
+int maxg;
+int maxb;
+
+
+void __attribute__((kernel)) compute_histogramb(uchar4 in)
 {
-volatile int32_t *addrR = &histogramR[in.r];
-rsAtomicInc(addrR);
-volatile int32_t *addrG = &histogramG[in.g];
-rsAtomicInc(addrG);
-volatile int32_t *addrB = &histogramB[in.b];
-rsAtomicInc(addrB);
+rsAtomicInc(&histogramB[in.b]);
+}
+void __attribute__((kernel)) compute_histogramr(uchar4 in)
+{
+rsAtomicInc(&histogramR[in.r]);
+}
+void __attribute__((kernel)) compute_histogramg(uchar4 in)
+{
+rsAtomicInc(&histogramG[in.g]);
 }
 
 uchar4 __attribute__((kernel)) apply_histogram(uchar4 in)
 {
-uchar valR = LUTr[in.r];
-uchar valG = LUTg[in.g];
-uchar valB = LUTb[in.b];
+uchar valR = histogramR[in.r];
+uchar valG = histogramG[in.g];
+uchar valB = histogramB[in.b];
 return (uchar4) {valR,valG,valB,in.a};
 }
 
-uchar4 __attribute__((kernel)) apply_dim(uchar4 in)
-{
-uchar valR = LUTr2[in.r];
-uchar valG = LUTg2[in.g];
-uchar valB = LUTb2[in.b];
-return (uchar4) {valR,valG,valB,in.a};
+void createRemapArray() {
+//create map for y
+r=maxr-minr;
+g=maxg-ming;
+b=maxb-minb;
+for (int i = 0; i < 256; i++) {
+histogramR[i]=(255*(i-minr))/r;
+histogramG[i]=(255*(i-ming))/g;
+histogramB[i]=(255*(i-minb))/b;
 }
-uchar4 __attribute__((kernel)) apply_egal(uchar4 in)
-{
-uchar valR = (histogramR2[in.r]*255)/histogramR2[255];
-uchar valG = (histogramG2[in.g]*255)/histogramG2[255];
-uchar valB = (histogramB2[in.b]*255)/histogramB2[255];
-return (uchar4) {valR,valG,valB,in.a};
 }
+
+void init() {
+for (int i = 0; i < 256; i++) {
+histogramR[i] = 0;
+histogramG[i] = 0;
+histogramB[i] = 0;
+}
+}
+void minArrayR() {
+        int i = 0;
+        while (histogramR[i] == 0) {
+            i++;
+        }
+        minr=i;
+    }
+
+void maxArrayR() {
+        int i = 255;
+        while (histogramR[i] == 0) {
+            i--;
+        }
+        maxr=i;
+ }
+void minArrayG() {
+        int i = 0;
+        while (histogramG[i] == 0) {
+            i++;
+        }
+        ming=i;
+    }
+
+void maxArrayG() {
+        int i = 255;
+        while (histogramG[i] == 0) {
+            i--;
+        }
+        maxg=i;
+ }
+void minArrayB() {
+        int i = 0;
+        while (histogramB[i] == 0) {
+            i++;
+        }
+        minb=i;
+    }
+
+void maxArrayB() {
+        int i = 255;
+        while (histogramB[i] == 0) {
+            i--;
+        }
+        maxb=i;
+ }

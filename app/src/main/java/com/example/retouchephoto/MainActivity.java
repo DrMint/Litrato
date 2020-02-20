@@ -458,6 +458,16 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newFilter);
 
+        newFilter = new Filter("Remove a color RS");
+        newFilter.setColorSeekBar();
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                FilterFunction.removeAColorRS(bmp, context, colorSeekHue);
+            }
+        });
+        filters.add(newFilter);
+
         newFilter = new Filter("Keep a color RS");
         newFilter.setColorSeekBar();
         newFilter.setFilterFunction(new FilterInterface() {
@@ -528,7 +538,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
             public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
-                FilterFunction.toExtDyn(bmp, context);
+                FilterFunction.toExtDyn(bmp, context,(int)(seekBar / 255f), (int)(seekBar2 / 255f));
             }
         });
         filters.add(newFilter);
@@ -700,6 +710,7 @@ public class MainActivity extends AppCompatActivity {
 
                 } else {
                     switch1.setVisibility(View.GONE);
+
                 }
 
                 // Only shows the seekBarValues when the seekBars are visible.

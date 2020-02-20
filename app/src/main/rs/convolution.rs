@@ -11,7 +11,6 @@ int kernelHeight;
 float kernelWeight = 1;
 
 uchar4 __attribute__((kernel)) toConvolution(uchar4 in,uint32_t x,uint32_t y) {
-
     in.r=0;
     in.b=0;
     in.g=0;
