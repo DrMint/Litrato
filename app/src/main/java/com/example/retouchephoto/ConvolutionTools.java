@@ -245,21 +245,4 @@ class ConvolutionTools {
     }
 
 
-    static int minArray(int[] array) {
-        int i = 0;
-        while (array[i] == 0) {
-            i++;
-        }
-        return i;
-    }
-
-    static int maxArray(int[] array) {
-        int i = 255;
-        while (array[i] == 0) {
-            i--;
-        }
-        return i;
-    }
-
-
 }

@@ -587,6 +587,8 @@ class FilterFunction {
         script.invoke_minArrayB();
         script.invoke_maxArrayR();
         script.invoke_minArrayG();
+        script.set_targetMin(targetMinLuminosity);
+        script.set_targetMax(targetMaxLuminosity);
         script.invoke_createRemapArray();
         script.forEach_apply_histogram(input, output);
         output.copyTo(bmp);
@@ -622,7 +624,7 @@ class FilterFunction {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs,input.getType());
         ScriptC_convolution script = new ScriptC_convolution(rs);
-        script.bind_pixels(input);
+        script.set_pixels(input);
         Allocation fGauss = Allocation.createSized(rs, Element.F32(rs), size + 1 + size);
         script.bind_kernel(fGauss);
         fGauss.copyFrom(gaussianKernel);
@@ -728,7 +730,7 @@ class FilterFunction {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs,input.getType());
         ScriptC_convolution script = new ScriptC_convolution(rs);
-        script.bind_pixels(input);
+        script.set_pixels(input);
         script.set_kernelWidth(size);
         script.set_kernelHeight(size);
         script.set_kernelWeight((size + 1 + size) * (size + 1 + size));

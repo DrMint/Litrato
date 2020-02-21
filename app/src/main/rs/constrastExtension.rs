@@ -15,7 +15,8 @@ int minb;
 int maxr;
 int maxg;
 int maxb;
-
+int targetMin;
+int targetMax;
 
 void __attribute__((kernel)) compute_histogramb(uchar4 in)
 {
@@ -39,14 +40,29 @@ return (uchar4) {valR,valG,valB,in.a};
 }
 
 void createRemapArray() {
-//create map for y
-r=maxr-minr;
-g=maxg-ming;
-b=maxb-minb;
+float stretchingr = (targetMax- targetMin);
+    if (maxr == minr) {
+         stretchingr/= 255;
+    } else {
+            stretchingr /= (maxr- minr);
+    }
+float stretchingg = (targetMax- targetMin);
+    if (maxg== ming) {
+         stretchingg/= 255;
+    } else {
+            stretchingg /= (maxg- ming);
+    }
+float stretchingb = (targetMax- targetMin);
+    if (maxb == minb) {
+         stretchingb/= 255;
+    } else {
+            stretchingb /= (maxb- minb);
+    }
+
 for (int i = 0; i < 256; i++) {
-histogramR[i]=(255*(i-minr))/r;
-histogramG[i]=(255*(i-ming))/g;
-histogramB[i]=(255*(i-minb))/b;
+histogramR[i]=((i-minr))*stretchingr+targetMin;
+histogramG[i]=((i-ming))*stretchingg+targetMin;
+histogramB[i]=((i-minb))*stretchingb+targetMin;
 }
 }
 
