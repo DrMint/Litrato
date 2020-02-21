@@ -538,7 +538,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
             public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
-                FilterFunction.toExtDyn(bmp, context,(int)(seekBar / 255f), (int)(seekBar2 / 255f));
+                FilterFunction.toExtDyn(bmp, context,(int)(seekBar), (int)(seekBar2));
             }
         });
         filters.add(newFilter);

@@ -64,11 +64,12 @@ class RenderScriptTools {
         ScriptC_convolution script = new ScriptC_convolution(rs);
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation test=Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs,input.getType());
         Allocation fGauss = Allocation.createSized(rs, Element.F32(rs), kernel.length);
         fGauss.copyFrom(kernel);
 
-        script.bind_pixels(input);
+        script.set_pixels(test);
         script.bind_kernel(fGauss);
 
         script.set_width(bmp.getWidth());
