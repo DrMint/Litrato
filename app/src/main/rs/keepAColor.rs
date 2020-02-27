@@ -36,7 +36,7 @@ uchar4 RS_KERNEL keepAColor(uchar4 in) {
     }
     }
     else{
-        if (t - choosedColor >= -35 && t - choosedColor <= 35) {
+        if (t - choosedColor >= -25 && t - choosedColor <= 25) {
             const uchar gray = (30 * in.r + 59 * in.g + 11 * in.b) / 100;
             return (uchar4) {gray, gray, gray,in.a };
         } else {
