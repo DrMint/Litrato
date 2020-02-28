@@ -2,7 +2,7 @@
 #pragma rs java_package_name(com.android.retouchephoto)
 
 int choosedColor;
-float margin;
+int margin;
 bool keep;
 int lut[360];
 int increment=0;
@@ -33,7 +33,7 @@ uchar4 RS_KERNEL keepAColor(uchar4 in) {
         t=60*((pixelf.b-pixelf.r)/(maxRGB-minRGB))+120;
     }
     else {
-            t=60*((pixelf.r-pixelf.g)/(maxRGB-minRGB))+240;
+         t=60*((pixelf.r-pixelf.g)/(maxRGB-minRGB))+240;
         }
     if( keep == true){
         s = min(s, 1.0f - 1.0f / margin * lut[(int) t]);
@@ -42,7 +42,7 @@ uchar4 RS_KERNEL keepAColor(uchar4 in) {
     else{
         s = min(s, 1.0f / margin * lut[(int) t]);
     }
-     float tI=(int)(t/60)%6;
+        float tI=(int)(t/60)%6;
         float f = t/60 -tI;
         float v = maxRGB;
         float l = v*(1-s);
@@ -58,7 +58,7 @@ uchar4 RS_KERNEL keepAColor(uchar4 in) {
             return rsPackColorTo8888(l,m,v,pixelf.a);
         }else if(tI==4){
             return rsPackColorTo8888(n,l,v,pixelf.a);
-        }else if(tI==5){
+        }else {
             return rsPackColorTo8888(v,l,m,pixelf.a);
         }
 }
