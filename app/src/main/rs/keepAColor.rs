@@ -27,7 +27,7 @@ uchar4 RS_KERNEL keepAColor(uchar4 in) {
     } else {
         s = 1 - (mymax - mymin);
     }
-    if( keep == true){
+    if (keep == true){
 
     if ((t - choosedColor) >= -25 && (t - choosedColor) <= 25 ){
         return in;
