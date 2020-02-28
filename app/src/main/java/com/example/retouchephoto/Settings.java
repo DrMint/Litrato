@@ -13,7 +13,7 @@ public class Settings {
      * The maximum size of a loaded image.
      * If the image is rectangular, the longest dimension will be resized to IMPORTED_BMP_SIZE and the other will be smaller than IMPORTED_BMP_SIZE.
      */
-    static final int IMPORTED_BMP_SIZE = 2200;
+    static final int IMPORTED_BMP_SIZE = 1000;
 
     /**
      * How much the user can zoom on the image.
