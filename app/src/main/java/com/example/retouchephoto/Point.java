@@ -1,7 +1,9 @@
 package com.example.retouchephoto;
 
 /**
- * This class is
+ * A point is an object with two integers.
+ * It is possible to create a point, copy a point, translate it, and test if two points are equals.
+ * It is used by ImageViewZoomScroll.
  *
  * @author Thomas Barillot
  * @version 1.0

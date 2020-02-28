@@ -29,6 +29,7 @@ class FilterFunctionIntrinsic {
 
     /**
      * Make the image blurry.
+     * This filter uses RenderScript.
      * @param bmp the image.
      * @param context the context.
      * @param radius how blurry the image should be (the size of the kernel).
@@ -52,7 +53,7 @@ class FilterFunctionIntrinsic {
 
     /**
      *  Highlights the contour of an image.
-     *  This filter use RenderScript.
+     *  This filter uses RenderScript.
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
@@ -81,7 +82,7 @@ class FilterFunctionIntrinsic {
 
     /**
      *  Highlights the contour of an image.
-     *  This filter use RenderScript.
+     *  This filter uses RenderScript.
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
@@ -101,8 +102,8 @@ class FilterFunctionIntrinsic {
 
     /**
      *  Enhanced the image sharpness.
-     *  It a negetive number is used for amount, turns the image, blurs the image slightly.
-     *  This filter use RenderScript.
+     *  If a negative number is used for amount, blurs the image slightly.
+     *  This filter uses RenderScript.
      *  @param bmp the image
      *  @param amount amount of sharpness.
      */
