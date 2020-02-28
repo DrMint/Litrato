@@ -12,6 +12,7 @@ import androidx.renderscript.Allocation;
 
 import com.android.retouchephoto.ScriptC_addNoise;
 import com.android.retouchephoto.ScriptC_gray;
+import com.android.retouchephoto.ScriptC_hueshift;
 import com.android.retouchephoto.ScriptC_invert;
 import com.android.retouchephoto.ScriptC_posterizing;
 import com.android.retouchephoto.ScriptC_rgbWeights;
@@ -57,33 +58,24 @@ class FilterFunction {
     /**
      *  Shift all the hue of all pixels by a certain value.
      *  @param bmp the image
+     * @param context the context
      *  @param shift the value to shift the hue with.
      */
-    static void hueShift(final Bitmap bmp, final int shift) {
-        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
 
-        float[] hsv = new float[3];
-        int pixelsLength = pixels.length;
+    static void hueShift(final Bitmap bmp, final Context context, final float shift) {
 
-        int[] lut = new int[360];
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
 
-        for (int i = 0; i < lut.length; i++) {
-            lut[i] = i + shift;
-            if (lut[i] < 0) {
-                lut[i] += 360;
-            } else if (lut[i] >= 360) {
-                lut[i] -= 360;
-            }
-        }
+        ScriptC_hueshift script = new ScriptC_hueshift(rs);
 
-        for (int i = 0; i < pixelsLength; i++) {
-            rgb2hsv(pixels[i], hsv);
-            hsv[0] = lut[(int) hsv[0]];
-            pixels[i] = hsv2rgb(hsv);
-        }
+        script.set_shift(shift);
+        script.invoke_calculateLUT();
+        script.forEach_hueshift(input, output);
 
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
     }
 
     /**

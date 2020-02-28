@@ -407,12 +407,14 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newFilter);
 
+
         newFilter = new Filter("Hue shift");
         newFilter.setSeekBar1(-180, 0, 180, "deg");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
             public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
-                FilterFunction.hueShift(bmp, (int) seekBar);
+                if (seekBar <= 0) seekBar = -seekBar;
+                FilterFunction.hueShift(bmp, context,seekBar);
             }
         });
         filters.add(newFilter);

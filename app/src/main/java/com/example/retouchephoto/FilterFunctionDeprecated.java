@@ -82,6 +82,37 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
     }
 
+    /**
+     *  Shift all the hue of all pixels by a certain value.
+     *  @param bmp the image
+     *  @param shift the value to shift the hue with.
+     */
+    @Deprecated static void hueShift(final Bitmap bmp, final int shift) {
+        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
+        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+
+        float[] hsv = new float[3];
+        int pixelsLength = pixels.length;
+
+        int[] lut = new int[360];
+
+        for (int i = 0; i < lut.length; i++) {
+            lut[i] = i + shift;
+            if (lut[i] < 0) {
+                lut[i] += 360;
+            } else if (lut[i] >= 360) {
+                lut[i] -= 360;
+            }
+        }
+
+        for (int i = 0; i < pixelsLength; i++) {
+            rgb2hsv(pixels[i], hsv);
+            hsv[0] = lut[(int) hsv[0]];
+            pixels[i] = hsv2rgb(hsv);
+        }
+
+        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+    }
 
     /**
      *  Colorizes the image with a certain hue given in parameters
