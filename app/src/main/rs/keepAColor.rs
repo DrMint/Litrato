@@ -4,7 +4,7 @@
 int choosedColor;
 float margin;
 bool keep;
-int lut[360];
+float lut[360];
 int increment = 0;
 
 uchar4 RS_KERNEL keepAColor(uchar4 in) {
@@ -33,13 +33,11 @@ uchar4 RS_KERNEL keepAColor(uchar4 in) {
     }
 
 
-    if( keep == true){
-        s = min(s, 1.0f - 1.0f / margin * lut[(int) t]);
-    } else{
-        s = min(s, 1.0f / margin * lut[(int) t]);
-    }
 
-    if (s < 0) s = 0;
+    s *= lut[(int) t];
+
+
+
 
     float tI=(int)(t/60)%6;
     float f = t/60 -tI;
@@ -86,4 +84,15 @@ void calculateLUT(){
              increment = -increment;
         }
     }
+
+    for (int i = 0; i < 360; i++) {
+        if( keep == true){
+            lut[i] = 1.0f - 1.0f / margin * lut[i];
+        } else{
+            lut[i] = 1.0f / margin * lut[i];
+        }
+        if (lut[i] < 0) lut[i] = 0;
+        if (lut[i] > 1) lut[i] = 1;
+    }
+
 }
