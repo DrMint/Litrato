@@ -26,7 +26,7 @@ class RenderScriptTools {
      * @param context the app context
      * @param kernel the kernel to use for convolution
      */
-    static void applyConvolution3x3RS(final Bitmap bmp, final Context context, final float[] kernel) {
+    static void applyConvolution3x3RIntrinsic(final Bitmap bmp, final Context context, final float[] kernel) {
 
         RenderScript rs = RenderScript.create(context);
         ScriptIntrinsicConvolve3x3 script = ScriptIntrinsicConvolve3x3.create(rs, Element.U8_4(rs));

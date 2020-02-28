@@ -17,7 +17,7 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
  * That way, it is easy to switch between them by simply changing the class when calling the function.
  * This is also true for FilterFunctionIntrinsic.
  */
- class FilterFunctionDeprecated {
+ @Deprecated class FilterFunctionDeprecated {
 
     /**
      *  A filter that convert the image to grayscale, but keeps a shade of color intact.
