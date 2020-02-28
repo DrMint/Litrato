@@ -292,6 +292,13 @@ The program memory usage starts around 77 MB and after one minute of standby, it
 ## BUGS AND LIMITATIONS
 Most bugs/limitations have been fixed already. A few subsisted:
 
+- When the histogram is resize, the image can get stretch because the imageView gets bigger or smaller.  
+Refreshing the image doesn't seem to work. we suspect this is because requestLayout is asynchronous, and  
+when the image refresh, it utilizes the imageView's aspect ratio before it actually changed.  
+Thus, refreshing the image will actually make the problem worse.
+
+- Right now, we only load a miniature of the image when it is taken from the camera.  We have to ask the system to create a temporary file in order to store the full image. Until then, the image is only 187px by 250px.
+
 - The implementation of Laplacian edge detection using ScriptIntrinsicConvolve3x3 has a problem when using an amount parameter above 14. The image turns very bright. I suspect the problem to be caused by kernel weights above 128 (the center weight is equal to 8 * (amount + 1) which is superior or equal to 128 when amount is above 14). As using this filter with that much blur isn’t very useful, I decided to simply limit the user seek bar to values between 0 and 14. However, for this particular release, I left the possibility to go up to 20 for testing purposes.
 
 - ScriptIntrinsicBlur isn’t able to handle blur radius above 25, this is not a limitation from this program, but from this library.
@@ -301,5 +308,17 @@ Most bugs/limitations have been fixed already. A few subsisted:
 - The app cannot be used in landscape mode, or else the layout gets terrible. We have lock the app in portrait mode.
 
 - [Talk about how RenderScript does random shit on different phones / emulators]
+
+## FUTURE FEATURES
+
+- When taking an image, we have to store it to get it at full resolution.  
+
+- Rotation of the image (at first 90, -90, 180 then any degrees).  
+
+- Crop an image, possibly merging the rotation and crop function UI wise.  
+
+- Makes sure that all filter functions are using RenderScript.  
+
+- An idea to keep the UI interactive while saving the image at high resolution would be to make all the modification on a smaller size image, save all the filter applied, and then apply them again to the full size image when saving. It is okay for the user to wait a few seconds when saving, but not while using a seekBar.
 
 
