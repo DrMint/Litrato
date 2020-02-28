@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/PO_RetoucheImage.RetouchePhoto.iml" filepath="$PROJECT_DIR$/PO_RetoucheImage.RetouchePhoto.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/PO_RetoucheImage.app.iml" filepath="$PROJECT_DIR$/app/PO_RetoucheImage.app.iml" />
-      <module fileurl="file:///autofs/unityaccount/cremi/rduhayon001/Bureau/test1/PO_RetoucheImage/RetouchePhoto.iml" filepath="/autofs/unityaccount/cremi/rduhayon001/Bureau/test1/PO_RetoucheImage/RetouchePhoto.iml" />
-      <module fileurl="file:///autofs/unityaccount/cremi/rduhayon001/Bureau/test1/PO_RetoucheImage/app/app.iml" filepath="/autofs/unityaccount/cremi/rduhayon001/Bureau/test1/PO_RetoucheImage/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RetouchePhoto.iml" filepath="$PROJECT_DIR$/RetouchePhoto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
 </project>

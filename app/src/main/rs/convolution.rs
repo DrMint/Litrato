@@ -31,7 +31,6 @@ uchar4 __attribute__((kernel)) toConvolution(uchar4 in,uint32_t x,uint32_t y) {
 }
 
 uchar4 __attribute__((kernel)) toConvolutionUniform(uchar4 in,uint32_t x,uint32_t y) {
-
     in.r=0;
     in.b=0;
     in.g=0;
@@ -48,45 +47,34 @@ uchar4 __attribute__((kernel)) toConvolutionUniform(uchar4 in,uint32_t x,uint32_
     return rsPackColorTo8888(color);
 }
 
-
-
 uchar4 __attribute__((kernel)) toConvolutionHorizontal(uchar4 in,uint32_t x,uint32_t y) {
-
     in.r=0;
     in.b=0;
     in.g=0;
-    in.a=0;
-
+    in.a=255;
     float4 color = rsUnpackColor8888(in);
 
-    if (x < kernelWidth || x >= height - kernelWidth) {
-        return rsPackColorTo8888(color);
+    if (x >= kernelWidth && x <= width - kernelWidth) {
+        for (int convX = -kernelWidth; convX <= kernelWidth; convX++) {
+            color += rsUnpackColor8888(rsGetElementAt_uchar4(pixels, x + convX + y * width)) * kernel[convX + kernelWidth] / kernelWeight;
+        }
     }
-
-    for (int convX = -kernelWidth; convX <= kernelWidth; convX++) {
-        color += rsUnpackColor8888(rsGetElementAt_uchar4(pixels, x + convX + y * width)) * kernel[convX + kernelWidth] / kernelWeight;
-    }
-
     return rsPackColorTo8888(color);
+
 }
 
 uchar4 __attribute__((kernel)) toConvolutionVertical(uchar4 in,uint32_t x,uint32_t y) {
-
     in.r=0;
     in.b=0;
     in.g=0;
-    in.a=0;
-
+    in.a=255;
     float4 color = rsUnpackColor8888(in);
 
-    if (y < kernelHeight || y >= height - kernelHeight) {
-        return rsPackColorTo8888(color);
+    if (y >= kernelHeight && y <= height - kernelHeight) {
+        for (int convY = -kernelHeight; convY <= kernelHeight; convY++) {
+            color += rsUnpackColor8888(rsGetElementAt_uchar4(pixels, x + ((y + convY) * width))) * kernel[convY + kernelHeight] / kernelWeight;
+        }
     }
-
-    for (int convY = -kernelHeight; convY <= kernelHeight; convY++) {
-        color += rsUnpackColor8888(rsGetElementAt_uchar4(pixels, x + ((y + convY) * width))) * kernel[convY + kernelHeight] / kernelWeight;
-    }
-
     return rsPackColorTo8888(color);
 }
 

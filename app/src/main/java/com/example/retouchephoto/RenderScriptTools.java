@@ -52,38 +52,62 @@ class RenderScriptTools {
      */
     static void applyConvolution(final Bitmap bmp, final Context context, final int kernelWidth, final int kernelHeight, final float[] kernel) {
 
-        float kernelWeight = 0f;
-
-        for (float v : kernel) {
-            kernelWeight += v;
-        }
-
-        if (kernelWeight == 0) kernelWeight++;
-
         RenderScript rs = RenderScript.create(context);
         ScriptC_convolution script = new ScriptC_convolution(rs);
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
-        Allocation test=Allocation.createFromBitmap(rs, bmp);
+        Allocation pixels = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs,input.getType());
-        Allocation fGauss = Allocation.createSized(rs, Element.F32(rs), kernel.length);
-        fGauss.copyFrom(kernel);
 
-        script.set_pixels(test);
-        script.bind_kernel(fGauss);
+        script.set_pixels(pixels);
 
         script.set_width(bmp.getWidth());
         script.set_height(bmp.getHeight());
 
         script.set_kernelWidth((kernelWidth - 1) / 2);
         script.set_kernelHeight((kernelHeight - 1) / 2);
-        script.set_kernelWeight(kernelWeight);
 
-        script.forEach_toConvolution(input, output);
+        float kernelWeight = 0f;
+
+        // If no kernel was provided then let's considered it as a kernel containing just a bunch of ones
+        if (kernel.length == 0) {
+            kernelWeight = kernelWidth * kernelHeight;
+            script.set_kernelWeight(kernelWeight);
+            script.forEach_toConvolutionUniform(input, output);
+        } else {
+            for (float v : kernel) {
+                kernelWeight += v;
+            }
+            if (kernelWeight == 0) kernelWeight++;
+            script.set_kernelWeight(kernelWeight);
+
+            Allocation kernelAlloc = Allocation.createSized(rs, Element.F32(rs), kernel.length);
+            kernelAlloc.copyFrom(kernel);
+            script.bind_kernel(kernelAlloc);
+
+            script.forEach_toConvolution(input, output);
+        }
 
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
     }
+
+
+
+    /**
+     * Does all the job of setting up the convolution, RenderScript stuff and then clean the mess.
+     * Without a kernel, the kernel weights will be uniform.
+     * @param bmp the image.
+     * @param context the app context
+     * @param kernelWidth the width of the kernel
+     * @param kernelHeight the height of the kernel
+     */
+    static void applyConvolution(final Bitmap bmp, final Context context, final int kernelWidth, final int kernelHeight) {
+        final float[] kernel = {};
+        applyConvolution(bmp, context, kernelWidth, kernelHeight, kernel);
+    }
+
+
 
     /**
      * Can be called after any RS function to destroy the different object used.

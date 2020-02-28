@@ -17,6 +17,9 @@ import androidx.renderscript.ScriptIntrinsicBlur;
  * This class uses Intrinsic functions such as ScriptIntrinsicConvolve3x3.
  * All filters should have the following signature:
  * static void FilterName(final Bitmap bmp, final Context context, ... other parameters that can influence the result)
+ * If a filter function has a Intrinsic equivalent, then the name of the function should be the same in both classes.
+ * That way, it is easy to switch between them by simply changing the class when calling the function.
+ * This is also true for FilterFunctionDeprecated.
  *
  * @author Thomas Barillot
  * @version 1.0
@@ -31,7 +34,7 @@ class FilterFunctionIntrinsic {
      * @param radius how blurry the image should be (the size of the kernel).
      *               Cannot be more than 25. because of Intrinsic's implementation limitations.
      */
-    static void gaussianRS(final Bitmap bmp, final Context context, final float radius) {
+    static void gaussianBlur(final Bitmap bmp, final Context context, final float radius) {
 
         RenderScript rs = RenderScript.create(context);
         ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
@@ -53,29 +56,25 @@ class FilterFunctionIntrinsic {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void sobelRS(final Bitmap bmp, final Context context, final float amount, boolean vertical) {
+    static void sobel(final Bitmap bmp, final Context context, final float amount, boolean vertical) {
 
-        if (amount > 0) gaussianRS(bmp, context, amount);
-
+        if (amount > 0) gaussianBlur(bmp, context, (int) amount);
         float v = amount + 1;
 
         float[] kernelVertical = {
-                -v, 0, v,
-                -2 * v, 0, 2 * v,
-                -v, 0, v
+                -v,         0,      v,
+                -2 * v,     0,      2 * v,
+                -v,         0,      v
         };
 
         float[] kernelHorizontal = {
-                -v, -2 * v, -v,
-                0, 0, 0,
-                v, 2 * v, v
+                -v,     -2 * v,     -v,
+                0,      0,          0,
+                v,      2 * v,      v
         };
 
-        if (vertical) {
-            applyConvolution3x3RS(bmp, context, kernelVertical);
-        } else {
-            applyConvolution3x3RS(bmp, context, kernelHorizontal);
-        }
+        float[] kernel = (vertical) ? kernelHorizontal : kernelVertical;
+        applyConvolution3x3RS(bmp, context, kernel);
 
         removeAlpha(bmp);
     }
@@ -86,15 +85,15 @@ class FilterFunctionIntrinsic {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void laplacianRS(final Bitmap bmp, final Context context, final float amount) {
+    static void laplacian(final Bitmap bmp, final Context context, final float amount) {
 
-        if (amount > 0) gaussianRS(bmp, context, amount);
+        if (amount > 0) gaussianBlur(bmp, context, amount);
 
         float v = amount + 1;
         float[] kernel = {
-                v, v, v,
-                v, -8 * v, v,
-                v, v, v
+                v,      v,          v,
+                v,      -8 * v,     v,
+                v,      v,          v
         };
         applyConvolution3x3RS(bmp, context, kernel);
         removeAlpha(bmp);
@@ -107,13 +106,12 @@ class FilterFunctionIntrinsic {
      *  @param bmp the image
      *  @param amount amount of sharpness.
      */
-    static void sharpenRS(final Bitmap bmp, final Context context, final float amount) {
+    static void sharpen(final Bitmap bmp, final Context context, final float amount) {
         float[] kernel = {
-                0f, -amount, 0f,
-                -amount, 1f + 4f * amount, -amount,
-                0f, -amount, 0f
+                0f,         -amount,            0f,
+                -amount,    1f + 4f * amount,   -amount,
+                0f,         -amount,            0f
         };
         applyConvolution3x3RS(bmp, context, kernel);
     }
-
 }

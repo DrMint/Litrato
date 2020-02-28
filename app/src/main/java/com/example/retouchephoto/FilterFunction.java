@@ -2,19 +2,11 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.util.Log;
 
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
-
-import static android.graphics.Color.blue;
-import static android.graphics.Color.green;
-import static android.graphics.Color.red;
-import static com.example.retouchephoto.ConvolutionTools.*;
 import static com.example.retouchephoto.ColorTools.*;
 import static com.example.retouchephoto.RenderScriptTools.*;
-import static java.lang.Math.abs;
 
 import androidx.renderscript.Allocation;
 
@@ -42,6 +34,24 @@ import com.android.retouchephoto.ScriptC_convolution;
  * @since   2020-02-08
  */
 class FilterFunction {
+
+    /**
+     *  A filter that convert the image to grayscale.
+     *  This filter use RenderScript.
+     *  @param bmp the image
+     */
+    private static void grayscale(final Bitmap bmp, final Context context) {
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_gray script = new ScriptC_gray(rs);
+        script.forEach_grayscale(input, output) ;
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
 
 
     /**
@@ -77,76 +87,12 @@ class FilterFunction {
     }
 
     /**
-     *  Each pixel becomes the average of size * size pixels around it.
-     *  @param bmp the image
-     *  @param size size of the kernel
-     */
-    static void averageBlur(final Bitmap bmp, final int size) {
-        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-
-        final int newSize = size + 1 + size;
-
-        // Convert all RGB values into luminosity
-        for (int i = 0; i < bmp.getWidth() * bmp.getHeight(); i++) {
-            pixels[i] = (pixels[i]) & 0x000000FF;
-        }
-
-        convolution2DUniform(pixels, bmp.getWidth(), bmp.getHeight(), newSize, newSize);
-        convertGreyToColor(pixels);
-
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-    }
-
-    /**
-     *  Apply a gaussian blur filter. This takes advantage of the Gaussian blur’s separable property by dividing the process into two passes.
-     *  In the first pass, a one-dimensional kernel is used to blur the image in only the horizontal or vertical direction.
-     *  In the second pass, the same one-dimensional kernel is used to blur in the remaining direction.
-     *  The resulting effect is the same as convolving with a two-dimensional kernel in a single pass, but requires fewer calculations.
-     *  (Text taken from the Wikipedia article Gaussian blur: https://en.wikipedia.org/wiki/Gaussian_blur)
-     *  @param bmp the pixels of the image
-     *  @param size size of the kernel
-     *  @param correctBorders corrects the borders if true, otherwise doesn't
-     *  @deprecated
-     */
-    static void gaussianBlur(final Bitmap bmp, final int size, final boolean correctBorders) {
-
-        if (size < 1) return;
-
-        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-
-        // Let's calculate the gaussian kernel
-        final double sigma = size / 3.0;
-        final double tmp = Math.exp(-(size * size / (2 * sigma * sigma)));
-        final int floatToIntCoef = (int) (1 / tmp);
-
-        final int[] gaussianKernel = new int[size + 1 + size];
-        for (int i = -size; i <= size ; i++) {
-            gaussianKernel[i + size] = (int) (Math.exp(-(i * i / (2 * sigma * sigma))) * floatToIntCoef);
-        }
-
-        // Convert all RGB values into luminosity
-        for (int i = 0; i < bmp.getWidth() * bmp.getWidth(); i++) {
-            // equivalent to pixels[i] = Red(pixels[i]);
-            pixels[i] = (pixels[i]) & 0x000000FF;
-        }
-
-        // Apply the gaussian kernel to the image, the first time horizontally, then vertically
-        convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, true, correctBorders);
-        convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, false, correctBorders);
-        convertGreyToColor(pixels);
-
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-    }
-
-    /**
      *  A filter that change the saturation of the image.
      *  This filter use RenderScript.
      *  @param bmp the image
      *  @param saturation the amount of saturation (must be between 0 and +inf)
      */
-    static void saturationRS(final Bitmap bmp, final Context context, final float saturation) {
+    static void saturation(final Bitmap bmp, final Context context, final float saturation) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -163,31 +109,13 @@ class FilterFunction {
         cleanRenderScript(script, rs, input, output);
     }
 
-    /**
-     *  A filter that convert the image to grayscale.
-     *  This filter use RenderScript.
-     *  @param bmp the image
-     */
-   static void toGrayRS(final Bitmap bmp, final Context context) {
-
-        RenderScript rs = RenderScript.create(context);
-        Allocation input = Allocation.createFromBitmap(rs, bmp);
-        Allocation output = Allocation.createTyped(rs, input.getType());
-
-        ScriptC_gray script = new ScriptC_gray(rs);
-        script.forEach_grayscale(input, output) ;
-
-        output.copyTo(bmp);
-        cleanRenderScript(script, rs, input, output);
-    }
-
 
     /**
      *  A filter that invert the luminosity of the image.
      *  This filter use RenderScript.
      *  @param bmp the image
      */
-    static void invertRS(final Bitmap bmp, final Context context) {
+    static void invert(final Bitmap bmp, final Context context) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -206,7 +134,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param exposure the exposure to use (should be between -inf and 255)
      */
-    static void brightnessRS(final Bitmap bmp, final Context context, final float exposure) {
+    static void brightness(final Bitmap bmp, final Context context, final float exposure) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -228,9 +156,9 @@ class FilterFunction {
      *  @param steps numbers of luminance values.
      *  @param toGray if true, also turns the image gray.
      */
-    static void posterizeRS(final Bitmap bmp, final Context context, final int steps, boolean toGray) {
+    static void posterize(final Bitmap bmp, final Context context, final int steps, boolean toGray) {
 
-        if (toGray) toGrayRS(bmp, context);
+        if (toGray) grayscale(bmp, context);
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -252,7 +180,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param level numbers of luminance values.
      */
-    static void thresholdRS(final Bitmap bmp, final Context context, final float level) {
+    static void threshold(final Bitmap bmp, final Context context, final float level) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -273,7 +201,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param level how powerful is the effect.
      */
-    static void temperatureRS(final Bitmap bmp, final Context context, final float level) {
+    static void temperature(final Bitmap bmp, final Context context, final float level) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -301,7 +229,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param level how much tint to apply.
      */
-    static void tintRS(final Bitmap bmp, final Context context, final float level) {
+    static void tint(final Bitmap bmp, final Context context, final float level) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -325,7 +253,7 @@ class FilterFunction {
      *  @param level numbers of luminance values.
      *  @param colorNoise turns the noise colored.
      */
-    static void noiseRS(final Bitmap bmp, final Context context, final int level, final boolean colorNoise) {
+    static void noise(final Bitmap bmp, final Context context, final int level, final boolean colorNoise) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -347,7 +275,7 @@ class FilterFunction {
     }
 
 
-    static void colorizeRS(final Bitmap bmp, final Context context, final int deg, final float saturation, boolean changeSaturation) {
+    static void colorize(final Bitmap bmp, final Context context, final int deg, final float saturation, boolean changeSaturation) {
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
@@ -367,7 +295,7 @@ class FilterFunction {
      * @param context the context
      * @param deg the color we want to keep (hue between 0 and 360)
      */
-    static void keepAColorRS(final Bitmap bmp, final Context context, final int deg) {
+    static void keepAColor(final Bitmap bmp, final Context context, final int deg) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -387,7 +315,7 @@ class FilterFunction {
      * @param context the context
      * @param deg the color we want to remove (hue between 0 and 360)
      */
-    static void removeAColorRS(final Bitmap bmp, final Context context, final int deg) {
+    static void removeAColor(final Bitmap bmp, final Context context, final int deg) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -406,7 +334,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param context the context
      */
-    static void histogramEqualizationRS(final Bitmap bmp, final Context context){
+    static void histogramEqualization(final Bitmap bmp, final Context context){
         Bitmap res = bmp.copy(bmp.getConfig(), true);
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, res);
@@ -508,7 +436,7 @@ class FilterFunction {
      *  @param context the context
      *  @param size size of the kernel
      */
-    static void gaussianRS(final Bitmap bmp, final Context context, int size) {
+    static void gaussianBlur(final Bitmap bmp, final Context context, int size) {
         directionalBlur(bmp, context, size, false);
         directionalBlur(bmp, context, size, true);
     }
@@ -519,13 +447,13 @@ class FilterFunction {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void laplacianRS(final Bitmap bmp, final Context context, final float amount) {
-        if (amount > 0) gaussianRS(bmp, context, (int) amount);
+    static void laplacian(final Bitmap bmp, final Context context, final float amount) {
+        if (amount > 0) gaussianBlur(bmp, context, (int) amount);
         float v = amount + 1;
         float[] kernel = {
-                v, v, v,
-                v, -8 * v, v,
-                v, v, v
+                v,      v,          v,
+                v,      -8 * v,     v,
+                v,      v,          v
         };
         applyConvolution(bmp, context, 3, 3, kernel);
     }
@@ -536,11 +464,11 @@ class FilterFunction {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void sharpenRS(final Bitmap bmp, final Context context, final float amount) {
+    static void sharpen(final Bitmap bmp, final Context context, final float amount) {
         float[] kernel = {
-                0f, -amount, 0f,
-                -amount, 1f + 4f * amount, -amount,
-                0f, -amount, 0f
+                0f,         -amount,            0f,
+                -amount,    1f + 4f * amount,   -amount,
+                0f,         -amount,            0f
         };
         applyConvolution(bmp, context, 3, 3, kernel);
     }
@@ -551,23 +479,22 @@ class FilterFunction {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void sobelRS(final Bitmap bmp, final Context context, final float amount, boolean vertical) {
-
-        if (amount > 0) gaussianRS(bmp, context, (int) amount);
-
+    static void sobel(final Bitmap bmp, final Context context, final float amount, boolean vertical) {
+        if (amount > 0) gaussianBlur(bmp, context, (int) amount);
         float v = amount + 1;
 
         float[] kernelVertical = {
-                -v, 0, v,
-                -2 * v, 0, 2 * v,
-                -v, 0, v
+                -v,         0,      v,
+                -2 * v,     0,      2 * v,
+                -v,         0,      v
         };
 
         float[] kernelHorizontal = {
-                -v, -2 * v, -v,
-                0, 0, 0,
-                v, 2 * v, v
+                -v,     -2 * v,     -v,
+                0,      0,          0,
+                v,      2 * v,      v
         };
+
         float[] kernel = (vertical) ? kernelHorizontal : kernelVertical;
         applyConvolution(bmp, context, 3, 3, kernel);
     }
@@ -577,22 +504,8 @@ class FilterFunction {
      *  @param bmp the image
      *  @param size size of the kernel
      */
-    static void averageBlurRS(final Bitmap bmp, final Context context, final int size) {
-        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        RenderScript rs = RenderScript.create(context);
-        Allocation input = Allocation.createFromBitmap(rs, bmp);
-        Allocation output = Allocation.createTyped(rs,input.getType());
-        ScriptC_convolution script = new ScriptC_convolution(rs);
-        script.set_pixels(input);
-        script.set_kernelWidth(size);
-        script.set_kernelHeight(size);
-        script.set_kernelWeight((size + 1 + size) * (size + 1 + size));
-        script.set_width(bmp.getWidth());
-        script.set_height(bmp.getHeight());
-        script.forEach_toConvolutionUniform(input, output);
-        output.copyTo(bmp);
-        cleanRenderScript(script, rs, input, output);
+    static void averageBlur(final Bitmap bmp, final Context context, final int size) {
+        applyConvolution(bmp, context, size * 2 + 1, size * 2 + 1);
     }
 
 }
