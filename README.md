@@ -161,8 +161,8 @@ ColorTools also implements to removeAlpha function. It simply set the alpha valu
 ### RenderScriptTools Class
 The RenderScriptTools implements tools useful for functions that use RS. The applyConvolution3x3RS function applies any 3x3 kernel to any image. However, it uses ScriptIntrinsicConvolve3x3. The applyConvolution function uses our own RenderScript convolution and isn't limited to 3x3 kernel. Actually, the kernel can even be rectangular. The cleanRenderScript function can be called after any RS function to destroy the Script, RenderScript, and a list of Allocation for input(s) and output(s).
 
-### ConvolutionTools Class
-This class implements tools used by any filter that uses convolution without RenderScript. **As our goal is to eventually remove all the FilterFunctions that doesn't utilize RenderScript this Class will soon be deprecated**. The two functions convulution1D and convulution2D are used to apply a 1D and 2D kernel on an image. This kernel can be of any size as long as it is odd. convulution1D also implements an optional correction for the pixels near the edge of the image; when the kernel tries to take the value of a pixel outside the image, it will instead take the closest one on the border of the image. convulution2DUniform can be used when the kernel has uniform weights such as with the Average filter.
+### ConvolutionTools Class (Deprecated)
+This class implements tools used by any filter that uses convolution without RenderScript. **It is now deprecated as all FilterFunctions now use RenderScript based convolution**. The two functions convulution1D and convulution2D are used to apply a 1D and 2D kernel on an image. This kernel can be of any size as long as it is odd. convulution1D also implements an optional correction for the pixels near the edge of the image; when the kernel tries to take the value of a pixel outside the image, it will instead take the closest one on the border of the image. convulution2DUniform can be used when the kernel has uniform weights such as with the Average filter.
 
 After every convolution algorithm, we want to make sure the values are still between 0 and 255. For that, we can use the normalizeOutput function. This function will make sure that even in the worst cases, the resulting values are kept between this range.
 
@@ -180,7 +180,7 @@ This class is where all filters are born. A filter function is a static method o
 This class also implement filters, however, it uses Intrinsic functions. If a filter function has a Intrinsic equivalent (i.e. a function that uses ScriptIntrinsicConvolve3x3), then the name of the function should be the same in both classes. That way, it is easy to switch between them by simply changing the class when calling the function. This is also true for FilterFunctionDeprecated.
 
 
-### FilterFunctionDeprecated Class
+### FilterFunctionDeprecated Class (Deprecated)
 This class is the legacy versions of currently used filters. Functions that uses non-RS convolution are in this class.
 
 keepOrRemoveAColor is the filter function for the Keep a color and Remove a color filters. It takes a target hue as a parameter. Then, for each pixel, a pixel turns progressively greyer depending on the distance in degrees between its hue and the target hue. In order the accelerate the process, a lookup table (abbreviated to LUT from now on) has been used.
@@ -333,18 +333,23 @@ Thus, refreshing the image will actually make the problem worse.
 
 - The app cannot be used in landscape mode, or else the layout gets terrible. We have lock the app in portrait mode.
 
-- [Talk about how RenderScript does random shit on different phones / emulators]
+- If the image resolution is too small (i.e. 187px by 250px), our implementation of RenderScript based convolution is faulty. The image gets skew and wrap around itself. We currently don't know why this is happening on smaller images.
 
 ## FUTURE FEATURES
 
-- When taking an image, we have to store it to get it at full resolution.  
+The following features will **surely** be added before 04/15/2020:
+ - A "Cartoon" filter that limits the number of colors and highlight the contour of the image.
+ - The ability to rotate the image by 90°, -90° or 180°.
+ - New presets that redirect the user to already existing filters. The preset will change the default values of this filter.
+ - The ability the remove the last applied filter (currently we can only remove all applied filters).
+ - Hue shift is one of the last function that isn't written in RS. Let's change that.
+ - Bug removal: take a picture from the camera at higher resolution than 187px by 250px.
 
-- Rotation of the image (at first 90, -90, 180 then any degrees).  
-
-- Crop an image, possibly merging the rotation and crop function UI wise.  
-
-- Makes sure that all filter functions are using RenderScript.  
-
-- An idea to keep the UI interactive while saving the image at high resolution would be to make all the modification on a smaller size image, save all the filter applied, and then apply them again to the full size image when saving. It is okay for the user to wait a few seconds when saving, but not while using a seekBar.
+The following features will **likely** be added before 04/15/2020:
+- Rotate the image at any degrees, which means that the image should also get cropped.
+- The ability to crop the image (with a switch to keep the original image ratio or not)
+- If we create the ability to crop the image, then fuse those to option in one UI (as Adobe Photoshop is doing it).
+- Save all state of the image. That way, we can have a "Filter History" and go back to any prior state.
+- An idea to keep the UI interactive while saving the image at its original resolution would be to work on a preview sized image, save all the filters applied, and then apply them again to the full size image when saving. It is okay for the user to wait a few seconds when saving, but not while using the UI.
 
 
