@@ -4,7 +4,7 @@
 The goal of this project is to create an Android app capable of editing photos and saving those changes to the gallery.
 Here a list of the features:
 - Take or select an image: images can be obtained from the gallery, or directly from the camera.
-- Zoom and scroll: when the image is loaded, it is possible to zoom on it using two fingers, and then move around with one finger.
+- Zoom and scroll: it is possible to zoom on it using two fingers, and then move around with one finger.
 - Numerous filters: the app allows the user to apply a vast array of filters.
 - Highly optimized: all filters are using the latest technologies (such as RenderScript) to offer the best user experience.
 - Reset and save: the user can always undo all filters applied by clicking the Original button. They can also save the image.
@@ -21,6 +21,10 @@ This app utilizes [divyanshub024's](https://github.com/divyanshub024) [ColorSeek
 
 When no filter has yet been applied, the `ORIGINAL` button will display`LOAD`. Clicking on it will ask to user if he wants to load an photo from the library, or take a photo.
 When no filter has yet been applied, the `APPLY` button will also change and display `SAVE`. The user will have to grant the app the right to write on the internal storage.
+
+When the user click on the histogram, it will reduce its size and make the image information disappear. Click on the histogram again will revert back to its prior state.
+
+The user can zoom on the image using two fingers, and then move around with one finger or two fingers. Double tapping the image will zoom on it, and double tapping again will make the image fit on the screen.
 
 ## FILTERS
 ### Brightness
