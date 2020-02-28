@@ -271,37 +271,41 @@ The last column is the ratio between the processing time for 1 Mpx and 3.6 Mpx. 
 | Tint                                            |    ✖   |         |     13     |      43      | 331 |
 | Sharpening                                      |    ✖   |         |     20     |      61      | 305 |
 | Colorize                                        |        |    ✖    |     81     |      328     | 405 |
-| Colorize                                        |    ✖   |    ✖    |          |           |  |
+| Colorize                                        |    ✖   |    ✖    |     25     |      102     | 291 |
 | Change hue                                      |        |    ✖    |     92     |      349     | 379 |
-| Change hue                                      |    ✖   |    ✖    |          |           |  |
+| Change hue                                      |    ✖   |    ✖    |     35     |      102     | 291 |
 | Hue shift                                       |        |    ✖    |     208    |      592     | 285 |
 | Invert                                          |    ✖   |         |     38     |      132     | 347 |
 | Keep a color                                    |        |    ✖    |     246    |      762     | 310 |
-| Keep a color                                    |    ✖   |    ✖    |          |           |  |
+| Keep a color                                    |    ✖   |    ✖    |     29     |      125     | 431 |
 | Remove a color                                  |        |    ✖    |     258    |      730     | 283 |
-| Remove a color                                  |    ✖   |    ✖    |          |           |  |
+| Remove a color                                  |    ✖   |    ✖    |     26     |      103     | 396 |
 | Posterize                                       |    ✖   |         |     16     |      72      | 450 |
 | Threshold                                       |    ✖   |         |     12     |      56      | 466 |
 | Add noise                                       |    ✖   |         |     544    |     1650     | 303 |
 | Linear contrast stretching                      |        |    ✖    |     272    |      979     | 360 |
-| Linear contrast stretching                      |    ✖   |         |     |      |       |
+| Linear contrast stretching                      |    ✖   |         |    125     |     503      | 402 |
 | Histogram equalization                          |        |    ✖    |     321    |      974     | 303 |
-| Histogram equalization                          |    ✖   |         |          |           |  |
+| Histogram equalization                          |    ✖   |         |     76     |     311      | 409 |
 | Average blur (2px)                              |        |         |     538    |     3030     | 563 |
 | Average blur (20px)                             |        |         |    16010   |       ?      |  ?  |
-| Average blur (20px)                             |    ✖   |         |    |             |    |
+| Average blur (20px)                             |    ✖   |         |    4210    |       ?      |  ?  |
 | Gaussian blur (25px)                            |        |         |    1400    |     7390     | 527 |
+| Gaussian blur (25px)                            |    ✖   |         |    385     |     1290     | 335 |
 | Gaussian blur (50px)                            |        |         |    3080    |     16300    | 529 |
-| Gaussian blur (50px) (without border correction) |        |         |    2630    |     15400    | 586 |
-| Gaussian blur (25px)                            |    ✖   |         |     |      | |
+| Gaussian blur (50px) (without border correction) |        |        |    2630    |     15400    | 586 |
 | Gaussian blur (INTRINSIC) (25px)                |    ✖   |         |     39     |      188     | 482 |
+| Directional blur (25px)                         |    ✖   |         |    173     |     503      | 291 |
 | Laplacian (2px)                                 |        |         |     839    |     6040     | 720 |
-| Laplacian (2px)                                 |    ✖    |         |     |     | |
+| Laplacian (2px)                                 |    ✖    |        |    230     |      371     | 161 |
 | Laplacian (INTRINSIC) (2px)                     |    ✖   |         |     19     |      56      | 294 |
-| Sobel (2px)                                     |    ✖   |         |     |      | |
+| Sobel (2px)                                     |    ✖   |         |     232    |      335     | 144 |
 | Histogram                                       |        |         |     31     |      110     | 355 |
 
 Those results show that the program still needs some improvements and optimizations. It makes it clear that filters using RenderScript are way faster than the others. The filters that use convolution kernels are expectedly slower than the rest. The Average blur filter is extremely slow at high kernel size. It is clear that the Gaussian blur being a separable filter makes a huge difference in performance when compared with the Average blur filter. Also, the Add noise filter is particularly slow despite using RenderScript. This is because it’s generating up to three random numbers for each pixel. It would be much faster—but more complicated—to superpose a pre-fetched noisy layer on top of the image.
+
+Our implementation of the Gaussian blur much slower than ScriptIntrinsicBlur. Because of this, Sobel and Laplacian are also significantly slower.
+
 Furthermore, the images used in a photography app such as this one would probably be those taken by the phone. The Samsung A10 takes pictures with a resolution of 13 Mpx which would make virtually all the filter unusable in real-time. It is clear that the interface should use a smaller version of the images to priorities interactivity, and only apply the filter to the original image when saving.
 
 ## MEMORY USAGE
