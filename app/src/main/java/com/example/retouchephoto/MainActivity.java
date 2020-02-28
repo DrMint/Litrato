@@ -440,10 +440,12 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Keep a color");
         newFilter.setColorSeekBar();
+        newFilter.setSeekBar2(0, 180, 360, "deg");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
             public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
-                FilterFunction.keepAColor(bmp, context, colorSeekHue);
+                FilterFunction.keepAColor(bmp, context, colorSeekHue,(int)seekBar2);
+                Log.i("value", colorSeekHue+" ");
             }
         });
         filters.add(newFilter);

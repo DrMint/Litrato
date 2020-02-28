@@ -266,13 +266,21 @@ class FilterFunction {
         cleanRenderScript(script, rs, input, output);
     }
 
+    /**
+     * Colorize an image with a picked hue and a picked saturation (which modifies the intensity of the color).
+     * @param bmp the image
+     * @param context the context
+     * @param hue the new hue for all pixels
+     * @param saturation the new saturation for all pixels
+     * @param changeSaturation if we change the saturation or not
+     */
 
-    static void colorize(final Bitmap bmp, final Context context, final int deg, final float saturation, boolean changeSaturation) {
+    static void colorize(final Bitmap bmp, final Context context, final int hue, final float saturation, boolean changeSaturation) {
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
         ScriptC_colorize colorizeScript = new ScriptC_colorize(rs);
-        colorizeScript.set_t(deg);
+        colorizeScript.set_t(hue);
         if (changeSaturation) {
             colorizeScript.set_saturation(saturation);
         }
@@ -287,14 +295,16 @@ class FilterFunction {
      * @param context the context
      * @param deg the color we want to keep (hue between 0 and 360)
      */
-    static void keepAColor(final Bitmap bmp, final Context context, final int deg) {
+    static void keepAColor(final Bitmap bmp, final Context context, final int deg, final int colorMargin) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
         ScriptC_keepAColor script = new ScriptC_keepAColor(rs);
         script.set_keep(true);
-        script.set_choosedColor((float) deg);
+        script.set_choosedColor(deg);
+        script.set_margin((float)colorMargin);
+        script.invoke_calculateLUT();
         script.forEach_keepAColor(input, output);
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
@@ -314,7 +324,7 @@ class FilterFunction {
         Allocation output = Allocation.createTyped(rs, input.getType());
         ScriptC_keepAColor script = new ScriptC_keepAColor(rs);
         script.set_keep(false);
-        script.set_choosedColor((float) deg);
+        script.set_choosedColor(deg);
         script.forEach_keepAColor(input, output);
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
