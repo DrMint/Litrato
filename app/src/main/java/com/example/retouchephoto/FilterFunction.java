@@ -317,7 +317,7 @@ class FilterFunction {
      * @param context the context
      * @param deg the color we want to remove (hue between 0 and 360)
      */
-    static void removeAColor(final Bitmap bmp, final Context context, final int deg) {
+    static void removeAColor(final Bitmap bmp, final Context context, final int deg, final int colorMargin) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -325,11 +325,15 @@ class FilterFunction {
         ScriptC_keepAColor script = new ScriptC_keepAColor(rs);
         script.set_keep(false);
         script.set_choosedColor(deg);
+        script.set_margin((float)colorMargin);
+        script.invoke_calculateLUT();
         script.forEach_keepAColor(input, output);
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
 
     }
+
+
     /**
      *  A filter that increase the contrast by evenly distributing
      *  the intensities on the histogram.
