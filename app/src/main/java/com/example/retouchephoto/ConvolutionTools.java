@@ -8,7 +8,7 @@ package com.example.retouchephoto;
  * @version 1.0
  * @since   2019-01-08
  */
-class ConvolutionTools {
+@Deprecated class ConvolutionTools {
 
     /**
      *  Apply the convolution kernel to the image.
@@ -21,7 +21,7 @@ class ConvolutionTools {
      *  @param kernelWidth the kernel width
      *  @param kernelHeight the kernel height
      */
-    static void convolution2D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final int kernelWidth, final int kernelHeight) {
+    @Deprecated static void convolution2D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final int kernelWidth, final int kernelHeight) {
         int[] output = new int[imageWidth * imageHeight];
 
         final int sizeX = (kernelWidth - 1) / 2;
@@ -52,7 +52,7 @@ class ConvolutionTools {
      *  @param kernelWidth the kernel width
      *  @param kernelHeight the kernel height
      */
-    static void convolution2DUniform(final int[] pixels, final int imageWidth, final int imageHeight, final int kernelWidth, final int kernelHeight) {
+    @Deprecated static void convolution2DUniform(final int[] pixels, final int imageWidth, final int imageHeight, final int kernelWidth, final int kernelHeight) {
         int[] output = new int[imageWidth * imageHeight];
 
         final int sizeX = (kernelWidth - 1) / 2;
@@ -82,7 +82,7 @@ class ConvolutionTools {
      *  @param horizontal will apply the convolution horizontally if true, otherwise vertically.
      *  @param correctBorders will apply the convolution even on the borders, otherwise not.
      */
-    static void convolution1D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final boolean horizontal, final boolean correctBorders) {
+    @Deprecated static void convolution1D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final boolean horizontal, final boolean correctBorders) {
         int[] output = new int[imageWidth * imageHeight];
 
         final int size = (kernel.length - 1) / 2;
@@ -170,7 +170,7 @@ class ConvolutionTools {
      *  @param output where the result will be stored.
      *  @param kernel the kernel used during convolution.
      */
-    private static void normalizeOutput(final int[] input, final int[] output, final int[] kernel) {
+    @Deprecated private static void normalizeOutput(final int[] input, final int[] output, final int[] kernel) {
         // We calculate the sum of our kernel to normalize the values.
         int sumNegativeKernel = 0;
         int sumPositiveKernel = 0;
@@ -193,7 +193,7 @@ class ConvolutionTools {
      *  @param sumNegativeKernel sum of all negative values in the kernel.
      *  @param sumPositiveKernel sum of all positive values in the kernel.
      */
-    private static void normalizeOutput(final int[] pixels, final int[] output, final int sumNegativeKernel, final int sumPositiveKernel) {
+    @Deprecated private static void normalizeOutput(final int[] pixels, final int[] output, final int sumNegativeKernel, final int sumPositiveKernel) {
         // Save the new values to pixels
         for (int i = 0; i < pixels.length; i++) {
             pixels[i] = (output[i] + 255 * sumNegativeKernel) / (sumNegativeKernel + sumPositiveKernel);
@@ -205,7 +205,7 @@ class ConvolutionTools {
      *  that array in a pixel array.
      *  @param pixels the pixel to be converted to color
      */
-    static void convertGreyToColor(final int[] pixels) {
+    @Deprecated static void convertGreyToColor(final int[] pixels) {
         // Saves the new values as colors
         int outputGrey;
         int pixelLength = pixels.length;
@@ -225,7 +225,7 @@ class ConvolutionTools {
      *  @param y the y coordinates of the pixel
      *  @return the pixels at (x, y) if the coordinates are inside the image, otherwise the closest pixel.
      */
-    static int correctedPixelGet(final int[] pixels, final int imageWidth, final int imageHeight, final int x, final int y) {
+    @Deprecated static int correctedPixelGet(final int[] pixels, final int imageWidth, final int imageHeight, final int x, final int y) {
         int newX = x;
         int newY = y;
 

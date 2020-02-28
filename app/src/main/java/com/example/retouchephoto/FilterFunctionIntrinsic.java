@@ -74,7 +74,7 @@ class FilterFunctionIntrinsic {
         };
 
         float[] kernel = (vertical) ? kernelHorizontal : kernelVertical;
-        applyConvolution3x3RS(bmp, context, kernel);
+        applyConvolution3x3RIntrinsic(bmp, context, kernel);
 
         removeAlpha(bmp);
     }
@@ -95,7 +95,7 @@ class FilterFunctionIntrinsic {
                 v,      -8 * v,     v,
                 v,      v,          v
         };
-        applyConvolution3x3RS(bmp, context, kernel);
+        applyConvolution3x3RIntrinsic(bmp, context, kernel);
         removeAlpha(bmp);
     }
 
@@ -112,6 +112,6 @@ class FilterFunctionIntrinsic {
                 -amount,    1f + 4f * amount,   -amount,
                 0f,         -amount,            0f
         };
-        applyConvolution3x3RS(bmp, context, kernel);
+        applyConvolution3x3RIntrinsic(bmp, context, kernel);
     }
 }

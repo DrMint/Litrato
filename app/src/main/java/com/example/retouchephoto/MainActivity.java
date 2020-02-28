@@ -318,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     // Convert px to dp
                     dimensionInDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
-                    //imageInfo.setVisibility(View.GONE);
+                    imageInfo.setVisibility(View.GONE);
                 }
 
                 collapsed = !collapsed;
@@ -793,6 +793,7 @@ public class MainActivity extends AppCompatActivity {
                         // Else it is an apply button
                     } else {
                         // Finds the imageView and makes it display original_image
+                        applyCorrectFilter();
                         beforeLastFilterImage = filteredImage.copy(filteredImage.getConfig(), true);
 
                         /* Put the spinner back to the default position */

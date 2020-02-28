@@ -11,9 +11,9 @@ public class Settings {
 
     /**
      * The maximum size of a loaded image.
-     * The image will not be bigger than MAXSIZE * MAXSIZE(the image ratio will be conserved).
+     * If the image is rectangular, the longest dimension will be resized to IMPORTED_BMP_SIZE and the other will be smaller than IMPORTED_BMP_SIZE.
      */
-    static final int IMPORTED_BMP_SIZE = 1000;
+    static final int IMPORTED_BMP_SIZE = 2200;
 
     /**
      * How much the user can zoom on the image.
@@ -22,7 +22,7 @@ public class Settings {
     static final float MAX_ZOOM_LEVEL = 5f;
 
     /**
-     * How much the user can zoom on the image.
+     * How much it zooms on the image when double tapping it.
      * For example: 5f means display 1/5 a the image.
      */
     static final float DOUBLE_TAP_ZOOM = 3f;

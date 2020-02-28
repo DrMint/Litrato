@@ -6,11 +6,19 @@ import static com.example.retouchephoto.ColorTools.hsv2rgb;
 import static com.example.retouchephoto.ColorTools.rgb2hsv;
 import static com.example.retouchephoto.ColorTools.rgb2s;
 import static com.example.retouchephoto.ColorTools.rgb2v;
+import static com.example.retouchephoto.ConvolutionTools.convertGreyToColor;
+import static com.example.retouchephoto.ConvolutionTools.convolution1D;
+import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
 
 /**
- * This class contains java version of the filters
+ * This class is the legacy versions of currently used filters. Functions that uses non-RS convolution are in this class.
+ * If a new version of a filter is created (i.e. using a different technology), the old one put there.
+ * If a FilterFunction has a Deprecated equivalent, then the name of the function should be the same in both classes.
+ * That way, it is easy to switch between them by simply changing the class when calling the function.
+ * This is also true for FilterFunctionIntrinsic.
  */
-class FilterFunctionDeprecated {
+ @Deprecated class FilterFunctionDeprecated {
+
     /**
      *  A filter that convert the image to grayscale, but keeps a shade of color intact.
      *  @param bmp the image
@@ -177,6 +185,72 @@ class FilterFunctionDeprecated {
             hsv[2] = lut[(int) (hsv[2] * 255)];
             pixels[i] = hsv2rgb(hsv);
         }
+
+        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+    }
+
+
+    /**
+     *  Each pixel becomes the average of size * size pixels around it.
+     *  @param bmp the image
+     *  @param size size of the kernel
+     */
+    @Deprecated static void averageBlur(final Bitmap bmp, final int size) {
+        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
+        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+
+        final int newSize = size + 1 + size;
+
+        // Convert all RGB values into luminosity
+        for (int i = 0; i < bmp.getWidth() * bmp.getHeight(); i++) {
+            pixels[i] = (pixels[i]) & 0x000000FF;
+        }
+
+        convolution2DUniform(pixels, bmp.getWidth(), bmp.getHeight(), newSize, newSize);
+        convertGreyToColor(pixels);
+
+        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+    }
+
+
+    /**
+     *  Apply a gaussian blur filter. This takes advantage of the Gaussian blur’s separable property by dividing the process into two passes.
+     *  In the first pass, a one-dimensional kernel is used to blur the image in only the horizontal or vertical direction.
+     *  In the second pass, the same one-dimensional kernel is used to blur in the remaining direction.
+     *  The resulting effect is the same as convolving with a two-dimensional kernel in a single pass, but requires fewer calculations.
+     *  (Text taken from the Wikipedia article Gaussian blur: https://en.wikipedia.org/wiki/Gaussian_blur)
+     *  @param bmp the pixels of the image
+     *  @param size size of the kernel
+     *  @param correctBorders corrects the borders if true, otherwise doesn't
+     *  @deprecated
+     */
+    @Deprecated static void gaussianBlur(final Bitmap bmp, final int size, final boolean correctBorders) {
+
+        if (size < 1) return;
+
+        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
+        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+
+        // Let's calculate the gaussian kernel
+        final double sigma = size / 3.0;
+        final double tmp = Math.exp(-(size * size / (2 * sigma * sigma)));
+        final int floatToIntCoef = (int) (1 / tmp);
+
+        final int[] gaussianKernel = new int[size + 1 + size];
+        for (int i = -size; i <= size ; i++) {
+            gaussianKernel[i + size] = (int) (Math.exp(-(i * i / (2 * sigma * sigma))) * floatToIntCoef);
+        }
+
+        // Convert all RGB values into luminosity
+        for (int i = 0; i < bmp.getWidth() * bmp.getWidth(); i++) {
+            // equivalent to pixels[i] = Red(pixels[i]);
+            pixels[i] = (pixels[i]) & 0x000000FF;
+        }
+
+        // Apply the gaussian kernel to the image, the first time horizontally, then vertically
+        convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, true, correctBorders);
+        convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, false, correctBorders);
+        convertGreyToColor(pixels);
 
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
     }
