@@ -335,6 +335,10 @@ Thus, refreshing the image will actually make the problem worse.
 
 - If the image resolution is too small (i.e. 187px by 250px), our implementation of RenderScript based convolution is faulty. The image gets skew and wrap around itself. We currently don't know why this is happening on smaller images.
 
+- The convolution works in general but it seems that there are problems with rendering on some phones, we have reported the problem to a professor but we currently don't find why it happens.
+
+- On emulator, seekbar which can normally go in negative values ​​do not go below 0, but it work on some phones we tested.
+
 ## FUTURE FEATURES
 
 The following features will **surely** be added before 04/15/2020:
