@@ -16,7 +16,7 @@ class ColorTools {
 
     /**
      * A filter used in debugging to test the rgb2hsv and hsv2rgb functions.
-     * Only to use for debugging purposes
+     * Only to uses for debugging purposes
      * @param pixels the image pixels
      */
     static void testHSVRGB(final int[] pixels) {
