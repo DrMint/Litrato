@@ -235,7 +235,12 @@ If we want to change zoom level, we use the following line, we can use `setZoom(
 
 Finally, when we want to refresh the image displayed by the our ImageView, we can use to following line of code:
 ```Java
-Bitmap newBmp = Bitmap.createBitmap(filteredImage, myImageView.getX(), myImageView.getY(), myImageView.getNewWidth(), myImageView.getNewHeight());
+Bitmap displayedBmp = Bitmap.createBitmap(  
+        fullSizeBmp,   
+	myImageView.getX(),   
+	myImageView.getY(),   
+	myImageView.getNewWidth(),   
+	myImageView.getNewHeight());
 ```
 
 Another very useful function in imageViewTouchPointToBmpCoordinates which convert the pixel touched on the imageView to the coordinates of that pixel in image (regardless of zoom and center position).
