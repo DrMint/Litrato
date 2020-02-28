@@ -211,7 +211,7 @@ Filter newFilter = new Filter("Name");       // We starts by creating a new Filt
 newFilter.setColorSeekBar();                 // This filter will use the ColorSeekBar
 newFilter.setSeekBar1(0, 100, 100, "%");     // It will also use the first SeekBar and the minimum, set, maximum value and unit is given in parameter.
 newFilter.setSeekBar2(0, 100, 100, "%");     // It will also use the second SeekBar
-newFilter.setSwitch1(true,"Color", "B&W");   // It will use the switch, default state, false state displayed name, and true state dispayed name
+newFilter.setSwitch1(true,"Off", "On");   // It will use the switch, default state, false state displayed name, and true state dispayed name
 
 // We override its apply method to redirect towards the appropriate FilterFunction.
 newFilter.setFilterFunction(new FilterInterface() {
@@ -227,6 +227,19 @@ Then we populate the spinner with the names of filters in our array of filter. T
 
 
 ### ImageViewZoomScroll Class
+This class is used to add new functionalities to ImageView objects: the ability to zoom and scroll on the image.
+Zoom and scroll events are handle by the MainActivity class, this class is used to calculate which portion of the image should be displayed. The more we zoom, the smaller this surface. When we scroll, we are moving this surface around.
+
+This surface is a rectangle defined by `newHeight`, `newWidth`, and `center`.
+If we want to change zoom level, we use the following line, we can use `setZoom(float zoom)` and we can move the image by using `translate(int x, int y)`.
+
+Finally, when we want to refresh the image displayed by the our ImageView, we can use to following line of code:
+```Java
+Bitmap newBmp = Bitmap.createBitmap(filteredImage, myImageView.getX(), myImageView.getY(), myImageView.getNewWidth(), myImageView.getNewHeight());
+```
+
+Another very useful function in imageViewTouchPointToBmpCoordinates which convert the pixel touched on the imageView to the coordinates of that pixel in image (regardless of zoom and center position).
+
 
 ### Settings Class
 This class is where constants and magic numbers are stored. It gives easy access to some settings.
