@@ -142,5 +142,6 @@
     <orderEntry type="library" name="Gradle: androidx.arch.core:core-runtime:2.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.constraintlayout:constraintlayout:1.1.3@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.divyanshu.colorseekbar:colorseekbar:1.0.2@aar" level="project" />
+    <orderEntry type="library" name="Gradle: __local_aars__:C.\Users\admin\AppData\Local\Android\Sdk\build-tools\28.0.3\renderscript\lib\androidx-rs.jar:unspecified@jar" level="project" />
   </component>
 </module>

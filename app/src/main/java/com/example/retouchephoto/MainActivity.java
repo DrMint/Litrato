@@ -543,7 +543,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Sobel");
-        newFilter.setSeekBar1(0, 2, 14, "px");
+        newFilter.setSeekBar1(1, 2, 14, "px");
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
