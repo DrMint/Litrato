@@ -325,17 +325,13 @@ Thus, refreshing the image will actually make the problem worse.
 
 - Right now, we only load a miniature of the image when it is taken from the camera.  We have to ask the system to create a temporary file in order to store the full image. Until then, the image is only 187px by 250px.
 
-- The implementation of Laplacian edge detection using ScriptIntrinsicConvolve3x3 has a problem when using an amount parameter above 14. The image turns very bright. I suspect the problem to be caused by kernel weights above 128 (the center weight is equal to 8 * (amount + 1) which is superior or equal to 128 when amount is above 14). As using this filter with that much blur isn’t very useful, I decided to simply limit the user seek bar to values between 0 and 14. However, for this particular release, I left the possibility to go up to 20 for testing purposes.
+- The implementation of Laplacian edge detection using ScriptIntrinsicConvolve3x3 has a problem when using an amount parameter above 14. The image turns very bright. I suspect the problem to be caused by kernel weights above 128 (the center weight is equal to 8 * (amount + 1) which is superior or equal to 128 when amount is above 14).
 
 - ScriptIntrinsicBlur isn’t able to handle blur radius above 25, this is not a limitation from this program, but from this library.
 
 - When loading images, the resulting image is sometimes misoriented (turned 90 degrees in one direction). This is probably due to the fact that some system saves the image rotation has a property and not directly apply it on the image. A rotation filter will be added eventually, and therefore, this problem will be fixed.
 
 - The app cannot be used in landscape mode, or else the layout gets terrible. We have lock the app in portrait mode.
-
-- If the image resolution is too small (i.e. 187px by 250px), our implementation of RenderScript based convolution is faulty. The image gets skew and wrap around itself. We currently don't know why this is happening on smaller images.
-
-- Our RenderScript based convolution works in general but it seems that there are problems with rendering on some phones, we have reported the problem to a teacher but we still don't know why it happens.
 
 - On emulator, seekbars with a negative minimum value cannot go below 0, but it work just fine on most phones we tested.
 
@@ -346,7 +342,6 @@ The following features will **surely** be added before 04/15/2020:
  - The ability to rotate the image by 90°, -90° or 180°.
  - New presets that redirect the user to already existing filters. The preset will change the default values of this filter.
  - The ability the remove the last applied filter (currently we can only remove all applied filters).
- - Hue shift is one of the last function that isn't written in RS. Let's change that.
  - Bug removal: take a picture from the camera at higher resolution than 187px by 250px.
 
 The following features will **likely** be added before 04/15/2020:
