@@ -12,8 +12,6 @@ Here a list of the features:
 
 [//]: # (_Features in **bold** are not yet implemented, or are not yet refined enough._)
 
-This app utilizes [divyanshub024's](https://github.com/divyanshub024) [ColorSeekBar](https://github.com/divyanshub024/ColorSeekBar) (Copyright 2018 Divyanshu Bhargava, licensed under the Apache License, Version 2.0).
-
 
 ## INTERFACE
 
