@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
 
-import static com.example.retouchephoto.ColorTools.*;
 import static com.example.retouchephoto.RenderScriptTools.*;
 
 import androidx.renderscript.Allocation;
@@ -115,4 +114,22 @@ class FilterFunctionIntrinsic {
         };
         applyConvolution3x3RIntrinsic(bmp, context, kernel);
     }
+
+    /**
+     * For all pixels, set the alpha value to 255.
+     * @param bmp the image to modify.
+     */
+    private static void removeAlpha (final Bitmap bmp) {
+
+        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
+        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+
+        for (int i = 0; i < bmp.getWidth() * bmp.getWidth(); i++) {
+            // Set alpha value to 255;
+            pixels[i] = (pixels[i] | 0xFF000000);
+        }
+
+        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+    }
+
 }

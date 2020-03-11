@@ -44,7 +44,6 @@ import java.util.Locale;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.divyanshu.colorseekbar.ColorSeekBar;
 import com.google.android.material.snackbar.Snackbar;
 
 /*TODO:
@@ -156,12 +155,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Adds listener for the color seek bar
-        final ColorSeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
-        colorSeekBar.setOnColorChangeListener(new ColorSeekBar.OnColorChangeListener() {
+        final SeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
+        colorSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onColorChangeListener(int i) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (inputsReady) applyCorrectFilter();
             }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         // Adds listener for the first switch
@@ -580,7 +581,7 @@ public class MainActivity extends AppCompatActivity {
                 // seek bar listener, which would apply the filter 3 time for no reason.
                 inputsReady = false;
 
-                final ColorSeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
+                final SeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
                 final SeekBar seekBar1 = findViewById(R.id.seekBar1);
                 final SeekBar seekBar2 = findViewById(R.id.seekBar2);
                 final Switch switch1 = findViewById(R.id.switch1);
@@ -597,11 +598,10 @@ public class MainActivity extends AppCompatActivity {
                     applyButton.setEnabled(true);
                 }
 
-
                 if (selectedFilter.colorSeekBar) {
                     colorSeekBar.setVisibility(View.VISIBLE);
                 } else {
-                    colorSeekBar.setVisibility(View.INVISIBLE);
+                    colorSeekBar.setVisibility(View.GONE);
                 }
 
                 if (selectedFilter.seekBar1) {
@@ -805,19 +805,14 @@ public class MainActivity extends AppCompatActivity {
         // If the spinner has yet to be initialize, aborts.
         if (sp.getSelectedItemPosition() == -1) return;
 
-        final ColorSeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
+        final SeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
         final SeekBar seekBar = findViewById(R.id.seekBar1);
         final SeekBar seekBar2 = findViewById(R.id.seekBar2);
         final Switch switch1 = findViewById(R.id.switch1);
 
-        // Stores the color from the color seek bar make sure the value is between [0; 359]
-        int colorSeekHue = ColorTools.rgb2h(colorSeekBar.getColor());
-        if (colorSeekHue < 0) colorSeekHue = 0;
-        if (colorSeekHue >= 360) colorSeekHue = 0;
-
         // Otherwise, applies the filter selected in the spinner.
         filteredImage = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
-        filters.get(sp.getSelectedItemPosition()).apply(filteredImage, getApplicationContext(), colorSeekHue, seekBar.getProgress(), seekBar2.getProgress(), switch1.isChecked());
+        filters.get(sp.getSelectedItemPosition()).apply(filteredImage, getApplicationContext(), colorSeekBar.getProgress(), seekBar.getProgress(), seekBar2.getProgress(), switch1.isChecked());
 
         // Refresh the image viewer and the histogram.
         refreshImageView();

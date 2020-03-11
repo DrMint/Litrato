@@ -1,6 +1,5 @@
 package com.example.retouchephoto;
 
-import android.graphics.Bitmap;
 import android.graphics.Color;
 
 
@@ -11,7 +10,7 @@ import android.graphics.Color;
  * @version 1.0
  * @since   2019-01-08
  */
-class ColorTools {
+@Deprecated class ColorTools {
 
     /**
      * Converts an HSV color into a RGB color.
@@ -19,7 +18,7 @@ class ColorTools {
      * @param color the HSV color to be converted
      * @return the color in RGB.
      */
-    static int hsv2rgb (final float[] color) {
+    @Deprecated static int hsv2rgb (final float[] color) {
         return hsv2rgb((int) color[0], color[1], color[2]);
     }
 
@@ -30,7 +29,7 @@ class ColorTools {
      * @param V the luminosity (between 0 and 1)
      * @return the color in RGB
      */
-    static int hsv2rgb (int H, float S, float V) {
+    @Deprecated static int hsv2rgb (int H, float S, float V) {
 
         if (S < 0) {S = 0;}
         if (S > 1) {S = 1;}
@@ -70,7 +69,7 @@ class ColorTools {
      * @param color the RGB color to be converted
      * @param hsv the float[] in which to store the result
      */
-    static void rgb2hsv (final int color, final float[] hsv) {
+    @Deprecated static void rgb2hsv (final int color, final float[] hsv) {
         float R = ((color >> 16) & 0x000000FF) / 255f;
         float G = ((color >>8 ) & 0x000000FF) / 255f;
         float B = ((color) & 0x000000FF) / 255f;
@@ -117,7 +116,7 @@ class ColorTools {
      * @param color the RGB color to be converted
      * @return the hue between 0 and 359
      */
-    static int rgb2h (final int color) {
+    @Deprecated static int rgb2h (final int color) {
         float R = ((color >> 16) & 0x000000FF) / 255f;
         float G = ((color >>8 ) & 0x000000FF) / 255f;
         float B = ((color) & 0x000000FF) / 255f;
@@ -149,7 +148,7 @@ class ColorTools {
      * @param color the RGB color to be converted
      * @return the saturation between 0 and 1
      */
-    static float rgb2s (final int color) {
+    @Deprecated static float rgb2s (final int color) {
         int R = (color >> 16) & 0x000000FF;
         int G = (color >>8 ) & 0x000000FF;
         int B = (color) & 0x000000FF;
@@ -167,28 +166,11 @@ class ColorTools {
      * @param color the RGB color to be converted
      * @return the luminosity between 0 and 1
      */
-    static float rgb2v (final int color) {
+    @Deprecated static float rgb2v (final int color) {
         int R = (color >> 16) & 0x000000FF;
         int G = (color >>8 ) & 0x000000FF;
         int B = (color) & 0x000000FF;
         return (float) Math.max(R, Math.max(G, B)) / 255;
-    }
-
-    /**
-     * For all pixels, set the alpha value to 255.
-     * @param bmp the image to modify.
-     */
-    static void removeAlpha (final Bitmap bmp) {
-
-        int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
-        bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-
-        for (int i = 0; i < bmp.getWidth() * bmp.getWidth(); i++) {
-            // Set alpha value to 255;
-            pixels[i] = (pixels[i] | 0xFF000000);
-        }
-
-        bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
     }
 
 }

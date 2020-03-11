@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="7dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/colorSeekBar"
         app:layout_constraintEnd_toStartOf="@+id/originalButton"
         app:layout_constraintStart_toStartOf="parent" />
@@ -64,18 +64,6 @@
         android:scaleType="fitXY"
         app:layout_constraintBottom_toTopOf="@+id/imageInformation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <com.divyanshu.colorseekbar.ColorSeekBar
-        android:id="@+id/colorSeekBar"
-        android:layout_width="0dp"
-        android:layout_height="23dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="7dp"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar1"
-        app:layout_constraintEnd_toStartOf="@+id/applyButton"
-        app:layout_constraintHorizontal_bias="0.731"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -130,9 +118,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="26dp"
-        android:layout_marginBottom="7dp"
+        android:layout_marginBottom="8dp"
         android:text=""
         app:layout_constraintBottom_toTopOf="@+id/histogram"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <SeekBar
+        android:id="@+id/colorSeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/gradient_color"
+        android:max="359"
+        android:min="0"
+        android:thumbTint="#000"
+        android:progressTint="#00000000"
+        android:progressBackgroundTint="#00000000"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar1"
+        app:layout_constraintEnd_toStartOf="@+id/applyButton"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
 

@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
-import static com.example.retouchephoto.ColorTools.*;
 import static com.example.retouchephoto.RenderScriptTools.*;
 
 import androidx.renderscript.Allocation;
