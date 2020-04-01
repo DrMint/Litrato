@@ -52,9 +52,6 @@ import com.google.android.material.snackbar.Snackbar;
         Refreshing the image doesn't seem to work. I suspect this is because requestLayout is asynchronous, and
         when the image refresh, it utilizes the imageView's aspect ratio before it actually changed.
         Thus, refreshing the image will actually make the problem worse.
-        [0002] - Sobel and Laplacian give strange results. The image is washed out. The result were different
-        a few releases ago. This is because to alpha values for the pixel are also changed for some reasons.
-        Right now, a fix is been issue which set all alphas to 255 but something better could probably be used.
         -------------------------------------------------------------------------------------------
     New functions:
         - When taking an image, we have to store it to get it at full resolution.
@@ -550,6 +547,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.sobel(bmp, context, seekBar, switch1);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Sketch");
+        newFilter.setSeekBar1(1, 4, 14, "");
+        newFilter.setSeekBar2(0, 20, 100, "");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                Bitmap texture = BitmapFactory.decodeResource(getResources(), R.drawable.canvas_texture);
+                texture = Bitmap.createScaledBitmap(texture, bmp.getWidth(), bmp.getHeight(), true);
+                FilterFunction.sketch(bmp, texture, context, (int) seekBar, seekBar2 / 100f);
+            }
+        });
+        filters.add(newFilter);
+
+        newFilter = new Filter("Cartoon");
+        newFilter.setSeekBar1(1, 0, 100, "px");
+        newFilter.setSeekBar2(2, 4, 14, "px");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                FilterFunction.cartoon(bmp, context, (int) seekBar, (int) seekBar2);
             }
         });
         filters.add(newFilter);

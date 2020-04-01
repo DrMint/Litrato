@@ -8,6 +8,7 @@ import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
 import androidx.renderscript.Script;
 import androidx.renderscript.ScriptIntrinsicConvolve3x3;
+import androidx.renderscript.ScriptIntrinsicBlend;
 
 import com.android.retouchephoto.ScriptC_convolution;
 
@@ -41,6 +42,23 @@ class RenderScriptTools {
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
     }
+
+
+    static void BlendIntrinsic(final Bitmap bmp1, final Bitmap bmp2, final Context context) {
+
+        RenderScript rs = RenderScript.create(context);
+        ScriptIntrinsicBlend script = ScriptIntrinsicBlend.create(rs, Element.U8_4(rs));
+
+        Allocation input = Allocation.createFromBitmap(rs, bmp1);
+        Allocation output = Allocation.createFromBitmap(rs, bmp2);
+
+        script.forEachMultiply(input, output);
+
+        cleanRenderScript(script, rs, input, output);
+    }
+
+
+
 
     /**
      * Does all the job of setting up the convolution, RenderScript stuff and then clean the mess.

@@ -11,6 +11,7 @@ import static com.example.retouchephoto.RenderScriptTools.*;
 import androidx.renderscript.Allocation;
 import androidx.renderscript.ScriptIntrinsicBlur;
 
+
 /**
  * This class implements all the filter function.
  * This class uses Intrinsic functions such as ScriptIntrinsicConvolve3x3.

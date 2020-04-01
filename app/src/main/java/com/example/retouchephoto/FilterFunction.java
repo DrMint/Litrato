@@ -23,6 +23,7 @@ import com.android.retouchephoto.ScriptC_keepAColor;
 import com.android.retouchephoto.ScriptC_histogram;
 import com.android.retouchephoto.ScriptC_constrastExtension;
 import com.android.retouchephoto.ScriptC_convolution;
+import com.android.retouchephoto.ScriptC_mix;
 
 /**
  * This class implements all the filter function.
@@ -512,5 +513,86 @@ class FilterFunction {
     static void averageBlur(final Bitmap bmp, final Context context, final int size) {
         applyConvolution(bmp, context, size * 2 + 1, size * 2 + 1);
     }
+
+
+
+
+
+    static void cartoon(final Bitmap bmp, final Context context, int contour, int posterize) {
+
+        Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
+
+        // First layer
+        laplacian(bmp, context, 4);
+        invert(bmp, context);
+        threshold(bmp, context, 0.8f);
+
+        // Second layer
+        posterize(bmpCopy, context, posterize, false);
+        toExtDyn(bmpCopy, context, contour, 255);
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation pixels = Allocation.createFromBitmap(rs, bmpCopy);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+
+        // Multiply layer 1 and 2
+        ScriptC_mix script = new ScriptC_mix(rs);
+        script.set_pixels(pixels);
+        script.forEach_multiply(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+
+    }
+
+
+
+    static void sketch(final Bitmap bmp, final Bitmap texture, final Context context, int contour, float saturation) {
+
+        Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
+
+        // First layer
+        laplacian(bmp, context, contour);
+        invert(bmp, context);
+
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation pixels = Allocation.createFromBitmap(rs, bmpCopy);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+
+        // Using layer 1's luminosity and apply it to layer 2
+        ScriptC_mix script = new ScriptC_mix(rs);
+        script.set_pixels(pixels);
+        script.set_luminositySaturation(saturation);
+        script.forEach_luminosity(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+
+        applyTexture(bmp, texture, context);
+    }
+
+
+    static void applyTexture(final Bitmap bmp, final Bitmap texture, final Context context) {
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation pixels = Allocation.createFromBitmap(rs, texture);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+
+        // Multiply layer 1 and 2
+        ScriptC_mix script = new ScriptC_mix(rs);
+        script.set_pixels(pixels);
+        script.forEach_multiply(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+
+
+
 
 }
