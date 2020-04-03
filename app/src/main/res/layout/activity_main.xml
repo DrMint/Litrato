@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
 
@@ -36,6 +37,7 @@
         android:layout_marginBottom="10dp"
         android:adjustViewBounds="false"
         android:contentDescription="@string/imageViewDescription"
+        android:cropToPadding="true"
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toTopOf="@+id/spinner"
         app:layout_constraintEnd_toEndOf="parent"
@@ -45,6 +47,20 @@
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/default_image" />
 
+    <ImageView
+        android:id="@+id/imView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="10dp"
+        android:adjustViewBounds="false"
+        android:cropToPadding="true"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toTopOf="@+id/spinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
     <Spinner
         android:id="@+id/spinner"
         android:layout_width="0dp"
@@ -140,6 +156,17 @@
         app:layout_constraintEnd_toStartOf="@+id/applyButton"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ToggleButton
+        android:id="@+id/crop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:text="ToggleButton"
+        app:layout_constraintBottom_toTopOf="@+id/histogram"
+        app:layout_constraintEnd_toStartOf="@+id/applyButton"
+        app:layout_constraintStart_toEndOf="@+id/switch1"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar2" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
