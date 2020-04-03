@@ -575,6 +575,15 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newFilter);
 
+        newFilter = new Filter("Mirror");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                FilterFunction.mirror(bmp, context);
+            }
+        });
+        filters.add(newFilter);
+
 
 
 

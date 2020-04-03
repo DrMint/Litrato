@@ -9,6 +9,7 @@ import static com.example.retouchephoto.RenderScriptTools.*;
 
 import androidx.renderscript.Allocation;
 
+import com.android.retouchephoto.ScriptC_mirror;
 import com.android.retouchephoto.ScriptC_addNoise;
 import com.android.retouchephoto.ScriptC_gray;
 import com.android.retouchephoto.ScriptC_hueshift;
@@ -586,6 +587,25 @@ class FilterFunction {
         ScriptC_mix script = new ScriptC_mix(rs);
         script.set_pixels(pixels);
         script.forEach_multiply(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+    static void mirror(final Bitmap bmp, final Context context) {
+
+        Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation pixels = Allocation.createFromBitmap(rs, bmpCopy);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+
+        // Multiply layer 1 and 2
+        ScriptC_mirror script = new ScriptC_mirror(rs);
+        script.set_width(bmp.getWidth());
+        script.set_pixels(pixels);
+        script.forEach_mirror(input, output);
 
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
