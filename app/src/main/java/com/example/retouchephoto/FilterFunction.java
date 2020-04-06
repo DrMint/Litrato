@@ -2,6 +2,7 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
@@ -513,6 +514,32 @@ class FilterFunction {
      */
     static void averageBlur(final Bitmap bmp, final Context context, final int size) {
         applyConvolution(bmp, context, size * 2 + 1, size * 2 + 1);
+    }
+
+    static void rotate(final Bitmap bmp, final float degrees){
+        Matrix mat = new Matrix();
+        mat.postRotate(degrees);
+        int []pixels= new int [bmp.getHeight()* bmp.getWidth()];
+        Bitmap rotateBmp=Bitmap.createBitmap(bmp, 0, 0,bmp.getWidth(),bmp.getHeight(), mat, true);
+        rotateBmp.getPixels(pixels,0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+    }
+
+    static void crop (final Bitmap bmp, final Point left, final Point right){
+        Bitmap tmpBmp;
+        int width = Math.abs(left.x-right.x);
+        int height = Math.abs(left.y-right.y);
+        if (left.x<right.x) {
+            tmpBmp = Bitmap.createBitmap(bmp, left.x,left.y,width,height);
+        }
+        else{
+            tmpBmp = Bitmap.createBitmap(bmp, right.x,right.y,width,height);
+        }
+        bmp.setHeight(height);
+        bmp.setWidth(width);
+        int []pixels=new int[width*height];
+        tmpBmp.getPixels(pixels,0,width,0,0,width,height);
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
 

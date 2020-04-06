@@ -6,10 +6,17 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.solver.widgets.Rectangle;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.MotionEventCompat;
 
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -43,8 +50,13 @@ import java.util.Locale;
 
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.google.android.material.snackbar.Snackbar;
+
+import static android.graphics.Bitmap.createBitmap;
+import static android.graphics.Bitmap.createScaledBitmap;
+import static android.view.MotionEvent.INVALID_POINTER_ID;
 
 /*TODO:
    Bugs:
@@ -78,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
     private PackageManager pm;
+    private ImageViewZoomScroll cropView;
 
     /**
      * This is the image as it was before applying any filter.
@@ -180,7 +193,8 @@ public class MainActivity extends AppCompatActivity {
 
         myImageView = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
         myImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
-
+        cropView = new ImageViewZoomScroll((ImageView)findViewById(R.id.imView));
+        cropView.getiView().setVisibility(View.INVISIBLE);
         // Selects the default image in the resource folder.
         Bitmap mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
         loadBitmap(mBitmap);
@@ -584,8 +598,113 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newFilter);
 
+        newFilter = new Filter("rotate+90");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                FilterFunction.rotate(bmp,90);
+                myImageView.setBmp(bmp.getHeight(),bmp.getWidth());
+            }
+        });
+        filters.add(newFilter);
+        newFilter = new Filter("rotate-90");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                myImageView.setBmp(bmp.getHeight(),bmp.getWidth());
+                FilterFunction.rotate(bmp,270);
+            }
+        });
+        filters.add(newFilter);
+        newFilter = new Filter("rotate180");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                FilterFunction.rotate(bmp,180);
+            }
+        });
+        filters.add(newFilter);
 
-
+        final Point tmpLeft=new Point();
+        final Point tmpRight= new Point();
+        newFilter = new Filter("crop");
+        newFilter.setFilterFunction(new FilterInterface() {
+            @Override
+            public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                if (!tmpLeft.isEquals(tmpRight)){
+                myImageView.setNewWidth(Math.abs(tmpLeft.x-tmpRight.x));
+                myImageView.setNewHeight(Math.abs(tmpLeft.y-tmpRight.y));
+                myImageView.setBmp(Math.abs(tmpLeft.x-tmpRight.x),Math.abs(tmpLeft.y-tmpRight.y));
+                cropView.setNewWidth(Math.abs(tmpLeft.x-tmpRight.x));
+                cropView.setNewHeight(Math.abs(tmpLeft.y-tmpRight.y));
+                cropView.setBmp(Math.abs(tmpLeft.x-tmpRight.x),Math.abs(tmpLeft.y-tmpRight.y));
+                FilterFunction.crop(bmp,tmpLeft,tmpRight);
+                //myImageView.getiView().setImageBitmap(bmp);
+                cropView.getiView().setImageBitmap(bmp);}
+            }
+        });
+        filters.add(newFilter);
+        ToggleButton toggle = (ToggleButton) findViewById(R.id.crop);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    myImageView.getiView().setVisibility(View.INVISIBLE);
+                    cropView.getiView().setVisibility(View.VISIBLE);
+                    final Bitmap tmpBmp = createScaledBitmap(filteredImage,filteredImage.getWidth(),filteredImage.getHeight(),true);
+                    cropView.setBmp(tmpBmp.getWidth(),tmpBmp.getHeight());
+                    cropView.calculateNewBmpSize();
+                    cropView.getiView().setImageBitmap(tmpBmp);
+                    findViewById(R.id.imView).setOnTouchListener(new View.OnTouchListener() {
+                        private int mActivePointerId = INVALID_POINTER_ID;
+                        private int mActivePointerId1 = INVALID_POINTER_ID;
+                        final Point left = new Point();
+                        final Point right = new Point();
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            mScaleDetector.onTouchEvent(event);
+                            final int action = MotionEventCompat.getActionMasked(event);
+                            final Bitmap mybmp=createBitmap(tmpBmp);
+                            cropView.getiView().setImageBitmap(mybmp);
+                            Canvas test = new Canvas(mybmp);
+                            Paint p = new Paint();
+                            p.setStyle(Paint.Style.STROKE);
+                            p.setStrokeWidth(tmpBmp.getWidth()/200);
+                            p.setARGB(100, 255, 255, 255);
+                            test.drawRect(left.x, left.y, right.x, right.y, p);
+                            switch (action) {
+                                case MotionEvent.ACTION_DOWN: {
+                                    final int pointerIndex = MotionEventCompat.getActionIndex(event);
+                                    final float x = MotionEventCompat.getX(event, pointerIndex);
+                                    final float y = MotionEventCompat.getY(event, pointerIndex);
+                                    left.x = cropView.imageViewTouchPointToBmpCoordinates(new Point(x, y)).x;
+                                    left.y = cropView.imageViewTouchPointToBmpCoordinates(new Point(x, y)).y;
+                                    mActivePointerId = MotionEventCompat.getPointerId(event, 0);
+                                }
+                                case MotionEvent.ACTION_MOVE: {
+                                    final int pointerIndex = MotionEventCompat.getActionIndex(event);
+                                    final float x = MotionEventCompat.getX(event, pointerIndex);
+                                    final float y = MotionEventCompat.getY(event, pointerIndex);
+                                    right.x = cropView.imageViewTouchPointToBmpCoordinates(new Point(x, y)).x;
+                                    right.y = cropView.imageViewTouchPointToBmpCoordinates(new Point(x, y)).y;
+                                    mActivePointerId = MotionEventCompat.getPointerId(event, 0);
+                                }
+                                case MotionEvent.ACTION_UP: {
+                                    break;
+                                }
+                            }
+                            tmpLeft.x = left.x;
+                            tmpLeft.y = left.y;
+                            tmpRight.x = right.x;
+                            tmpRight.y = right.y;
+                            return true;
+                        }
+                    });
+                } else {
+                    cropView.getiView().setVisibility(View.INVISIBLE);
+                    myImageView.getiView().setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
         // Adds all filter names in a array that will be used by the spinner
         String[] arraySpinner = new String[filters.size()];
@@ -854,7 +973,7 @@ public class MainActivity extends AppCompatActivity {
      * Displays filteredImage on the imageView.
      */
     private void refreshImageView() {
-        Bitmap newBmp = Bitmap.createBitmap(filteredImage, myImageView.getX(), myImageView.getY(), myImageView.getNewWidth(), myImageView.getNewHeight());
+        Bitmap newBmp = createBitmap(filteredImage, myImageView.getX(), myImageView.getY(), myImageView.getNewWidth(), myImageView.getNewHeight());
         final ImageView imgViewer = findViewById(R.id.imageView);
         imgViewer.setImageBitmap(newBmp);
     }
@@ -902,7 +1021,7 @@ public class MainActivity extends AppCompatActivity {
             max = Math.max(max, Bvalues[i]);
         }
 
-        Bitmap hist = Bitmap.createBitmap(256, 200, Bitmap.Config.ARGB_8888);
+        Bitmap hist = createBitmap(256, 200, Bitmap.Config.ARGB_8888);
         int histHeight = hist.getHeight() - 1;
         int histWidth = hist.getWidth();
 

@@ -67,6 +67,7 @@ class ImageViewZoomScroll {
     int getY() {return center.y;}
     int getNewWidth() {return newWidth;}
     int getNewHeight() {return newHeight;}
+    ImageView getiView(){return iView;}
 
     void setBmp(int bmpWidth, int bmpHeight) {
         this.bmpWidth = bmpWidth;
@@ -115,6 +116,13 @@ class ImageViewZoomScroll {
     void setMaxZoom(float maxZoom) {
         if (maxZoom < 1f) maxZoom = 1f;
         this.maxZoom = maxZoom;
+    }
+
+    void setNewWidth(int newWidth){
+        this.newWidth=newWidth;
+    }
+    void setNewHeight(int newHeight){
+        this.newHeight=newHeight;
     }
 
     void reset() {
@@ -206,7 +214,7 @@ class ImageViewZoomScroll {
         }
     }
 
-    private void calculateNewBmpSize() {
+    public void calculateNewBmpSize() {
 
         int iViewWidth = iView.getMeasuredWidth();
         int iViewHeight = iView.getMeasuredHeight();
