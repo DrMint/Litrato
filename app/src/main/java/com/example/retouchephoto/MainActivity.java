@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
     private PackageManager pm;
-    private ImageViewZoomScroll cropView;
+    //private ImageViewZoomScroll cropView;
 
     /**
      * This is the image as it was before applying any filter.
@@ -121,6 +121,11 @@ public class MainActivity extends AppCompatActivity {
     private final List<Filter> filters = new ArrayList<>();
 
     private ImageViewZoomScroll myImageView;
+
+
+    private boolean cropGoingOn = false;
+    Point cropStart = new Point();
+    Point cropEnd = new Point();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,8 +198,7 @@ public class MainActivity extends AppCompatActivity {
 
         myImageView = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
         myImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
-        cropView = new ImageViewZoomScroll((ImageView)findViewById(R.id.imView));
-        cropView.getiView().setVisibility(View.INVISIBLE);
+
         // Selects the default image in the resource folder.
         Bitmap mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
         loadBitmap(mBitmap);
@@ -257,8 +261,40 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                mScaleDetector.onTouchEvent(event);
-                mGestureDetector.onTouchEvent(event);
+                if (cropGoingOn) {
+                    final Bitmap mybmp = createBitmap(filteredImage);
+                    myImageView.getiView().setImageBitmap(mybmp);
+                    Canvas test = new Canvas(mybmp);
+                    Paint p = new Paint();
+                    p.setStyle(Paint.Style.STROKE);
+                    p.setStrokeWidth(filteredImage.getWidth()/200);
+                    p.setARGB(100, 255, 255, 255);
+                    test.drawRect(cropStart.x, cropStart.y, cropEnd.x, cropEnd.y, p);
+
+                    //switch (action) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            cropStart.x = (int) event.getRawX();
+                            cropStart.y = (int) event.getRawY();
+                            cropStart = myImageView.imageViewTouchPointToBmpCoordinates(cropStart);
+                            myImageView.sanitizeBmpCoordinates(cropStart);
+                        }
+                        case MotionEvent.ACTION_MOVE: {
+                            cropEnd.x = (int) event.getRawX();
+                            cropEnd.y = (int) event.getRawY();
+                            cropEnd = myImageView.imageViewTouchPointToBmpCoordinates(cropEnd);
+                            myImageView.sanitizeBmpCoordinates(cropEnd);
+                        }
+                        case MotionEvent.ACTION_UP: {
+                            break;
+                        }
+                    }
+
+                } else {
+                    mScaleDetector.onTouchEvent(event);
+                    mGestureDetector.onTouchEvent(event);
+                }
+
                 return true;
             }
         });
@@ -625,86 +661,17 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newFilter);
 
-        final Point tmpLeft=new Point();
-        final Point tmpRight= new Point();
-        newFilter = new Filter("crop");
+        newFilter = new Filter("Crop");
+        newFilter.onlyApplyOnce = true;
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
             public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
-                if (!tmpLeft.isEquals(tmpRight)){
-                myImageView.setNewWidth(Math.abs(tmpLeft.x-tmpRight.x));
-                myImageView.setNewHeight(Math.abs(tmpLeft.y-tmpRight.y));
-                myImageView.setBmp(Math.abs(tmpLeft.x-tmpRight.x),Math.abs(tmpLeft.y-tmpRight.y));
-                cropView.setNewWidth(Math.abs(tmpLeft.x-tmpRight.x));
-                cropView.setNewHeight(Math.abs(tmpLeft.y-tmpRight.y));
-                cropView.setBmp(Math.abs(tmpLeft.x-tmpRight.x),Math.abs(tmpLeft.y-tmpRight.y));
-                FilterFunction.crop(bmp,tmpLeft,tmpRight);
-                //myImageView.getiView().setImageBitmap(bmp);
-                cropView.getiView().setImageBitmap(bmp);}
-            }
-        });
-        filters.add(newFilter);
-        ToggleButton toggle = (ToggleButton) findViewById(R.id.crop);
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    myImageView.getiView().setVisibility(View.INVISIBLE);
-                    cropView.getiView().setVisibility(View.VISIBLE);
-                    final Bitmap tmpBmp = createScaledBitmap(filteredImage,filteredImage.getWidth(),filteredImage.getHeight(),true);
-                    cropView.setBmp(tmpBmp.getWidth(),tmpBmp.getHeight());
-                    cropView.calculateNewBmpSize();
-                    cropView.getiView().setImageBitmap(tmpBmp);
-                    findViewById(R.id.imView).setOnTouchListener(new View.OnTouchListener() {
-                        private int mActivePointerId = INVALID_POINTER_ID;
-                        private int mActivePointerId1 = INVALID_POINTER_ID;
-                        final Point left = new Point();
-                        final Point right = new Point();
-                        @Override
-                        public boolean onTouch(View v, MotionEvent event) {
-                            mScaleDetector.onTouchEvent(event);
-                            final int action = MotionEventCompat.getActionMasked(event);
-                            final Bitmap mybmp=createBitmap(tmpBmp);
-                            cropView.getiView().setImageBitmap(mybmp);
-                            Canvas test = new Canvas(mybmp);
-                            Paint p = new Paint();
-                            p.setStyle(Paint.Style.STROKE);
-                            p.setStrokeWidth(tmpBmp.getWidth()/200);
-                            p.setARGB(100, 255, 255, 255);
-                            test.drawRect(left.x, left.y, right.x, right.y, p);
-                            switch (action) {
-                                case MotionEvent.ACTION_DOWN: {
-                                    final int pointerIndex = MotionEventCompat.getActionIndex(event);
-                                    final float x = MotionEventCompat.getX(event, pointerIndex);
-                                    final float y = MotionEventCompat.getY(event, pointerIndex);
-                                    left.x = cropView.imageViewTouchPointToBmpCoordinates(new Point(x, y)).x;
-                                    left.y = cropView.imageViewTouchPointToBmpCoordinates(new Point(x, y)).y;
-                                    mActivePointerId = MotionEventCompat.getPointerId(event, 0);
-                                }
-                                case MotionEvent.ACTION_MOVE: {
-                                    final int pointerIndex = MotionEventCompat.getActionIndex(event);
-                                    final float x = MotionEventCompat.getX(event, pointerIndex);
-                                    final float y = MotionEventCompat.getY(event, pointerIndex);
-                                    right.x = cropView.imageViewTouchPointToBmpCoordinates(new Point(x, y)).x;
-                                    right.y = cropView.imageViewTouchPointToBmpCoordinates(new Point(x, y)).y;
-                                    mActivePointerId = MotionEventCompat.getPointerId(event, 0);
-                                }
-                                case MotionEvent.ACTION_UP: {
-                                    break;
-                                }
-                            }
-                            tmpLeft.x = left.x;
-                            tmpLeft.y = left.y;
-                            tmpRight.x = right.x;
-                            tmpRight.y = right.y;
-                            return true;
-                        }
-                    });
-                } else {
-                    cropView.getiView().setVisibility(View.INVISIBLE);
-                    myImageView.getiView().setVisibility(View.VISIBLE);
+                if (!cropStart.isEquals(cropEnd)) {
+                    FilterFunction.crop(bmp, cropStart, cropEnd);
                 }
             }
         });
+        filters.add(newFilter);
 
         // Adds all filter names in a array that will be used by the spinner
         String[] arraySpinner = new String[filters.size()];
@@ -740,6 +707,12 @@ public class MainActivity extends AppCompatActivity {
                 final Button originalButton = findViewById(R.id.originalButton);
 
                 Filter selectedFilter = filters.get(position);
+
+                if (selectedFilter.getName() == "Crop") {
+                    cropGoingOn = true;
+                    cropStart = new Point(0,0);
+                    cropStart = new Point(0,0);
+                }
 
                 if (position != 0) {
                     applyButton.setText(getResources().getString(R.string.applyButtonString));
@@ -860,7 +833,8 @@ public class MainActivity extends AppCompatActivity {
                         // Else it is an apply button
                     } else {
                         // Finds the imageView and makes it display original_image
-                        applyCorrectFilter();
+                        applyCorrectFilter(true);
+                        cropGoingOn = false;
                         beforeLastFilterImage = filteredImage.copy(filteredImage.getConfig(), true);
 
                         /* Put the spinner back to the default position */
@@ -928,31 +902,35 @@ public class MainActivity extends AppCompatActivity {
             sb.show();
         }
 
-        // Store this image in originalImage, generate all the useful values
         this.originalImage = bmp;
 
-        // Reset the zoom factor
-        myImageView.setBmp(originalImage.getWidth(), originalImage.getHeight());
-        myImageView.reset();
-
-        // reset the image which also refresh the imageViewer and histogram
+        // reset the image which also refresh the imageViewer and histogram, and reset the zoom factor
         resetImage();
 
-        // Display the image characteristics on imageInformation
+        refreshImageInfo();
+    }
+
+
+    private void refreshImageInfo() {
         final TextView imageInfo = findViewById(R.id.imageInformation);
-        final String infoString = String.format(Locale.ENGLISH,"%s%d  |  %s%d", getResources().getString(R.string.width), bmp.getWidth(), getResources().getString(R.string.height), bmp.getHeight());
+        final String infoString = String.format(Locale.ENGLISH,"%s%d  |  %s%d", getResources().getString(R.string.width), filteredImage.getWidth(), getResources().getString(R.string.height), filteredImage.getHeight());
         imageInfo.setText(infoString);
     }
 
     /**
      * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
      * seek bars and color bar. Refreshes the histogram and imageViewer after.
+     * @param finalApply is this apply is not a preview but the final apply of the filter
      */
-    private void applyCorrectFilter() {
+    private void applyCorrectFilter(boolean finalApply) {
 
         final Spinner sp = findViewById(R.id.spinner);
+
         // If the spinner has yet to be initialize, aborts.
         if (sp.getSelectedItemPosition() == -1) return;
+
+        Filter selectedFilter = filters.get(sp.getSelectedItemPosition());
+        if (selectedFilter.onlyApplyOnce && !finalApply) return;
 
         final SeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
         final SeekBar seekBar = findViewById(R.id.seekBar1);
@@ -961,7 +939,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Otherwise, applies the filter selected in the spinner.
         filteredImage = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
-        filters.get(sp.getSelectedItemPosition()).apply(filteredImage, getApplicationContext(), colorSeekBar.getProgress(), seekBar.getProgress(), seekBar2.getProgress(), switch1.isChecked());
+        selectedFilter.apply(filteredImage, getApplicationContext(), colorSeekBar.getProgress(), seekBar.getProgress(), seekBar2.getProgress(), switch1.isChecked());
 
         // Refresh the image viewer and the histogram.
         refreshImageView();
@@ -970,9 +948,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
+     * seek bars and color bar. Refreshes the histogram and imageViewer after.
+     */
+    private void applyCorrectFilter() {
+        applyCorrectFilter(false);
+    }
+
+    /**
      * Displays filteredImage on the imageView.
      */
     private void refreshImageView() {
+        // If the image size has been modify between two refreshes, reset the display and change the values.
+        if (filteredImage.getWidth() != myImageView.getBmpWidth() || filteredImage.getHeight() != myImageView.getBmpHeight()) {
+            myImageView.setBmp(filteredImage.getWidth(), filteredImage.getHeight());
+            myImageView.reset();
+            refreshImageInfo();
+        }
         Bitmap newBmp = createBitmap(filteredImage, myImageView.getX(), myImageView.getY(), myImageView.getNewWidth(), myImageView.getNewHeight());
         final ImageView imgViewer = findViewById(R.id.imageView);
         imgViewer.setImageBitmap(newBmp);
@@ -985,11 +977,14 @@ public class MainActivity extends AppCompatActivity {
         // Finds the imageView and makes it display original_image
         final ImageView imageView = findViewById(R.id.imageView);
         imageView.setImageBitmap(originalImage);
+        myImageView.setBmp(originalImage.getWidth(), originalImage.getHeight());
+        myImageView.reset();
         beforeLastFilterImage = originalImage.copy(originalImage.getConfig(), true);
         filteredImage = originalImage.copy(originalImage.getConfig(), true);
 
         // Get the pixels into a pixel array and refresh the histogram.
         refreshHistogram();
+        refreshImageInfo();
     }
 
 

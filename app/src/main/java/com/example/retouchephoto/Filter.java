@@ -55,6 +55,12 @@ class Filter {
     String switch1UnitFalse;
     String switch1UnitTrue;
 
+    /**
+     * Does this filter should only be applied when you click on "Apply" or also when tweaking the parameters ?
+     * By default: false
+     */
+    boolean onlyApplyOnce = false;
+
     private FilterInterface myInterface;
 
     Filter(String name) {

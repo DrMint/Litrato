@@ -2,6 +2,7 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 
 import androidx.renderscript.Element;
@@ -525,25 +526,30 @@ class FilterFunction {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    static void crop (final Bitmap bmp, final Point left, final Point right){
-        Bitmap tmpBmp;
-        int width = Math.abs(left.x-right.x);
-        int height = Math.abs(left.y-right.y);
-        if (left.x<right.x) {
-            tmpBmp = Bitmap.createBitmap(bmp, left.x,left.y,width,height);
-        }
-        else{
-            tmpBmp = Bitmap.createBitmap(bmp, right.x,right.y,width,height);
-        }
+    /**
+     * Takes a image and keeps only what's between point a and b
+     * @param bmp the image to crop
+     * @param a a corner defining the rectangle
+     * @param b the opposite corner of the rectangle
+     */
+    static void crop (final Bitmap bmp, final Point a, final Point b){
+
+        int width = Math.abs(a.x - b.x);
+        int height = Math.abs(a.y - b.y);
+
+        int startX = Math.min(a.x, b.x);
+        int startY = Math.min(a.y, b.y);
+
+        Bitmap bmpCopy = Bitmap.createBitmap(bmp, startX, startY, width, height);
+
+        int pixels[] = new int[width * height];
         bmp.setHeight(height);
         bmp.setWidth(width);
-        int []pixels=new int[width*height];
-        tmpBmp.getPixels(pixels,0,width,0,0,width,height);
+
+        bmpCopy.getPixels(pixels,0,width,0,0,width,height);
         bmp.setPixels(pixels,0,width,0,0,width,height);
+
     }
-
-
-
 
 
     static void cartoon(final Bitmap bmp, final Context context, int contour, int posterize) {

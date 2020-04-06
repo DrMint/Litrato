@@ -57,6 +57,24 @@ public class Point {
     }
 
     /**
+     * Change the coordinates of the point
+     * @param x coordinates on the X axis
+     * @param y coordinates on the y axis
+     */
+    void set(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    /**
+     * Copy the coordinates of a point to this point
+     * @param p to point to be copied
+     */
+    void set(Point p) {
+        set(p.x, p.y);
+    }
+
+    /**
      * Returns a copy of the point.
      * @return a copy of the point.
      */
