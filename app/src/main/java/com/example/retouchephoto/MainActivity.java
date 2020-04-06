@@ -274,14 +274,14 @@ public class MainActivity extends AppCompatActivity {
                     //switch (action) {
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN: {
-                            cropStart.x = (int) event.getRawX();
-                            cropStart.y = (int) event.getRawY();
+                            cropStart.x = (int) event.getX();
+                            cropStart.y = (int) event.getY();
                             cropStart = myImageView.imageViewTouchPointToBmpCoordinates(cropStart);
                             myImageView.sanitizeBmpCoordinates(cropStart);
                         }
                         case MotionEvent.ACTION_MOVE: {
-                            cropEnd.x = (int) event.getRawX();
-                            cropEnd.y = (int) event.getRawY();
+                            cropEnd.x = (int) event.getX();
+                            cropEnd.y = (int) event.getY();
                             cropEnd = myImageView.imageViewTouchPointToBmpCoordinates(cropEnd);
                             myImageView.sanitizeBmpCoordinates(cropEnd);
                         }
