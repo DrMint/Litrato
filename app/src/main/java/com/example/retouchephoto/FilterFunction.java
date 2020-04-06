@@ -611,8 +611,4 @@ class FilterFunction {
         cleanRenderScript(script, rs, input, output);
     }
 
-
-
-
-
 }
