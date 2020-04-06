@@ -1,5 +1,7 @@
 package com.example.retouchephoto;
 
+import android.graphics.Color;
+
 /**
  * This class is where all the constant are store. It gives easy access to some settings.
  *
@@ -33,4 +35,8 @@ public class Settings {
      * this value is how far off is still considered equal.
      */
     static final float IMAGE_RATIO_PRECISION = 0.01f;
+
+    static final int CROP_OPACITY = 100;
+
+    static final int CROP_BORDER_SIZE = 5;
 }

@@ -264,12 +264,19 @@ public class MainActivity extends AppCompatActivity {
                 if (cropGoingOn) {
                     final Bitmap mybmp = createBitmap(filteredImage);
                     myImageView.getiView().setImageBitmap(mybmp);
-                    Canvas test = new Canvas(mybmp);
-                    Paint p = new Paint();
-                    p.setStyle(Paint.Style.STROKE);
-                    p.setStrokeWidth(filteredImage.getWidth()/200);
-                    p.setARGB(100, 255, 255, 255);
-                    test.drawRect(cropStart.x, cropStart.y, cropEnd.x, cropEnd.y, p);
+                    Canvas myCanvas = new Canvas(mybmp);
+
+                    Paint paintFiller = new Paint();
+                    paintFiller.setStyle(Paint.Style.FILL);
+                    paintFiller.setARGB(Settings.CROP_OPACITY, 255,255,255);
+
+                    Paint paintStroke = new Paint();
+                    paintStroke.setStyle(Paint.Style.STROKE);
+                    paintStroke.setStrokeWidth(Settings.CROP_BORDER_SIZE);
+                    paintStroke.setARGB(Settings.CROP_OPACITY, 0,0,0);
+
+                    myCanvas.drawRect(cropStart.x, cropStart.y, cropEnd.x, cropEnd.y, paintFiller);
+                    myCanvas.drawRect(cropStart.x, cropStart.y, cropEnd.x, cropEnd.y, paintStroke);
 
                     //switch (action) {
                     switch (event.getAction()) {
