@@ -26,7 +26,6 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.graphics.Color;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,10 +67,10 @@ public class MainActivity extends AppCompatActivity {
 
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
-    //private PackageManager pm;
 
     /**
      * This is the image as it was before applying any filter.
+     * The image has been resized if necessary.
      */
     private Bitmap originalImage;
 
@@ -122,24 +121,160 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        layoutImageView = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
-        layoutButtonApply = findViewById(R.id.applyButton);
-        layoutButtonOriginal = findViewById(R.id.originalButton);
-        layoutHistogram = findViewById(R.id.histogram);
-        layoutImageInfo = findViewById(R.id.imageInformation);
-        layoutSeekBar1 = findViewById(R.id.seekBar1);
-        layoutSeekBar2 = findViewById(R.id.seekBar2);
-        layoutColorSeekBar = findViewById(R.id.colorSeekBar);
-        layoutSeekBarValue1 = findViewById(R.id.seekBarValue1);
-        layoutSeekBarValue2 = findViewById(R.id.seekBarValue2);
-        layoutSwitch1 = findViewById(R.id.switch1);
-        layoutSpinner = findViewById(R.id.spinner);
+        // Sets all the layout shortcuts.
+        layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
+        layoutButtonApply       = findViewById(R.id.applyButton);
+        layoutButtonOriginal    = findViewById(R.id.originalButton);
+        layoutHistogram         = findViewById(R.id.histogram);
+        layoutImageInfo         = findViewById(R.id.imageInformation);
+        layoutSeekBar1          = findViewById(R.id.seekBar1);
+        layoutSeekBar2          = findViewById(R.id.seekBar2);
+        layoutColorSeekBar      = findViewById(R.id.colorSeekBar);
+        layoutSeekBarValue1     = findViewById(R.id.seekBarValue1);
+        layoutSeekBarValue2     = findViewById(R.id.seekBarValue2);
+        layoutSwitch1           = findViewById(R.id.switch1);
+        layoutSpinner           = findViewById(R.id.spinner);
 
-        // Selects the default image in the resource folder.
+        // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
         layoutImageView.setImageBitmap(filteredImage);
         layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
 
+        // Create the list of filters
+        generateFilters();
+
+        // Initialize all the different listeners.
+        initializeListener();
+
+    }
+
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // After the user as selected an image, loads it and stores it in this.original_image
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Bitmap mBitmap;
+            try {
+                mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+
+                /* Puts the spinner back to the default position */
+                layoutSpinner.setSelection(0);
+
+                setBitmap(mBitmap);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            //Load the last taken photo.
+            setBitmap(FileInputOutput.getLastTakenBitmap());
+        }
+    }
+
+    /**
+     * Function called when a new image is loaded by the program.
+     * @param bmp the image to load
+     */
+    private void setBitmap(Bitmap bmp) {
+
+        // If the bmp is null, aborts
+        if (bmp == null) return;
+
+        // Resize the image before continuing, if necessary
+        if (bmp.getHeight() > Settings.IMPORTED_BMP_SIZE || bmp.getWidth() > Settings.IMPORTED_BMP_SIZE) {
+            bmp = ImageTools.resizeAsContainInARectangle(bmp, Settings.IMPORTED_BMP_SIZE);
+            Snackbar sb = Snackbar.make(
+                    layoutSpinner,
+                    "Image resized to " + bmp.getWidth() + "px by " + bmp.getHeight() + "px",
+                    Snackbar.LENGTH_SHORT);
+            sb.show();
+        }
+
+        // Set this image as the originalImage and reset the UI
+        originalImage = bmp;
+        resetImage();
+    }
+
+    /**
+     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
+     * seek bars and color bar. Refreshes the histogram and imageViewer after.
+     * @param finalApply is this apply is not a preview but the final apply of the filter
+     */
+    private void applyCorrectFilter(boolean finalApply) {
+
+        // If the spinner has yet to be initialize, aborts.
+        if (layoutSpinner.getSelectedItemPosition() == -1) return;
+
+        Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
+        if (selectedFilter.onlyApplyOnce && !finalApply) return;
+
+        // Otherwise, applies the filter selected in the spinner.
+        filteredImage = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
+
+        Bitmap result = selectedFilter.apply(
+                filteredImage,
+                getApplicationContext(),
+                layoutColorSeekBar.getProgress(),
+                layoutSeekBar1.getProgress(),
+                layoutSeekBar2.getProgress(),
+                layoutSwitch1.isChecked());
+
+        if (result != null) {
+            filteredImage = result;
+        }
+
+        // Refresh the image viewer and the histogram.
+        refreshImageView();
+    }
+
+    private void applyCorrectFilter() {
+        applyCorrectFilter(false);
+    }
+
+    /**
+     * Displays filteredImage on the imageView, also refreshes Histogram and ImageInfo
+     */
+    private void refreshImageView() {
+        layoutImageView.setImageBitmap(filteredImage);
+        refreshHistogram();
+        refreshImageInfo();
+    }
+
+    /**
+     * Display the original image in "imageView" and refresh the histogram.
+     */
+    private void resetImage() {
+        beforeLastFilterImage = originalImage.copy(originalImage.getConfig(), true);
+        filteredImage = originalImage.copy(originalImage.getConfig(), true);
+        refreshImageView();
+    }
+
+    /**
+     * Display the histogram of filteredImage on layoutHistogram
+     */
+    private void refreshHistogram() {
+        layoutHistogram.setImageBitmap(ImageTools.generateHistogram(filteredImage));
+    }
+
+    private void refreshImageInfo() {
+
+        final String infoString = String.format(
+                Locale.ENGLISH,"%s%d  |  %s%d",
+                getResources().getString(R.string.width),
+                filteredImage.getWidth(),
+                getResources().getString(R.string.height),
+                filteredImage.getHeight());
+
+        layoutImageInfo.setText(infoString);
+    }
+
+
+
+    private void initializeListener() {
         // Adds listener for the first seek bar
         layoutSeekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -502,8 +637,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
 
+
+
+
+
+    private void generateFilters() {
         // Creates the filters
         Filter newFilter = new Filter("Select a filter...");
         filters.add(newFilter);
@@ -798,13 +939,12 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setFilterFunction(new FilterInterface() {
             @Override
             public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
-                if (!cropStart.isEquals(cropEnd)) {
-                    return FilterFunction.crop(bmp, cropStart, cropEnd);
-                }
-                return null;
+                return FilterFunction.crop(bmp, cropStart, cropEnd);
             }
         });
         filters.add(newFilter);
+
+
 
 
 
@@ -816,206 +956,12 @@ public class MainActivity extends AppCompatActivity {
             arraySpinner[i] = filters.get(i).getName();
         }
 
+        // Initialize the spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, arraySpinner);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         layoutSpinner.setAdapter(adapter);
-
     }
 
 
-
-
-
-    @Override
-    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // After the user as selected an image, loads it and stores it in this.original_image
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Bitmap mBitmap;
-            try {
-                mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
-
-                /* Puts the spinner back to the default position */
-                layoutSpinner.setSelection(0);
-
-                setBitmap(mBitmap);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            //Load the last taken photo.
-            setBitmap(FileInputOutput.getLastTakenBitmap());
-        }
-    }
-
-    /**
-     * Function called when a new image is loaded by the program.
-     * @param bmp the image to load
-     */
-    private void setBitmap(Bitmap bmp) {
-
-        // If the bmp is null, aborts
-        if (bmp == null) return;
-
-        // Limits the image size to MAXSIZE * MAXSIZE
-        if (bmp.getHeight() > Settings.IMPORTED_BMP_SIZE || bmp.getWidth() > Settings.IMPORTED_BMP_SIZE) {
-            if (bmp.getHeight() >  bmp.getWidth()) {
-                bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth() * Settings.IMPORTED_BMP_SIZE / bmp.getHeight() , Settings.IMPORTED_BMP_SIZE, true);
-            } else {
-                bmp = Bitmap.createScaledBitmap(bmp, Settings.IMPORTED_BMP_SIZE, bmp.getHeight() * Settings.IMPORTED_BMP_SIZE / bmp.getWidth(), true);
-            }
-            Snackbar sb = Snackbar.make(layoutSpinner, "Image resized to " + bmp.getWidth() + "px by " + bmp.getHeight() + "px", Snackbar.LENGTH_SHORT);
-            sb.show();
-        }
-
-        originalImage = bmp;
-        resetImage();
-    }
-
-    private void refreshImageInfo() {
-
-        final String infoString = String.format(
-                Locale.ENGLISH,"%s%d  |  %s%d",
-                getResources().getString(R.string.width),
-                filteredImage.getWidth(),
-                getResources().getString(R.string.height),
-                filteredImage.getHeight());
-
-        layoutImageInfo.setText(infoString);
-    }
-
-    /**
-     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
-     * seek bars and color bar. Refreshes the histogram and imageViewer after.
-     * @param finalApply is this apply is not a preview but the final apply of the filter
-     */
-    private void applyCorrectFilter(boolean finalApply) {
-
-        // If the spinner has yet to be initialize, aborts.
-        if (layoutSpinner.getSelectedItemPosition() == -1) return;
-
-        Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
-        if (selectedFilter.onlyApplyOnce && !finalApply) return;
-
-        // Otherwise, applies the filter selected in the spinner.
-        filteredImage = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
-
-        Bitmap result = selectedFilter.apply(
-                filteredImage,
-                getApplicationContext(),
-                layoutColorSeekBar.getProgress(),
-                layoutSeekBar1.getProgress(),
-                layoutSeekBar2.getProgress(),
-                layoutSwitch1.isChecked());
-
-        if (result != null) {
-            filteredImage = result;
-        }
-
-        // Refresh the image viewer and the histogram.
-        refreshImageView();
-    }
-
-    /**
-     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
-     * seek bars and color bar. Refreshes the histogram and imageViewer after.
-     */
-    private void applyCorrectFilter() {
-        applyCorrectFilter(false);
-    }
-
-    /**
-     * Displays filteredImage on the imageView.
-     */
-    private void refreshImageView() {
-        layoutImageView.setImageBitmap(filteredImage);
-        refreshImageInfo();
-    }
-
-    /**
-     * Display the original image in "imageView" and refresh the histogram.
-     */
-    private void resetImage() {
-        beforeLastFilterImage = originalImage.copy(originalImage.getConfig(), true);
-        filteredImage = originalImage.copy(originalImage.getConfig(), true);
-        layoutImageView.setImageBitmap(filteredImage);
-        layoutImageView.reset();
-
-        refreshHistogram();
-        refreshImageInfo();
-    }
-
-    /**
-     *  Generates the histogram and displays it in "histogram"
-     */
-    private void refreshHistogram() {
-
-        int[] pixels = new int[filteredImage.getWidth() * filteredImage.getHeight()];
-        filteredImage.getPixels(pixels, 0, filteredImage.getWidth(), 0, 0, filteredImage.getWidth(), filteredImage.getHeight());
-
-        int[] Rvalues = new int[256];
-        int[] Gvalues = new int[256];
-        int[] Bvalues = new int[256];
-
-        // Stores how many occurrences of all color intensities, for each channel.
-        for (int pixel : pixels) {
-            Rvalues[(pixel >> 16) & 0x000000FF] += 1;
-            Gvalues[(pixel >>8 ) & 0x000000FF] += 1;
-            Bvalues[(pixel) & 0x000000FF] += 1;
-        }
-
-        int max = 0;
-
-        // Finds the intensity (in all three channels) with the maximum number of occurrences.
-        for (int i = 0; i < 256; i++) {
-            max = Math.max(max, Rvalues[i]);
-            max = Math.max(max, Gvalues[i]);
-            max = Math.max(max, Bvalues[i]);
-        }
-
-        Bitmap hist = createBitmap(256, 200, Bitmap.Config.ARGB_8888);
-        int histHeight = hist.getHeight() - 1;
-        int histWidth = hist.getWidth();
-
-        int[] histPixels = new int[hist.getHeight() * hist.getWidth()];
-
-        // If the image is blank, return with a black histogram.
-        if (max == 0) {
-            for (int x = 0; x < histWidth; x++) {
-                for (int y = 0; y < histHeight; y++) {
-                    histPixels[x + ((histHeight - y) * histWidth)] = Color.rgb(0, 0, 0);
-                }
-            }
-
-        } else {
-
-            int colorR;
-            int colorG;
-            int colorB;
-
-            for (int x = 0; x < histWidth; x++) {
-                for (int y = 0; y < histHeight; y++) {
-
-                    colorR = 0;
-                    colorG = 0;
-                    colorB = 0;
-
-                    if (Math.sqrt(Rvalues[x] * histHeight / max) * 14 >= y) {colorR = 255;}
-                    if (Math.sqrt(Gvalues[x] * histHeight / max) * 14 >= y) {colorG = 255;}
-                    if (Math.sqrt(Bvalues[x] * histHeight / max) * 14 >= y) {colorB = 255;}
-
-                    histPixels[x + ((histHeight - y) * histWidth)] = Color.rgb(colorR, colorG, colorB);
-
-                }
-            }
-        }
-
-        hist.setPixels(histPixels, 0, hist.getWidth(), 0, 0, hist.getWidth(), hist.getHeight());
-        layoutHistogram.setImageBitmap(hist);
-    }
 }
 

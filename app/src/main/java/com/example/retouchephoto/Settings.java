@@ -1,5 +1,7 @@
 package com.example.retouchephoto;
 
+import android.os.Environment;
+
 /**
  * This class is where all the constant are store. It gives easy access to some settings.
  *
@@ -40,4 +42,8 @@ class Settings {
 
     // 100 means no compression, the lower you go, the stronger the compression
     static final int OUTPUT_JPG_QUALITY = 90;
+
+    static final String SAVE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "Litrato" + "/";
+
+    static final String SAVE_PATH_ORIGINAL = SAVE_PATH + "Original" + "/";
 }

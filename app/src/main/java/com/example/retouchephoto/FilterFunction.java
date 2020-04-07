@@ -517,21 +517,9 @@ class FilterFunction {
     }
 
     static Bitmap rotate(final Bitmap bmp, final float degrees){
-        /*
-        Matrix mat = new Matrix();
-        mat.postRotate(degrees);
-        int []pixels= new int [bmp.getHeight()* bmp.getWidth()];
-        Bitmap rotateBmp = Bitmap.cr
-        Bitmap rotateBmp = Bitmap.createBitmap(bmp, 0, 0,bmp.getWidth(),bmp.getHeight(), mat, true);
-        rotateBmp.getPixels(pixels,0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
-
-         */
-
         Matrix matrix = new Matrix();
         matrix.postRotate(degrees);
         return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
-
     }
 
     /**
@@ -542,14 +530,16 @@ class FilterFunction {
      */
     static Bitmap crop (final Bitmap bmp, final Point a, final Point b){
 
-        int width = Math.abs(a.x - b.x);
-        int height = Math.abs(a.y - b.y);
+        if (!a.isEquals(b)) {
+            int width = Math.abs(a.x - b.x);
+            int height = Math.abs(a.y - b.y);
 
-        int startX = Math.min(a.x, b.x);
-        int startY = Math.min(a.y, b.y);
+            int startX = Math.min(a.x, b.x);
+            int startY = Math.min(a.y, b.y);
 
-        return Bitmap.createBitmap(bmp, startX, startY, width, height);
-
+            return Bitmap.createBitmap(bmp, startX, startY, width, height);
+        }
+        return bmp;
     }
 
 
@@ -580,7 +570,6 @@ class FilterFunction {
         cleanRenderScript(script, rs, input, output);
 
     }
-
 
 
     static void sketch(final Bitmap bmp, final Bitmap texture, final Context context, int contour, float saturation) {
