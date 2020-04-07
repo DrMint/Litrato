@@ -2,7 +2,9 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
@@ -635,4 +637,22 @@ class FilterFunction {
         cleanRenderScript(script, rs, input, output);
     }
 
+
+    static void drawRectangle(final Bitmap bmp, Point a, Point b) {
+        if (!a.isEquals(b)) {
+            Canvas myCanvas = new Canvas(bmp);
+
+            Paint paintFiller = new Paint();
+            paintFiller.setStyle(Paint.Style.FILL);
+            paintFiller.setARGB(Settings.CROP_OPACITY, 255,255,255);
+
+            Paint paintStroke = new Paint();
+            paintStroke.setStyle(Paint.Style.STROKE);
+            paintStroke.setStrokeWidth(Settings.CROP_BORDER_SIZE);
+            paintStroke.setARGB(Settings.CROP_OPACITY, 0,0,0);
+
+            myCanvas.drawRect(a.x, a.y, b.x, b.y, paintFiller);
+            myCanvas.drawRect(a.x, a.y, b.x, b.y, paintStroke);
+        }
+    }
 }

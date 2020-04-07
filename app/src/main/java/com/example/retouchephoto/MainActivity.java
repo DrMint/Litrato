@@ -5,8 +5,6 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -36,8 +34,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
-
-import static android.graphics.Bitmap.createBitmap;
 
 /*TODO:
    Bugs:
@@ -97,9 +93,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private final List<Filter> filters = new ArrayList<>();
 
-    private boolean cropGoingOn = false;
-    private Point cropStart = new Point();
-    private Point cropEnd = new Point();
+    //private Point cropStart = new Point();
+    //private Point cropEnd = new Point();
 
     private ImageViewZoomScroll layoutImageView;
     private Button      layoutButtonApply;
@@ -113,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView    layoutSeekBarValue2;
     private Switch      layoutSwitch1;
     private Spinner     layoutSpinner;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,30 +193,36 @@ public class MainActivity extends AppCompatActivity {
         resetImage();
     }
 
-    /**
-     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
-     * seek bars and color bar. Refreshes the histogram and imageViewer after.
-     * @param finalApply is this apply is not a preview but the final apply of the filter
-     */
-    private void applyCorrectFilter(boolean finalApply) {
-
+    private void previewOrApply(boolean apply) {
         // If the spinner has yet to be initialize, aborts.
         if (layoutSpinner.getSelectedItemPosition() == -1) return;
 
-        Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
-        if (selectedFilter.onlyApplyOnce && !finalApply) return;
-
-        // Otherwise, applies the filter selected in the spinner.
+        // filteredImage is now a fresh copy of beforeLastFilterImage
         filteredImage = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
 
-        Bitmap result = selectedFilter.apply(
-                filteredImage,
-                getApplicationContext(),
-                layoutColorSeekBar.getProgress(),
-                layoutSeekBar1.getProgress(),
-                layoutSeekBar2.getProgress(),
-                layoutSwitch1.isChecked());
+        Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
 
+        Bitmap result;
+        if (apply) {
+            result = selectedFilter.apply(
+                    filteredImage,
+                    getApplicationContext(),
+                    layoutColorSeekBar.getProgress(),
+                    layoutSeekBar1.getProgress(),
+                    layoutSeekBar2.getProgress(),
+                    layoutSwitch1.isChecked());
+        } else {
+            result = selectedFilter.preview(
+                    filteredImage,
+                    getApplicationContext(),
+                    layoutColorSeekBar.getProgress(),
+                    layoutSeekBar1.getProgress(),
+                    layoutSeekBar2.getProgress(),
+                    layoutSwitch1.isChecked());
+        }
+
+
+        // If the filter return a bitmap, filteredImage becomes this bitmap
         if (result != null) {
             filteredImage = result;
         }
@@ -231,8 +231,16 @@ public class MainActivity extends AppCompatActivity {
         refreshImageView();
     }
 
-    private void applyCorrectFilter() {
-        applyCorrectFilter(false);
+    /**
+     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
+     * seek bars and color bar. Refreshes the histogram and imageViewer after.
+     */
+    private void applyFilter() {
+        previewOrApply(true);
+    }
+
+    private void previewFilter() {
+        previewOrApply(false);
     }
 
     /**
@@ -275,12 +283,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initializeListener() {
+
         // Adds listener for the first seek bar
         layoutSeekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (inputsReady) applyCorrectFilter();
+                if (inputsReady) previewFilter();
                 Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
                 layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar1Unit));
             }
@@ -294,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (inputsReady) applyCorrectFilter();
+                if (inputsReady) previewFilter();
                 Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
                 layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar2Unit));
             }
@@ -307,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
         layoutColorSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (inputsReady) applyCorrectFilter();
+                if (inputsReady) previewFilter();
             }
             public void onStartTrackingTouch(SeekBar seekBar) {}
             public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -323,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
                 }
-                if (inputsReady) applyCorrectFilter();
+                if (inputsReady) previewFilter();
             }
         });
 
@@ -385,58 +394,16 @@ public class MainActivity extends AppCompatActivity {
             public void onScaleEnd(ScaleGestureDetector detector) {}
         });
 
-        // When the imageView is touched in any fashion, call both the ScaleGestureDetector and GestureDetector.
-        layoutImageView.setOnTouchListener(new View.OnTouchListener() {
 
-            @Override
+        // The default behavior of imageView.
+        final View.OnTouchListener defaultImageViewTouchListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
-
-                if (cropGoingOn) {
-                    //TODO: See if you can't use filteredImage directly instead of another bitmap
-                    final Bitmap mybmp = createBitmap(filteredImage);
-                    layoutImageView.getImageView().setImageBitmap(mybmp);
-                    Canvas myCanvas = new Canvas(mybmp);
-
-                    Paint paintFiller = new Paint();
-                    paintFiller.setStyle(Paint.Style.FILL);
-                    paintFiller.setARGB(Settings.CROP_OPACITY, 255,255,255);
-
-                    Paint paintStroke = new Paint();
-                    paintStroke.setStyle(Paint.Style.STROKE);
-                    paintStroke.setStrokeWidth(Settings.CROP_BORDER_SIZE);
-                    paintStroke.setARGB(Settings.CROP_OPACITY, 0,0,0);
-
-                    myCanvas.drawRect(cropStart.x, cropStart.y, cropEnd.x, cropEnd.y, paintFiller);
-                    myCanvas.drawRect(cropStart.x, cropStart.y, cropEnd.x, cropEnd.y, paintStroke);
-
-                    //switch (action) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN: {
-                            cropStart.x = (int) event.getX();
-                            cropStart.y = (int) event.getY();
-                            cropStart = layoutImageView.imageViewTouchPointToBmpCoordinates(cropStart);
-                            layoutImageView.sanitizeBmpCoordinates(cropStart);
-                        }
-                        case MotionEvent.ACTION_MOVE: {
-                            cropEnd.x = (int) event.getX();
-                            cropEnd.y = (int) event.getY();
-                            cropEnd = layoutImageView.imageViewTouchPointToBmpCoordinates(cropEnd);
-                            layoutImageView.sanitizeBmpCoordinates(cropEnd);
-                        }
-                        case MotionEvent.ACTION_UP: {
-                            break;
-                        }
-                    }
-
-                } else {
-                    myScaleDetector.onTouchEvent(event);
-                    myGestureDetector.onTouchEvent(event);
-                }
-
+                myScaleDetector.onTouchEvent(event);
+                myGestureDetector.onTouchEvent(event);
                 v.performClick();
                 return true;
             }
-        });
+        };
 
         // When the user clicks on the reset button, puts back the original image
         layoutButtonOriginal.setOnClickListener(new View.OnClickListener() {
@@ -482,12 +449,14 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     resetImage();
 
-                    /* Puts the spinner back to the default position */
+                    //Puts the spinner back to the default position
                     layoutSpinner.setSelection(0);
                     ((Button) v).setText(getResources().getString(R.string.loadButtonString));
                 }
             }
         });
+
+
 
         // When the user clicks on the histogram, makes it collapse or bring it back up.
         layoutHistogram.setOnClickListener(new View.OnClickListener() {
@@ -533,14 +502,16 @@ public class MainActivity extends AppCompatActivity {
 
                 Filter selectedFilter = filters.get(position);
 
-                if (selectedFilter.getName().equals("Crop")) {
-                    cropGoingOn = true;
-                    cropStart = new Point(0,0);
-                    cropStart = new Point(0,0);
-                    layoutImageView.reset();
+                selectedFilter.init();
+
+                // Apply the custom filterTouchListener to layoutImageView if it exists, else revert to the default one.
+                View.OnTouchListener filterTouchListener = selectedFilter.getImageViewTouchListener();
+                if (filterTouchListener == null) {
+                    layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
                 } else {
-                    cropGoingOn = false;
+                    layoutImageView.setOnTouchListener(filterTouchListener);
                 }
+
 
                 if (position != 0) {
                     layoutButtonApply.setText(getResources().getString(R.string.applyButtonString));
@@ -597,7 +568,7 @@ public class MainActivity extends AppCompatActivity {
                 layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar1.getProgress(), selectedFilter.seekBar1Unit));
                 layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar2.getProgress(), selectedFilter.seekBar2Unit));
 
-                applyCorrectFilter();
+                previewFilter();
 
                 // The seek bars listener can be triggered again.
                 inputsReady = true;
@@ -626,8 +597,7 @@ public class MainActivity extends AppCompatActivity {
                         // Else it is an apply button
                     } else {
                         // Finds the imageView and makes it display original_image
-                        applyCorrectFilter(true);
-                        cropGoingOn = false;
+                        applyFilter();
                         beforeLastFilterImage = filteredImage.copy(filteredImage.getConfig(), true);
 
                         /* Put the spinner back to the default position */
@@ -651,9 +621,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Brightness");
         newFilter.setSeekBar1(-100, 0, 100, "%");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 if (seekBar <= 0) seekBar *= -seekBar;
                 FilterFunction.brightness(bmp, context, seekBar * 2.55f);
                 return null;
@@ -663,9 +633,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Saturation");
         newFilter.setSeekBar1(0, 100, 200, "%");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.saturation(bmp, context,seekBar / 100f);
                 return null;
             }
@@ -674,9 +644,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Temperature");
         newFilter.setSeekBar1(-100, 0, 100, "%");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.temperature(bmp, context, seekBar / 10f);
                 return null;
             }
@@ -685,9 +655,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Tint");
         newFilter.setSeekBar1(-100, 0, 100, "%");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.tint(bmp, context, seekBar / 10f);
                 return null;
             }
@@ -696,9 +666,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Sharpening");
         newFilter.setSeekBar1(-100, 0, 100, "%");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.sharpen(bmp, context, seekBar / 200f);
                 return null;
             }
@@ -708,9 +678,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Colorize");
         newFilter.setColorSeekBar();
         newFilter.setSeekBar1(0,100,100,"");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.colorize(bmp, context, colorSeekHue, seekBar / 100f, true);
                 return null;
             }
@@ -719,9 +689,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Change hue");
         newFilter.setColorSeekBar();
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.colorize(bmp, context, colorSeekHue,0, false);
                 return null;
             }
@@ -731,9 +701,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Hue shift");
         newFilter.setSeekBar1(-180, 0, 180, "deg");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.hueShift(bmp, context,seekBar);
                 return null;
             }
@@ -741,9 +711,9 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Invert");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.invert(bmp, context);
                 return null;
             }
@@ -753,9 +723,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Keep a color");
         newFilter.setColorSeekBar();
         newFilter.setSeekBar1(1, 25, 360, "deg");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.keepAColor(bmp, context, colorSeekHue,(int)seekBar);
                 return null;
             }
@@ -765,9 +735,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Remove a color");
         newFilter.setColorSeekBar();
         newFilter.setSeekBar1(1, 25, 360, "deg");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.removeAColor(bmp, context, colorSeekHue,(int)seekBar);
                 return null;
             }
@@ -777,9 +747,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Posterize");
         newFilter.setSeekBar1(2, 10, 32, "steps");
         newFilter.setSwitch1(true,"Color", "B&W");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.posterize(bmp, context, (int) seekBar, switch1);
                 return null;
             }
@@ -788,9 +758,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Threshold");
         newFilter.setSeekBar1(0, 128, 256, "");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.threshold(bmp, context, seekBar / 256f);
                 return null;
             }
@@ -800,9 +770,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Add noise");
         newFilter.setSeekBar1(0, 0, 255, "");
         newFilter.setSwitch1(false,"B&W Noise", "Color Noise");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.noise(bmp, context, (int) seekBar, switch1);
                 return null;
             }
@@ -812,9 +782,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Linear contrast stretching");
         newFilter.setSeekBar1(0, 0, 255, "");
         newFilter.setSeekBar2(0, 255, 255, "");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.toExtDyn(bmp, context,(int)(seekBar), (int)(seekBar2));
                 return null;
             }
@@ -822,9 +792,9 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Histogram equalization");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.histogramEqualization(bmp, context);
                 return null;
             }
@@ -833,9 +803,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Average blur");
         newFilter.setSeekBar1(1, 2, 19, "px");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.averageBlur(bmp, context, (int) seekBar);
                 return null;
             }
@@ -844,9 +814,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Gaussian blur");
         newFilter.setSeekBar1(1, 2, 25, "px");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.gaussianBlur(bmp, context, (int) seekBar);
                 return null;
             }
@@ -856,9 +826,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Directional blur");
         newFilter.setSeekBar1(2, 2, 30, "");
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.directionalBlur(bmp, context, (int) seekBar, switch1);
                 return null;
             }
@@ -867,9 +837,9 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Laplacian");
         newFilter.setSeekBar1(1, 2, 14, "px");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.laplacian(bmp, context, seekBar);
                 return null;
             }
@@ -879,9 +849,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Sobel");
         newFilter.setSeekBar1(1, 2, 14, "px");
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.sobel(bmp, context, seekBar, switch1);
                 return null;
             }
@@ -891,9 +861,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Sketch");
         newFilter.setSeekBar1(1, 4, 14, "");
         newFilter.setSeekBar2(0, 20, 100, "");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 Bitmap texture = BitmapFactory.decodeResource(getResources(), R.drawable.canvas_texture);
                 texture = Bitmap.createScaledBitmap(texture, bmp.getWidth(), bmp.getHeight(), true);
                 FilterFunction.sketch(bmp, texture, context, (int) seekBar, seekBar2 / 100f);
@@ -905,9 +875,9 @@ public class MainActivity extends AppCompatActivity {
         newFilter = new Filter("Cartoon");
         newFilter.setSeekBar1(1, 0, 100, "px");
         newFilter.setSeekBar2(2, 4, 14, "px");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.cartoon(bmp, context, (int) seekBar, (int) seekBar2);
                 return null;
             }
@@ -915,9 +885,9 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Mirror");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 FilterFunction.mirror(bmp, context);
                 return null;
             }
@@ -926,24 +896,65 @@ public class MainActivity extends AppCompatActivity {
 
         newFilter = new Filter("Rotation");
         newFilter.setSeekBar1(-180, 0, 180, "deg");
-        newFilter.setFilterFunction(new FilterInterface() {
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 return FilterFunction.rotate(bmp, seekBar);
             }
         });
         filters.add(newFilter);
 
+
         newFilter = new Filter("Crop");
-        newFilter.onlyApplyOnce = true;
-        newFilter.setFilterFunction(new FilterInterface() {
+        final Point cropStart = new Point();
+        final Point cropEnd = new Point();
+
+        newFilter.setImageViewTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        cropStart.x = (int) event.getX();
+                        cropStart.y = (int) event.getY();
+                        cropStart.set(layoutImageView.imageViewTouchPointToBmpCoordinates(cropStart));
+                        layoutImageView.sanitizeBmpCoordinates(cropStart);
+                    }
+                    case MotionEvent.ACTION_MOVE: {
+                        cropEnd.x = (int) event.getX();
+                        cropEnd.y = (int) event.getY();
+                        cropEnd.set(layoutImageView.imageViewTouchPointToBmpCoordinates(cropEnd));
+                        layoutImageView.sanitizeBmpCoordinates(cropEnd);
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        break;
+                    }
+                }
+                previewFilter();
+                v.performClick();
+                return true;
+            }
+        });
+        newFilter.setFilterInitFunction(new FilterInitInterface() {
+            @Override
+            public void init() {
+                cropStart.set(0,0);
+                cropEnd.set(0,0);
+                layoutImageView.reset();
+            }
+        });
+        newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
+            @Override
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                FilterFunction.drawRectangle(bmp, cropStart, cropEnd);
+                return null;
+            }
+        });
+        newFilter.setFilterApplyFunction(new FilterApplyInterface() {
             @Override
             public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
                 return FilterFunction.crop(bmp, cropStart, cropEnd);
             }
         });
         filters.add(newFilter);
-
 
 
 

@@ -2,6 +2,7 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.view.View;
 
 /**
  * A instance of this class has many properties such as what kind of inputs (colorSeekBar and seekBars) should be available to the user.
@@ -55,13 +56,10 @@ class Filter {
     String switch1UnitFalse;
     String switch1UnitTrue;
 
-    /**
-     * Does this filter should only be applied when you click on "Apply" or also when tweaking the parameters ?
-     * By default: false
-     */
-    boolean onlyApplyOnce = false;
-
-    private FilterInterface myInterface;
+    private FilterApplyInterface myApplyInterface;
+    private FilterPreviewInterface myPreviewInterface;
+    private FilterInitInterface myInitInterface;
+    private View.OnTouchListener myImageViewTouchListener;
 
     Filter(String name) {
         this.name = name;
@@ -97,8 +95,24 @@ class Filter {
         this.colorSeekBar = true;
     }
 
-    void setFilterFunction(final FilterInterface newInterface) {
-        this.myInterface = newInterface;
+    void setFilterApplyFunction(final FilterApplyInterface newInterface) {
+        this.myApplyInterface = newInterface;
+    }
+
+    void setFilterPreviewFunction(final FilterPreviewInterface newInterface) {
+        this.myPreviewInterface = newInterface;
+    }
+
+    void setFilterInitFunction(final FilterInitInterface newInterface) {
+        this.myInitInterface = newInterface;
+    }
+
+    void setImageViewTouchListener(final View.OnTouchListener newTouchListener) {
+        this.myImageViewTouchListener = newTouchListener;
+    }
+
+    View.OnTouchListener getImageViewTouchListener() {
+        return myImageViewTouchListener;
     }
 
     /**
@@ -111,8 +125,17 @@ class Filter {
      *  @param seekBar2 the value of seeBar2.
      */
     Bitmap apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
-        if (myInterface != null) return myInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+        if (myApplyInterface != null) return myApplyInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+        return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+    }
+
+    Bitmap preview(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
+        if (myPreviewInterface != null) return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
         return null;
+    }
+
+    void init() {
+        if (myInitInterface != null) myInitInterface.init();
     }
 }
 
