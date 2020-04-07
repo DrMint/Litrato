@@ -110,8 +110,9 @@ class Filter {
      *  @param seekBar the value of seekBar1.
      *  @param seekBar2 the value of seeBar2.
      */
-    void apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
-        if (myInterface != null) myInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+    Bitmap apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
+        if (myInterface != null) return myInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+        return null;
     }
 }
 

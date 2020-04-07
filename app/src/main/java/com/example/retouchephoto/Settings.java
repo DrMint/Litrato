@@ -1,7 +1,5 @@
 package com.example.retouchephoto;
 
-import android.graphics.Color;
-
 /**
  * This class is where all the constant are store. It gives easy access to some settings.
  *
@@ -39,4 +37,7 @@ public class Settings {
     static final int CROP_OPACITY = 100;
 
     static final int CROP_BORDER_SIZE = 5;
+
+    // 100 means no compression, the lower you go, the stronger the compression
+    static final int OUTPUT_JPG_QUALITY = 90;
 }
