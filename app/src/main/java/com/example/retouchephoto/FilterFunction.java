@@ -2,7 +2,6 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Matrix;
 
 import androidx.renderscript.Element;
@@ -611,6 +610,7 @@ class FilterFunction {
     }
 
 
+    @SuppressWarnings("WeakerAccess")
     static void applyTexture(final Bitmap bmp, final Bitmap texture, final Context context) {
 
         RenderScript rs = RenderScript.create(context);

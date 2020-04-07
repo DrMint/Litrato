@@ -35,7 +35,7 @@ class FilterFunctionIntrinsic {
      * @param radius how blurry the image should be (the size of the kernel).
      *               Cannot be more than 25. because of Intrinsic's implementation limitations.
      */
-    static void gaussianBlur(final Bitmap bmp, final Context context, final float radius) {
+    private static void gaussianBlur(final Bitmap bmp, final Context context, final float radius) {
 
         RenderScript rs = RenderScript.create(context);
         ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
@@ -57,6 +57,7 @@ class FilterFunctionIntrinsic {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
+    @SuppressWarnings("unused")
     static void sobel(final Bitmap bmp, final Context context, final float amount, boolean vertical) {
 
         if (amount > 0) gaussianBlur(bmp, context, (int) amount);
@@ -86,6 +87,7 @@ class FilterFunctionIntrinsic {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
+    @SuppressWarnings("unused")
     static void laplacian(final Bitmap bmp, final Context context, final float amount) {
 
         if (amount > 0) gaussianBlur(bmp, context, amount);
@@ -107,6 +109,7 @@ class FilterFunctionIntrinsic {
      *  @param bmp the image
      *  @param amount amount of sharpness.
      */
+    @SuppressWarnings("unused")
     static void sharpen(final Bitmap bmp, final Context context, final float amount) {
         float[] kernel = {
                 0f,         -amount,            0f,

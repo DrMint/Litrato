@@ -7,7 +7,7 @@ package com.example.retouchephoto;
  * @version 1.0
  * @since   2020-31-01
  */
-public class Settings {
+class Settings {
 
     /**
      * The maximum size of a loaded image.

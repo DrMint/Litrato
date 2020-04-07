@@ -44,6 +44,7 @@ class RenderScriptTools {
     }
 
 
+    @SuppressWarnings("unused")
     static void BlendIntrinsic(final Bitmap bmp1, final Bitmap bmp2, final Context context) {
 
         RenderScript rs = RenderScript.create(context);

@@ -2,14 +2,6 @@ package com.example.retouchephoto;
 
 import android.graphics.Bitmap;
 
-import static com.example.retouchephoto.ColorTools.hsv2rgb;
-import static com.example.retouchephoto.ColorTools.rgb2hsv;
-import static com.example.retouchephoto.ColorTools.rgb2s;
-import static com.example.retouchephoto.ColorTools.rgb2v;
-import static com.example.retouchephoto.ConvolutionTools.convertGreyToColor;
-import static com.example.retouchephoto.ConvolutionTools.convolution1D;
-import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
-
 /**
  * This class is the legacy versions of currently used filters. Functions that uses non-RS convolution are in this class.
  * If a new version of a filter is created (i.e. using a different technology), the old one put there.
@@ -17,6 +9,7 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
  * That way, it is easy to switch between them by simply changing the class when calling the function.
  * This is also true for FilterFunctionIntrinsic.
  */
+ @SuppressWarnings("deprecation")
  @Deprecated class FilterFunctionDeprecated {
 
     /**
@@ -67,15 +60,15 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
         // For each pixel, change the saturation depending on the distance of the hue with deg.
         if (keepColor) {
             for (int i = 0; i < pixelsLength; i++) {
-                rgb2hsv(pixels[i], hsv);
+                ColorTools.rgb2hsv(pixels[i], hsv);
                 hsv[1] = Math.min(hsv[1], 1f - 1f / colorMargin * lut[(int) hsv[0]]);
-                pixels[i] = hsv2rgb(hsv);
+                pixels[i] = ColorTools.hsv2rgb(hsv);
             }
         } else {
             for (int i = 0; i < pixelsLength; i++) {
-                rgb2hsv(pixels[i], hsv);
+                ColorTools.rgb2hsv(pixels[i], hsv);
                 hsv[1] = Math.min(hsv[1], 1f / colorMargin * lut[(int) hsv[0]]);
-                pixels[i] = hsv2rgb(hsv);
+                pixels[i] = ColorTools.hsv2rgb(hsv);
             }
         }
 
@@ -106,9 +99,9 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
         }
 
         for (int i = 0; i < pixelsLength; i++) {
-            rgb2hsv(pixels[i], hsv);
+            ColorTools.rgb2hsv(pixels[i], hsv);
             hsv[0] = lut[(int) hsv[0]];
-            pixels[i] = hsv2rgb(hsv);
+            pixels[i] = ColorTools.hsv2rgb(hsv);
         }
 
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
@@ -122,7 +115,7 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
     @Deprecated static void colorize(final Bitmap bmp, final int deg, final float saturation) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        for (int i = 0; i < pixels.length; i++) pixels[i] = hsv2rgb(deg, saturation, rgb2v(pixels[i]));
+        for (int i = 0; i < pixels.length; i++) pixels[i] = ColorTools.hsv2rgb(deg, saturation, ColorTools.rgb2v(pixels[i]));
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
     }
 
@@ -135,7 +128,7 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
     @Deprecated static void changeHue(final Bitmap bmp, final int deg) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
-        for (int i = 0; i < pixels.length; i++) pixels[i] = hsv2rgb(deg, rgb2s(pixels[i]), rgb2v(pixels[i]));
+        for (int i = 0; i < pixels.length; i++) pixels[i] = ColorTools.hsv2rgb(deg, ColorTools.rgb2s(pixels[i]), ColorTools.rgb2v(pixels[i]));
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
     }
 
@@ -156,8 +149,8 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
         int pixelsLength = pixels.length;
 
         for (int pixel : pixels) {
-            minLuminosity = Math.min(minLuminosity, rgb2v(pixel));
-            maxLuminosity = Math.max(maxLuminosity, rgb2v(pixel));
+            minLuminosity = Math.min(minLuminosity, ColorTools.rgb2v(pixel));
+            maxLuminosity = Math.max(maxLuminosity, ColorTools.rgb2v(pixel));
         }
 
         float stretching = (targetMaxLuminosity - targetMinLuminosity);
@@ -174,9 +167,9 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
 
         float[] hsv = new float[3];
         for (int i = 0; i < pixelsLength; i++) {
-            rgb2hsv(pixels[i], hsv);
+            ColorTools.rgb2hsv(pixels[i], hsv);
             hsv[2] = lut[(int) (hsv[2] * 255)];
-            pixels[i] = hsv2rgb(hsv);
+            pixels[i] = ColorTools.hsv2rgb(hsv);
         }
 
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
@@ -196,7 +189,7 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
         int[] histogram = new int[256];
 
         for (int pixel : pixels) {
-            histogram[(int) (rgb2v(pixel) * 255)]++;
+            histogram[(int) (ColorTools.rgb2v(pixel) * 255)]++;
         }
 
         int[] cdf = new int[256];
@@ -212,9 +205,9 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
 
         float[] hsv = new float[3];
         for (int i = 0; i < pixelsLength; i++) {
-            rgb2hsv(pixels[i], hsv);
+            ColorTools.rgb2hsv(pixels[i], hsv);
             hsv[2] = lut[(int) (hsv[2] * 255)];
-            pixels[i] = hsv2rgb(hsv);
+            pixels[i] = ColorTools.hsv2rgb(hsv);
         }
 
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
@@ -237,8 +230,8 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
             pixels[i] = (pixels[i]) & 0x000000FF;
         }
 
-        convolution2DUniform(pixels, bmp.getWidth(), bmp.getHeight(), newSize, newSize);
-        convertGreyToColor(pixels);
+        ConvolutionTools.convolution2DUniform(pixels, bmp.getWidth(), bmp.getHeight(), newSize, newSize);
+        ConvolutionTools.convertGreyToColor(pixels);
 
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
     }
@@ -279,9 +272,9 @@ import static com.example.retouchephoto.ConvolutionTools.convolution2DUniform;
         }
 
         // Apply the gaussian kernel to the image, the first time horizontally, then vertically
-        convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, true, correctBorders);
-        convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, false, correctBorders);
-        convertGreyToColor(pixels);
+        ConvolutionTools.convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, true, correctBorders);
+        ConvolutionTools.convolution1D(pixels, bmp.getWidth(), bmp.getWidth(), gaussianKernel, false, correctBorders);
+        ConvolutionTools.convertGreyToColor(pixels);
 
         bmp.setPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
     }

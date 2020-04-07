@@ -9,7 +9,7 @@ package com.example.retouchephoto;
  * @version 1.0
  * @since   2020-31-01
  */
-public class Point {
+class Point {
 
     /**
      * Coordinates on the x axis.
@@ -51,6 +51,7 @@ public class Point {
      * @param x translation on the X axis
      * @param y translation on the y axis
      */
+    @SuppressWarnings("unused")
     void translate(int x, int y) {
         this.x += x;
         this.y += y;
@@ -61,6 +62,7 @@ public class Point {
      * @param x coordinates on the X axis
      * @param y coordinates on the y axis
      */
+    @SuppressWarnings("WeakerAccess")
     void set(int x, int y) {
         this.x = x;
         this.y = y;
@@ -70,6 +72,7 @@ public class Point {
      * Copy the coordinates of a point to this point
      * @param p to point to be copied
      */
+    @SuppressWarnings("unused")
     void set(Point p) {
         set(p.x, p.y);
     }
@@ -78,6 +81,7 @@ public class Point {
      * Returns a copy of the point.
      * @return a copy of the point.
      */
+    @SuppressWarnings("unused")
     Point copy() {
         return new Point(x, y);
     }

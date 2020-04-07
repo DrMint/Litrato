@@ -1,7 +1,5 @@
 package com.example.retouchephoto;
 
-import android.Manifest;
-import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -9,16 +7,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
 
-import android.os.Environment;
 import android.provider.MediaStore;
 
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -35,13 +28,8 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.graphics.Color;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -58,12 +46,9 @@ import static android.graphics.Bitmap.createBitmap;
         Refreshing the image doesn't seem to work. I suspect this is because requestLayout is asynchronous, and
         when the image refresh, it utilizes the imageView's aspect ratio before it actually changed.
         Thus, refreshing the image will actually make the problem worse.
+        [0002] - There is a bug when not applying a filter and directly going to crop.
         -------------------------------------------------------------------------------------------
     New functions:
-        - When taking an image, we have to store it to get it at full resolution.
-        - Rotation of the image (at first 90, -90, 180 then any degrees).
-        - Crop an image, possibly merging the rotation and crop function UI wise.
-        - Makes sure that all filter functions are using RenderScript.
         - An idea to keep the UI interactive while saving the image at high resolution would be to
           make all the modification on a smaller size image, save all the filter applied, and then
           apply them again to the full size image when saving. It is okay for the user to wait a few
@@ -83,8 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
-    private PackageManager pm;
-    //private ImageViewZoomScroll cropView;
+    //private PackageManager pm;
 
     /**
      * This is the image as it was before applying any filter.
@@ -114,34 +98,56 @@ public class MainActivity extends AppCompatActivity {
      */
     private final List<Filter> filters = new ArrayList<>();
 
-    private ImageViewZoomScroll myImageView;
-
-
     private boolean cropGoingOn = false;
-    Point cropStart = new Point();
-    Point cropEnd = new Point();
+    private Point cropStart = new Point();
+    private Point cropEnd = new Point();
 
-    String lastTakenImagePath;
+    private ImageViewZoomScroll layoutImageView;
+    private Button      layoutButtonApply;
+    private Button      layoutButtonOriginal;
+    private ImageView   layoutHistogram;
+    private TextView    layoutImageInfo;
+    private SeekBar     layoutSeekBar1;
+    private SeekBar     layoutSeekBar2;
+    private SeekBar     layoutColorSeekBar;
+    private TextView    layoutSeekBarValue1;
+    private TextView    layoutSeekBarValue2;
+    private Switch      layoutSwitch1;
+    private Spinner     layoutSpinner;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
-        pm = getApplicationContext().getPackageManager();
+
+        layoutImageView = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
+        layoutButtonApply = findViewById(R.id.applyButton);
+        layoutButtonOriginal = findViewById(R.id.originalButton);
+        layoutHistogram = findViewById(R.id.histogram);
+        layoutImageInfo = findViewById(R.id.imageInformation);
+        layoutSeekBar1 = findViewById(R.id.seekBar1);
+        layoutSeekBar2 = findViewById(R.id.seekBar2);
+        layoutColorSeekBar = findViewById(R.id.colorSeekBar);
+        layoutSeekBarValue1 = findViewById(R.id.seekBarValue1);
+        layoutSeekBarValue2 = findViewById(R.id.seekBarValue2);
+        layoutSwitch1 = findViewById(R.id.switch1);
+        layoutSpinner = findViewById(R.id.spinner);
+
+        // Selects the default image in the resource folder.
+        setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
+        layoutImageView.setImageBitmap(filteredImage);
+        layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
 
         // Adds listener for the first seek bar
-        final SeekBar seekBar = findViewById(R.id.seekBar1);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        layoutSeekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (inputsReady) applyCorrectFilter();
-                final TextView seekBarValue = findViewById(R.id.seekBarValue1);
-                final Spinner sp = findViewById(R.id.spinner);
-                Filter selectedFilter = filters.get(sp.getSelectedItemPosition());
-                seekBarValue.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar1Unit));
+                Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
+                layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar1Unit));
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -149,16 +155,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Adds listener for the second seek bar
-        final SeekBar seekBar2 = findViewById(R.id.seekBar2);
-        seekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        layoutSeekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (inputsReady) applyCorrectFilter();
-                final TextView seekBarValue = findViewById(R.id.seekBarValue2);
-                final Spinner sp = findViewById(R.id.spinner);
-                Filter selectedFilter = filters.get(sp.getSelectedItemPosition());
-                seekBarValue.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar2Unit));
+                Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
+                layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar2Unit));
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -166,8 +169,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Adds listener for the color seek bar
-        final SeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
-        colorSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        layoutColorSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (inputsReady) applyCorrectFilter();
@@ -177,89 +179,87 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Adds listener for the first switch
-        final Switch switch1 = findViewById(R.id.switch1);
-        switch1.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+        layoutSwitch1.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                final Spinner sp = findViewById(R.id.spinner);
-                Filter selectedFilter = filters.get(sp.getSelectedItemPosition());
-                if (switch1.isChecked()) {
-                    switch1.setText(selectedFilter.switch1UnitTrue + "   ");
+                Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
+                if (layoutSwitch1.isChecked()) {
+                    layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
                 } else {
-                    switch1.setText(selectedFilter.switch1UnitFalse + "   ");
+                    layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
                 }
                 if (inputsReady) applyCorrectFilter();
             }
         });
 
-        myImageView = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
-        myImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
-
-        // Selects the default image in the resource folder.
-        Bitmap mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-        loadBitmap(mBitmap);
-
         // Create the GestureDetector which handles the scrolling and double tap.
-        //TODO: Make sure that it is okay to use GestureDetector as it seems to be deprecated.
-        final GestureDetector mGestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
-
-            @Override
+        final GestureDetector myGestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.OnGestureListener() {
 
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                myImageView.translate((int) (distanceX / myImageView.getZoom()), (int) (distanceY / myImageView.getZoom()));
-
-                //TODO: Because of bug 0001, we are obligated to refresh the image when scrolling.
-                myImageView.refresh();
+                layoutImageView.translate((int) (distanceX / layoutImageView.getZoom()), (int) (distanceY / layoutImageView.getZoom()));
                 refreshImageView();
                 return false;
             }
 
-            @Override
+            //Not used
+            public boolean onDown(MotionEvent e) {return false;}
+            public void onShowPress(MotionEvent e) {}
+            public boolean onSingleTapUp(MotionEvent e) {return false;}
+            public void onLongPress(MotionEvent e) {}
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {return false;}
+        });
+
+        //myGestureDetector.setIsLongpressEnabled(true);
+        myGestureDetector.setOnDoubleTapListener(new GestureDetector.OnDoubleTapListener() {
+
             public boolean onDoubleTap(MotionEvent e) {
-                // This will zoom *3 when double click, and revert to normal zoom when double clicked again;
-                if (myImageView.getZoom() != 1f) {
-                    myImageView.reset();
+
+                if (layoutImageView.getZoom() != 1f) {
+                    layoutImageView.reset();
                 } else {
-                    Point touch = myImageView.imageViewTouchPointToBmpCoordinates(new Point(e.getX(), e.getY()));
-                    myImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
-                    myImageView.setCenter(touch);
+                    Point touch = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(e.getX(), e.getY()));
+                    layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
+                    layoutImageView.setCenter(touch);
                 }
                 refreshImageView();
-                return super.onDoubleTap(e);
+                return true;
             }
+
+            // Not used
+            public boolean onSingleTapConfirmed(MotionEvent e) {return false;}
+            public boolean onDoubleTapEvent(MotionEvent e) {return false;}
 
         });
 
         // Create the ScaleGestureDetector which handles the scaling.
-        final ScaleGestureDetector mScaleDetector = new ScaleGestureDetector(MainActivity.this, new ScaleGestureDetector.OnScaleGestureListener() {
+        final ScaleGestureDetector myScaleDetector = new ScaleGestureDetector(MainActivity.this, new ScaleGestureDetector.OnScaleGestureListener() {
             float lastZoomFactor;
 
-            @Override
-            public void onScaleEnd(ScaleGestureDetector detector) {
-            }
-
-            @Override
             public boolean onScaleBegin(ScaleGestureDetector detector) {
-                lastZoomFactor = myImageView.getZoom();
+                lastZoomFactor = layoutImageView.getZoom();
                 return true;
             }
 
-            @Override
             public boolean onScale(ScaleGestureDetector detector) {
-                myImageView.setZoom(lastZoomFactor * detector.getScaleFactor());
+                layoutImageView.setZoom(lastZoomFactor * detector.getScaleFactor());
                 refreshImageView();
                 return false;
             }
+
+            //Not used
+            public void onScaleEnd(ScaleGestureDetector detector) {}
         });
 
         // When the imageView is touched in any fashion, call both the ScaleGestureDetector and GestureDetector.
-        findViewById(R.id.imageView).setOnTouchListener(new View.OnTouchListener() {
+        layoutImageView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
                 if (cropGoingOn) {
+                    //TODO: See if you can't use filteredImage directly instead of another bitmap
                     final Bitmap mybmp = createBitmap(filteredImage);
-                    myImageView.getiView().setImageBitmap(mybmp);
+                    layoutImageView.getImageView().setImageBitmap(mybmp);
                     Canvas myCanvas = new Canvas(mybmp);
 
                     Paint paintFiller = new Paint();
@@ -279,14 +279,14 @@ public class MainActivity extends AppCompatActivity {
                         case MotionEvent.ACTION_DOWN: {
                             cropStart.x = (int) event.getX();
                             cropStart.y = (int) event.getY();
-                            cropStart = myImageView.imageViewTouchPointToBmpCoordinates(cropStart);
-                            myImageView.sanitizeBmpCoordinates(cropStart);
+                            cropStart = layoutImageView.imageViewTouchPointToBmpCoordinates(cropStart);
+                            layoutImageView.sanitizeBmpCoordinates(cropStart);
                         }
                         case MotionEvent.ACTION_MOVE: {
                             cropEnd.x = (int) event.getX();
                             cropEnd.y = (int) event.getY();
-                            cropEnd = myImageView.imageViewTouchPointToBmpCoordinates(cropEnd);
-                            myImageView.sanitizeBmpCoordinates(cropEnd);
+                            cropEnd = layoutImageView.imageViewTouchPointToBmpCoordinates(cropEnd);
+                            layoutImageView.sanitizeBmpCoordinates(cropEnd);
                         }
                         case MotionEvent.ACTION_UP: {
                             break;
@@ -294,26 +294,26 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 } else {
-                    mScaleDetector.onTouchEvent(event);
-                    mGestureDetector.onTouchEvent(event);
+                    myScaleDetector.onTouchEvent(event);
+                    myGestureDetector.onTouchEvent(event);
                 }
 
+                v.performClick();
                 return true;
             }
         });
 
         // When the user clicks on the reset button, puts back the original image
-        findViewById(R.id.originalButton).setOnClickListener(new View.OnClickListener() {
+        layoutButtonOriginal.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
 
-                final Spinner sp = findViewById(R.id.spinner);
-
                 // If the button is displaying Load an image
-                if (((Button) v).getText().toString() == getResources().getString(R.string.loadButtonString)) {
+                if (((Button) v).getText().toString().equals(getResources().getString(R.string.loadButtonString))) {
 
                     // Makes sure the phone has a camera module.
+                    PackageManager pm = getApplicationContext().getPackageManager();
                     if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
                         final CharSequence[] items = {"Take Photo", "Choose from Library"};
                         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
@@ -324,20 +324,9 @@ public class MainActivity extends AppCompatActivity {
 
                                 if (items[item].equals("Take Photo")) {
 
-                                    String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + getString(R.string.app_name) + "/Original/";
-
-                                    File dir = new File(fullPath);
-                                    if (!dir.exists()) {
-                                        dir.mkdirs();
-                                    }
-
-                                    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-                                    lastTakenImagePath = fullPath + timeStamp + ".jpg";
-                                    File file = new File(lastTakenImagePath);
-                                    Uri outputFileUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".provider", file);
                                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, FileInputOutput.getUriForNewFile(MainActivity.this));
                                     startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 
                                 } else if (items[item].equals("Choose from Library")) {
@@ -359,14 +348,14 @@ public class MainActivity extends AppCompatActivity {
                     resetImage();
 
                     /* Puts the spinner back to the default position */
-                    sp.setSelection(0);
+                    layoutSpinner.setSelection(0);
                     ((Button) v).setText(getResources().getString(R.string.loadButtonString));
                 }
             }
         });
 
         // When the user clicks on the histogram, makes it collapse or bring it back up.
-        findViewById(R.id.histogram).setOnClickListener(new View.OnClickListener() {
+        layoutHistogram.setOnClickListener(new View.OnClickListener() {
 
             boolean collapsed = false;
 
@@ -374,17 +363,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 int dimensionInDp;
-                final TextView imageInfo = findViewById(R.id.imageInformation);
 
                 if (collapsed) {
                     // Convert px to dp
                     dimensionInDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, getResources().getDisplayMetrics());
-                    imageInfo.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                    imageInfo.setVisibility(View.VISIBLE);
+                    layoutImageInfo.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    layoutImageInfo.setVisibility(View.VISIBLE);
                 } else {
                     // Convert px to dp
                     dimensionInDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
-                    imageInfo.setVisibility(View.GONE);
+                    layoutImageInfo.setVisibility(View.GONE);
                 }
 
                 collapsed = !collapsed;
@@ -395,6 +383,125 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        layoutSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            /**
+             * Handles when an item is selected in the spinner.
+             */
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                // This values is used to avoid applying filters while the seek bar are modified.
+                // Changing the seek bar minimum, progress or maximum values would normally call the
+                // seek bar listener, which would apply the filter 3 time for no reason.
+                inputsReady = false;
+
+                Filter selectedFilter = filters.get(position);
+
+                if (selectedFilter.getName().equals("Crop")) {
+                    cropGoingOn = true;
+                    cropStart = new Point(0,0);
+                    cropStart = new Point(0,0);
+                    layoutImageView.reset();
+                } else {
+                    cropGoingOn = false;
+                }
+
+                if (position != 0) {
+                    layoutButtonApply.setText(getResources().getString(R.string.applyButtonString));
+                    layoutButtonOriginal.setText(getResources().getString(R.string.originalButtonString));
+                    layoutButtonApply.setEnabled(true);
+                }
+
+                if (selectedFilter.colorSeekBar) {
+                    layoutColorSeekBar.setVisibility(View.VISIBLE);
+                } else {
+                    layoutColorSeekBar.setVisibility(View.INVISIBLE);
+                }
+
+                if (selectedFilter.seekBar1) {
+                    layoutSeekBar1.setVisibility(View.VISIBLE);
+                    layoutSeekBar1.setMin(selectedFilter.seekBar1Min);
+                    layoutSeekBar1.setMax(selectedFilter.seekBar1Max);
+                    layoutSeekBar1.setProgress(selectedFilter.seekBar1Set);
+                } else {
+                    layoutSeekBar1.setVisibility(View.INVISIBLE);
+                }
+
+                if (selectedFilter.seekBar2) {
+                    layoutSeekBar2.setVisibility(View.VISIBLE);
+                    layoutSeekBar2.setMin(selectedFilter.seekBar2Min);
+                    layoutSeekBar2.setMax(selectedFilter.seekBar2Max);
+                    layoutSeekBar2.setProgress(selectedFilter.seekBar2Set);
+                } else {
+                    layoutSeekBar2.setVisibility(View.INVISIBLE);
+                }
+
+                if (selectedFilter.switch1) {
+                    layoutSwitch1.setVisibility(View.VISIBLE);
+                    layoutSwitch1.setChecked(selectedFilter.switch1Default);
+                    if (layoutSwitch1.isChecked()) {
+                        layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
+                    } else {
+                        layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
+                    }
+
+
+                    if (!selectedFilter.seekBar2) {
+                        layoutSeekBar2.setVisibility(View.INVISIBLE);
+                    }
+
+                } else {
+                    layoutSwitch1.setVisibility(View.INVISIBLE);
+
+                }
+
+                // Only shows the seekBarValues when the seekBars are visible.
+                layoutSeekBarValue1.setVisibility(layoutSeekBar1.getVisibility());
+                layoutSeekBarValue2.setVisibility(layoutSeekBar2.getVisibility());
+                layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar1.getProgress(), selectedFilter.seekBar1Unit));
+                layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar2.getProgress(), selectedFilter.seekBar2Unit));
+
+                applyCorrectFilter();
+
+                // The seek bars listener can be triggered again.
+                inputsReady = true;
+            }
+
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+
+        // When the user click on the apply button, apply the selected filter in the spinner
+        layoutButtonApply.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (originalImage != null) {
+
+                    // If the spinner has no filter selected, it is a save button
+                    if (layoutSpinner.getSelectedItemPosition() == 0) {
+
+                        // Did it save properly?
+                        if (FileInputOutput.saveImage(filteredImage, MainActivity.this)) {
+                            v.setEnabled(false);
+                            Snackbar.make(v, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
+                        }
+
+                        // Else it is an apply button
+                    } else {
+                        // Finds the imageView and makes it display original_image
+                        applyCorrectFilter(true);
+                        cropGoingOn = false;
+                        beforeLastFilterImage = filteredImage.copy(filteredImage.getConfig(), true);
+
+                        /* Put the spinner back to the default position */
+                        layoutSpinner.setSelection(0);
+                        ((Button)v).setText(getResources().getString(R.string.saveButtonString));
+                    }
+                }
+            }
+        });
 
 
         // Creates the filters
@@ -699,178 +806,24 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newFilter);
 
+
+
+
+
         // Adds all filter names in a array that will be used by the spinner
         String[] arraySpinner = new String[filters.size()];
         for (int i = 0; i < filters.size(); i++) {
             arraySpinner[i] = filters.get(i).getName();
         }
 
-        final Spinner sp = findViewById(R.id.spinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, arraySpinner);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        sp.setAdapter(adapter);
+        layoutSpinner.setAdapter(adapter);
 
-        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-            /**
-             * Handles when an item is selected in the spinner.
-             */
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                // This values is used to avoid applying filters while the seek bar are modified.
-                // Changing the seek bar minimum, progress or maximum values would normally call the
-                // seek bar listener, which would apply the filter 3 time for no reason.
-                inputsReady = false;
-
-                final SeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
-                final SeekBar seekBar1 = findViewById(R.id.seekBar1);
-                final SeekBar seekBar2 = findViewById(R.id.seekBar2);
-                final Switch switch1 = findViewById(R.id.switch1);
-                final TextView seekBarValue1 = findViewById(R.id.seekBarValue1);
-                final TextView seekBarValue2 = findViewById(R.id.seekBarValue2);
-                final Button applyButton = findViewById(R.id.applyButton);
-                final Button originalButton = findViewById(R.id.originalButton);
-
-                Filter selectedFilter = filters.get(position);
-
-                if (selectedFilter.getName() == "Crop") {
-                    cropGoingOn = true;
-                    cropStart = new Point(0,0);
-                    cropStart = new Point(0,0);
-                }
-
-                if (position != 0) {
-                    applyButton.setText(getResources().getString(R.string.applyButtonString));
-                    originalButton.setText(getResources().getString(R.string.originalButtonString));
-                    applyButton.setEnabled(true);
-                }
-
-                if (selectedFilter.colorSeekBar) {
-                    colorSeekBar.setVisibility(View.VISIBLE);
-                } else {
-                    colorSeekBar.setVisibility(View.GONE);
-                }
-
-                if (selectedFilter.seekBar1) {
-                    seekBar1.setVisibility(View.VISIBLE);
-                    seekBar1.setMin(selectedFilter.seekBar1Min);
-                    seekBar1.setMax(selectedFilter.seekBar1Max);
-                    seekBar1.setProgress(selectedFilter.seekBar1Set);
-                } else {
-                    seekBar1.setVisibility(View.INVISIBLE);
-                }
-
-                if (selectedFilter.seekBar2) {
-                    seekBar2.setVisibility(View.VISIBLE);
-                    seekBar2.setMin(selectedFilter.seekBar2Min);
-                    seekBar2.setMax(selectedFilter.seekBar2Max);
-                    seekBar2.setProgress(selectedFilter.seekBar2Set);
-                } else {
-                    seekBar2.setVisibility(View.INVISIBLE);
-                }
-
-                if (selectedFilter.switch1) {
-                    switch1.setVisibility(View.VISIBLE);
-                    switch1.setChecked(selectedFilter.switch1Default);
-                    if (switch1.isChecked()) {
-                        switch1.setText(selectedFilter.switch1UnitTrue);
-                    } else {
-                        switch1.setText(selectedFilter.switch1UnitFalse);
-                    }
-
-
-                    if (!selectedFilter.seekBar2) {
-                        seekBar2.setVisibility(View.GONE);
-                    }
-
-                } else {
-                    switch1.setVisibility(View.GONE);
-
-                }
-
-                // Only shows the seekBarValues when the seekBars are visible.
-                seekBarValue1.setVisibility(seekBar1.getVisibility());
-                seekBarValue2.setVisibility(seekBar2.getVisibility());
-                seekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar1.getProgress(), selectedFilter.seekBar1Unit));
-                seekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar2.getProgress(), selectedFilter.seekBar2Unit));
-
-                // Finds the imageView and makes it display beforeLastFilterImage
-                if (originalImage != null) {
-                    final ImageView imageView = findViewById(R.id.imageView);
-                    imageView.setImageBitmap(beforeLastFilterImage);
-                    applyCorrectFilter();
-                }
-
-                // The seek bars listener can be triggered again.
-                inputsReady = true;
-
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
-
-        // When the user click on the apply button, apply the selected filter in the spinner
-        findViewById(R.id.applyButton).setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (originalImage != null) {
-                    final Spinner sp = findViewById(R.id.spinner);
-
-                    // If the spinner has no filter selected, it is a save button
-                    if (sp.getSelectedItemPosition() == 0) {
-
-                        saveImage(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + getString(R.string.app_name) + "/", filteredImage);
-                        v.setEnabled(false);
-                        Snackbar.make(v, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
-
-                    // Else it is an apply button
-                    } else {
-                        // Finds the imageView and makes it display original_image
-                        applyCorrectFilter(true);
-                        cropGoingOn = false;
-                        beforeLastFilterImage = filteredImage.copy(filteredImage.getConfig(), true);
-
-                        /* Put the spinner back to the default position */
-                        sp.setSelection(0);
-                        ((Button)v).setText(getResources().getString(R.string.saveButtonString));
-                    }
-                }
-            }
-        });
     }
 
 
-    void saveImage(String fullPath, Bitmap bmp) {
 
-        int MY_PERMISSIONS = 10;
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS);
-
-        try {
-            File dir = new File(fullPath);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            OutputStream fOut;
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            File file = new File(fullPath, timeStamp + ".jpg");
-            file.createNewFile();
-            fOut = new FileOutputStream(file);
-
-            bmp.compress(Bitmap.CompressFormat.JPEG, Settings.OUTPUT_JPG_QUALITY, fOut);
-            fOut.flush();
-            fOut.close();
-
-            // This asks the MediaStore to add this image to the gallery. This seems to duplicate the file in the Picture folder.
-            //MediaStore.Images.Media.insertImage(MainActivity.this.getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
-
-        } catch (Exception e) {
-            Log.e("saveToExternalStorage()", e.getMessage());
-        }
-    }
 
 
     @Override
@@ -884,10 +837,9 @@ public class MainActivity extends AppCompatActivity {
                 mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
 
                 /* Puts the spinner back to the default position */
-                final Spinner sp = findViewById(R.id.spinner);
-                sp.setSelection(0);
+                layoutSpinner.setSelection(0);
 
-                loadBitmap(mBitmap);
+                setBitmap(mBitmap);
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -895,42 +847,19 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            File imgFile = new  File(lastTakenImagePath);
-            if(imgFile.exists()){
-                Bitmap mBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                loadBitmap(mBitmap);
-                //ImageView myImage = (ImageView) findViewById(R.id.lastTakenImagePath);
-                //myImage.setImageBitmap(myBitmap);
-
-            }
+            //Load the last taken photo.
+            setBitmap(FileInputOutput.getLastTakenBitmap());
         }
-
-        /*
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap mBitmap;
-            if (extras != null) {
-                mBitmap = (Bitmap) extras.get("data");
-                if (mBitmap != null) {
-                    //TODO: Right now, this method will only load a miniature of the image.
-                    //      We have to ask the system to create a temporary file in order to store the full image.
-                    loadBitmap(mBitmap);
-                }
-            }
-
-        }
-
-         */
-
     }
 
     /**
      * Function called when a new image is loaded by the program.
      * @param bmp the image to load
      */
-    private void loadBitmap(Bitmap bmp) {
-        final ImageView imgViewer = findViewById(R.id.imageView);
-        imgViewer.setScaleType(ImageView.ScaleType.FIT_CENTER);
+    private void setBitmap(Bitmap bmp) {
+
+        // If the bmp is null, aborts
+        if (bmp == null) return;
 
         // Limits the image size to MAXSIZE * MAXSIZE
         if (bmp.getHeight() > Settings.IMPORTED_BMP_SIZE || bmp.getWidth() > Settings.IMPORTED_BMP_SIZE) {
@@ -939,23 +868,24 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 bmp = Bitmap.createScaledBitmap(bmp, Settings.IMPORTED_BMP_SIZE, bmp.getHeight() * Settings.IMPORTED_BMP_SIZE / bmp.getWidth(), true);
             }
-            Snackbar sb = Snackbar.make(imgViewer, "Image resized to " + bmp.getWidth() + "px by " + bmp.getHeight() + "px", Snackbar.LENGTH_SHORT);
+            Snackbar sb = Snackbar.make(layoutSpinner, "Image resized to " + bmp.getWidth() + "px by " + bmp.getHeight() + "px", Snackbar.LENGTH_SHORT);
             sb.show();
         }
 
-        this.originalImage = bmp;
-
-        // reset the image which also refresh the imageViewer and histogram, and reset the zoom factor
+        originalImage = bmp;
         resetImage();
-
-        refreshImageInfo();
     }
 
-
     private void refreshImageInfo() {
-        final TextView imageInfo = findViewById(R.id.imageInformation);
-        final String infoString = String.format(Locale.ENGLISH,"%s%d  |  %s%d", getResources().getString(R.string.width), filteredImage.getWidth(), getResources().getString(R.string.height), filteredImage.getHeight());
-        imageInfo.setText(infoString);
+
+        final String infoString = String.format(
+                Locale.ENGLISH,"%s%d  |  %s%d",
+                getResources().getString(R.string.width),
+                filteredImage.getWidth(),
+                getResources().getString(R.string.height),
+                filteredImage.getHeight());
+
+        layoutImageInfo.setText(infoString);
     }
 
     /**
@@ -965,30 +895,29 @@ public class MainActivity extends AppCompatActivity {
      */
     private void applyCorrectFilter(boolean finalApply) {
 
-        final Spinner sp = findViewById(R.id.spinner);
-
         // If the spinner has yet to be initialize, aborts.
-        if (sp.getSelectedItemPosition() == -1) return;
+        if (layoutSpinner.getSelectedItemPosition() == -1) return;
 
-        Filter selectedFilter = filters.get(sp.getSelectedItemPosition());
+        Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
         if (selectedFilter.onlyApplyOnce && !finalApply) return;
-
-        final SeekBar colorSeekBar = findViewById(R.id.colorSeekBar);
-        final SeekBar seekBar = findViewById(R.id.seekBar1);
-        final SeekBar seekBar2 = findViewById(R.id.seekBar2);
-        final Switch switch1 = findViewById(R.id.switch1);
 
         // Otherwise, applies the filter selected in the spinner.
         filteredImage = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
-        Bitmap result = selectedFilter.apply(filteredImage, getApplicationContext(), colorSeekBar.getProgress(), seekBar.getProgress(), seekBar2.getProgress(), switch1.isChecked());
+
+        Bitmap result = selectedFilter.apply(
+                filteredImage,
+                getApplicationContext(),
+                layoutColorSeekBar.getProgress(),
+                layoutSeekBar1.getProgress(),
+                layoutSeekBar2.getProgress(),
+                layoutSwitch1.isChecked());
+
         if (result != null) {
             filteredImage = result;
         }
 
         // Refresh the image viewer and the histogram.
         refreshImageView();
-        refreshHistogram();
-
     }
 
     /**
@@ -1003,34 +932,22 @@ public class MainActivity extends AppCompatActivity {
      * Displays filteredImage on the imageView.
      */
     private void refreshImageView() {
-        // If the image size has been modify between two refreshes, reset the display and change the values.
-        if (filteredImage.getWidth() != myImageView.getBmpWidth() || filteredImage.getHeight() != myImageView.getBmpHeight()) {
-            myImageView.setBmp(filteredImage.getWidth(), filteredImage.getHeight());
-            myImageView.reset();
-            refreshImageInfo();
-        }
-        Bitmap newBmp = createBitmap(filteredImage, myImageView.getX(), myImageView.getY(), myImageView.getNewWidth(), myImageView.getNewHeight());
-        final ImageView imgViewer = findViewById(R.id.imageView);
-        imgViewer.setImageBitmap(newBmp);
+        layoutImageView.setImageBitmap(filteredImage);
+        refreshImageInfo();
     }
 
     /**
      * Display the original image in "imageView" and refresh the histogram.
      */
     private void resetImage() {
-        // Finds the imageView and makes it display original_image
-        final ImageView imageView = findViewById(R.id.imageView);
-        imageView.setImageBitmap(originalImage);
-        myImageView.setBmp(originalImage.getWidth(), originalImage.getHeight());
-        myImageView.reset();
         beforeLastFilterImage = originalImage.copy(originalImage.getConfig(), true);
         filteredImage = originalImage.copy(originalImage.getConfig(), true);
+        layoutImageView.setImageBitmap(filteredImage);
+        layoutImageView.reset();
 
-        // Get the pixels into a pixel array and refresh the histogram.
         refreshHistogram();
         refreshImageInfo();
     }
-
 
     /**
      *  Generates the histogram and displays it in "histogram"
@@ -1098,38 +1015,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         hist.setPixels(histPixels, 0, hist.getWidth(), 0, 0, hist.getWidth(), hist.getHeight());
-        final ImageView histogram = findViewById(R.id.histogram);
-        histogram.setImageBitmap(hist);
-
+        layoutHistogram.setImageBitmap(hist);
     }
-
-
-    static Bitmap toSquare(Bitmap bmp, int newSize) {
-
-        int currentWidth = bmp.getWidth();
-        int currentHeight =  bmp.getHeight();
-
-        int newWidth = currentWidth;
-        int newHeight = currentHeight;
-
-        int newX = 0;
-        int newY = 0;
-
-        if (currentWidth > currentHeight) {
-            newWidth = currentHeight;
-            newX = (currentWidth - currentHeight) / 2;
-        } else {
-            newHeight = currentWidth;
-            newY = (currentHeight - currentWidth) / 2;
-        }
-
-        bmp = Bitmap.createBitmap(bmp, newX, newY, newWidth, newHeight);
-
-        // L'image est maintenant un carrée
-
-        return Bitmap.createScaledBitmap(bmp, newSize, newSize, true);
-
-    }
-
 }
 
