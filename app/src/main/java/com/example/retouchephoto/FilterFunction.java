@@ -2,9 +2,7 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
@@ -12,6 +10,8 @@ import static com.example.retouchephoto.RenderScriptTools.*;
 
 import androidx.renderscript.Allocation;
 
+import com.android.retouchephoto.ScriptC_burn;
+import com.android.retouchephoto.ScriptC_gamma;
 import com.android.retouchephoto.ScriptC_mirror;
 import com.android.retouchephoto.ScriptC_addNoise;
 import com.android.retouchephoto.ScriptC_gray;
@@ -396,7 +396,7 @@ class FilterFunction {
      *  @param size size of the kernel
      *  @param vertical applies the kernel vertically, horizontally otherwise.
      */
-    static void directionalBlur(final Bitmap bmp, final Context context, int size, boolean vertical) {
+    static void directionalBlur(final Bitmap bmp, final Context context, final int size, final boolean vertical) {
 
         if (size < 1) return;
 
@@ -446,7 +446,7 @@ class FilterFunction {
      *  @param context the context
      *  @param size size of the kernel
      */
-    static void gaussianBlur(final Bitmap bmp, final Context context, int size) {
+    static void gaussianBlur(final Bitmap bmp, final Context context, final int size) {
         directionalBlur(bmp, context, size, false);
         directionalBlur(bmp, context, size, true);
     }
@@ -489,7 +489,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void sobel(final Bitmap bmp, final Context context, final float amount, boolean vertical) {
+    static void sobel(final Bitmap bmp, final Context context, final float amount, final boolean vertical) {
         if (amount > 0) gaussianBlur(bmp, context, (int) amount);
         float v = amount + 1;
 
@@ -519,9 +519,12 @@ class FilterFunction {
     }
 
     static Bitmap rotate(final Bitmap bmp, final float degrees){
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degrees);
-        return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+        if (degrees != 0) {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(degrees);
+            return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+        }
+        return bmp;
     }
 
     /**
@@ -545,7 +548,7 @@ class FilterFunction {
     }
 
 
-    static void cartoon(final Bitmap bmp, final Context context, int contour, int posterize) {
+    static void cartoon(final Bitmap bmp, final Context context, final int contour, final int posterize) {
 
         Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
 
@@ -574,7 +577,7 @@ class FilterFunction {
     }
 
 
-    static void sketch(final Bitmap bmp, final Bitmap texture, final Context context, int contour, float saturation) {
+    static void sketch(final Bitmap bmp, final Context context, final int contour, final float saturation) {
 
         Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
 
@@ -582,27 +585,13 @@ class FilterFunction {
         laplacian(bmp, context, contour);
         invert(bmp, context);
 
-
-        RenderScript rs = RenderScript.create(context);
-        Allocation input = Allocation.createFromBitmap(rs, bmp);
-        Allocation pixels = Allocation.createFromBitmap(rs, bmpCopy);
-        Allocation output = Allocation.createTyped(rs,input.getType());
-
         // Using layer 1's luminosity and apply it to layer 2
-        ScriptC_mix script = new ScriptC_mix(rs);
-        script.set_pixels(pixels);
-        script.set_luminositySaturation(saturation);
-        script.forEach_luminosity(input, output);
-
-        output.copyTo(bmp);
-        cleanRenderScript(script, rs, input, output);
-
-        applyTexture(bmp, texture, context);
+        applyTexture(bmp, bmpCopy, context, BlendType.LUMINOSITY, saturation);
     }
 
 
     @SuppressWarnings("WeakerAccess")
-    static void applyTexture(final Bitmap bmp, final Bitmap texture, final Context context) {
+    static void applyTexture(final Bitmap bmp, final Bitmap texture, final Context context, final BlendType typeOfBlend, final float parameter) {
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -612,10 +601,49 @@ class FilterFunction {
         // Multiply layer 1 and 2
         ScriptC_mix script = new ScriptC_mix(rs);
         script.set_pixels(pixels);
-        script.forEach_multiply(input, output);
+
+        switch (typeOfBlend) {
+            case MULTIPLY:
+                script.forEach_multiply(input, output);
+                break;
+
+            case ADD:
+                script.forEach_add(input, output);
+                break;
+
+            case LUMINOSITY:
+                script.set_luminositySaturation(parameter);
+                script.forEach_luminosity(input, output);
+                break;
+        }
+
 
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
+    }
+
+    static void gamma(final Bitmap bmp, final Context context, final float gamma) {
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_gamma script = new ScriptC_gamma(rs);
+
+        script.invoke_setGamma(gamma);
+        script.forEach_gamma(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+
+    }
+
+    static void applyTexture(final Bitmap bmp, final Bitmap texture, final Context context, final BlendType typeOfBlend) {
+        applyTexture(bmp, texture, context, typeOfBlend,0);
+    }
+
+    static void applyTexture(final Bitmap bmp, final Bitmap texture, final Context context) {
+        applyTexture(bmp, texture, context, BlendType.MULTIPLY);
     }
 
     static void mirror(final Bitmap bmp, final Context context) {
@@ -637,22 +665,47 @@ class FilterFunction {
         cleanRenderScript(script, rs, input, output);
     }
 
+    static void burnValues(final Bitmap bmp, final Context context, final float level) {
 
-    static void drawRectangle(final Bitmap bmp, Point a, Point b) {
-        if (!a.isEquals(b)) {
-            Canvas myCanvas = new Canvas(bmp);
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
 
-            Paint paintFiller = new Paint();
-            paintFiller.setStyle(Paint.Style.FILL);
-            paintFiller.setARGB(Settings.CROP_OPACITY, 255,255,255);
+        ScriptC_burn script = new ScriptC_burn(rs);
 
-            Paint paintStroke = new Paint();
-            paintStroke.setStyle(Paint.Style.STROKE);
-            paintStroke.setStrokeWidth(Settings.CROP_BORDER_SIZE);
-            paintStroke.setARGB(Settings.CROP_OPACITY, 0,0,0);
-
-            myCanvas.drawRect(a.x, a.y, b.x, b.y, paintFiller);
-            myCanvas.drawRect(a.x, a.y, b.x, b.y, paintStroke);
+        if (level < 0) {
+            script.invoke_setBurnBlackIntensity(-level);
+        } else {
+            script.invoke_setBurnWhiteIntensity(level);
         }
+
+        script.forEach_burn(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
     }
+
+    static void constrastBurn(final Bitmap bmp, final Context context, float level) {
+
+        RenderScript rs = RenderScript.create(context);
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_burn script = new ScriptC_burn(rs);
+
+        if (level < 0 ) {
+            level /= 2f;
+        } else {
+            level *= 2f;
+        }
+
+        script.invoke_setBurnIntensity(level);
+
+        script.forEach_burn(input, output);
+
+        output.copyTo(bmp);
+        cleanRenderScript(script, rs, input, output);
+    }
+
+
 }

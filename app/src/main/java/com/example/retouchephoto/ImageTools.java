@@ -1,17 +1,21 @@
 package com.example.retouchephoto;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 
 import static android.graphics.Bitmap.createBitmap;
 
 class ImageTools {
 
+
+    @SuppressWarnings("SameParameterValue")
     static Bitmap resizeAsContainInARectangle(Bitmap bmp, int maxSize) {
         if (bmp.getHeight() >  bmp.getWidth()) {
-            return Bitmap.createScaledBitmap(bmp, bmp.getWidth() * Settings.IMPORTED_BMP_SIZE / bmp.getHeight() , Settings.IMPORTED_BMP_SIZE, true);
+            return Bitmap.createScaledBitmap(bmp, bmp.getWidth() * maxSize / bmp.getHeight() , maxSize, true);
         } else {
-            return Bitmap.createScaledBitmap(bmp, Settings.IMPORTED_BMP_SIZE, bmp.getHeight() * Settings.IMPORTED_BMP_SIZE / bmp.getWidth(), true);
+            return Bitmap.createScaledBitmap(bmp, maxSize, bmp.getHeight() * maxSize / bmp.getWidth(), true);
         }
     }
 
@@ -82,6 +86,33 @@ class ImageTools {
 
         hist.setPixels(histPixels, 0, hist.getWidth(), 0, 0, hist.getWidth(), hist.getHeight());
         return hist;
+    }
+
+
+    static void drawRectangle(final Bitmap bmp, Point a, Point b, int color) {
+        drawRectangle(bmp, a, b, color, -1);
+    }
+
+
+    static void drawRectangle(final Bitmap bmp, Point a, Point b, int color, int thickness) {
+        if (!a.isEquals(b)) {
+            Canvas myCanvas = new Canvas(bmp);
+
+            Paint paint = new Paint();
+            if (thickness > 0) {
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(Settings.CROP_BORDER_SIZE);
+            } else {
+                paint.setStyle(Paint.Style.FILL);
+            }
+            paint.setColor(color);
+            myCanvas.drawRect(a.x, a.y, b.x, b.y, paint);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    static void fillWithColor(final Bitmap bmp, int color) {
+        drawRectangle(bmp, new Point(0,0), new Point(bmp.getWidth(), bmp.getHeight()), color);
     }
 
 

@@ -22,6 +22,7 @@ interface FilterApplyInterface {
      * @param seekBar the state of seekBar1
      * @param seekBar2 the state of seekBar2
      */
+    @SuppressWarnings("unused")
     Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1);
 
 }

@@ -156,8 +156,6 @@ class ImageViewZoomScroll {
 
     float getZoom() {return zoom;}
 
-    ImageView getImageView(){return imageView;}
-
     /**
      * Returns the top left point of the image.
      * The image is scaled by the imageView to fit the imageView area without changing the aspect ratio.

@@ -2,6 +2,7 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.View;
 
 /**
@@ -125,6 +126,7 @@ class Filter {
      *  @param seekBar2 the value of seeBar2.
      */
     Bitmap apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
+        //Log.wtf("St", name + "; " + colorSeekHue + "; " + seekBar + "; " + seekBar2 + "; " + switch1 + "; " ); // For debug only
         if (myApplyInterface != null) return myApplyInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
         return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
     }

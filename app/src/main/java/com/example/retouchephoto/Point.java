@@ -62,7 +62,6 @@ class Point {
      * @param x coordinates on the X axis
      * @param y coordinates on the y axis
      */
-    @SuppressWarnings("WeakerAccess")
     void set(int x, int y) {
         this.x = x;
         this.y = y;
@@ -91,6 +90,7 @@ class Point {
      * @param other the other point.
      * @return true if both points are equal, false otherwise.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isEquals(Point other) {
         return isEquals(other.x, other.y);
     }
