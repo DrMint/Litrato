@@ -4,145 +4,614 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".MainActivity">
-
-
-    <Button
-        android:id="@+id/applyButton"
-        style="@style/Widget.AppCompat.Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="7dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:enabled="false"
-        android:text="@string/saveButtonString"
-        app:layout_constraintBottom_toTopOf="@+id/histogram"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/originalButton" />
 
     <Button
         android:id="@+id/originalButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:text="@string/loadButtonString"
+        android:text="@string/openButtonString"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <Button
+        android:id="@+id/saveButton"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/saveButtonString"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        android:textColor="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/spinner" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/oldVersionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/oldVersionButtonString"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toStartOf="@+id/saveButton"
+        app:layout_constraintStart_toEndOf="@+id/originalButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/presetsButton"
+            style="@android:style/ButtonBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/presetsButton"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textColor="@android:color/black"/>
+
+        <Button
+            android:id="@+id/toolsButton"
+            style="@android:style/ButtonBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/toolsButton"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textColor="@android:color/black"/>
+
+        <Button
+            android:id="@+id/filtersButton"
+            style="@android:style/ButtonBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/filtersButton"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textColor="@android:color/black"/>
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="10dp"
-        android:adjustViewBounds="false"
+        android:adjustViewBounds="true"
         android:contentDescription="@string/imageViewDescription"
-        android:cropToPadding="true"
         android:scaleType="fitCenter"
-        app:layout_constraintBottom_toTopOf="@+id/spinner"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@+id/oldVersionButton"
         app:srcCompat="@drawable/default_image" />
 
-    <Spinner
-        android:id="@+id/spinner"
+    <HorizontalScrollView
+        android:id="@+id/presetsBar"
+        style="@android:style/ButtonBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintBottom_toTopOf="@+id/colorSeekBar"
-        app:layout_constraintEnd_toStartOf="@+id/originalButton"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <ImageView
-        android:id="@+id/histogram"
-        android:layout_width="0dp"
-        android:layout_height="180dp"
-        android:contentDescription="@string/histogramViewDescription"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toTopOf="@+id/imageInformation"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
 
-    <TextView
-        android:id="@+id/imageInformation"
-        android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/presetsLinearLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"/>
+    </HorizontalScrollView>
+
+    <TableLayout
+        android:id="@+id/toolsBar"
+        style="@android:style/ButtonBar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
 
-    <SeekBar
-        android:id="@+id/seekBar1"
-        style="@style/Widget.AppCompat.SeekBar"
-        android:layout_width="0dp"
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
+                android:id="@+id/rotationButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageRotation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/rotationButton"
+                    android:src="@drawable/rotate" />
+
+                <TextView
+                    android:id="@+id/textRotation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/rotationButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cropButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="2"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageCrop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/cropButton"
+                    android:src="@drawable/crop" />
+
+                <TextView
+                    android:id="@+id/textCrop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/cropButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/flipButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="3"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageFlip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/flipButton"
+                    android:src="@drawable/flip" />
+
+                <TextView
+                    android:id="@+id/textFlip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/flipButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/stickersButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="4"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageStickers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/stickersButton"
+                    android:src="@drawable/stickers" />
+
+                <TextView
+                    android:id="@+id/textStickers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/stickersButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
+                android:id="@+id/luminosityButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageLuminosity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/luminosityButton"
+                    android:src="@drawable/luminosity" />
+
+                <TextView
+                    android:id="@+id/textLuminosity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/luminosityButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/contrastButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="2"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageContrast"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/contrastButton"
+                    android:src="@drawable/contrast" />
+
+                <TextView
+                    android:id="@+id/textContrast"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/contrastButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sharpnessButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="3"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageSharpness"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/sharpnessButton"
+                    android:src="@drawable/sharpness" />
+
+                <TextView
+                    android:id="@+id/textSharpness"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/sharpnessButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/autoButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="4"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageAuto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/autoButton"
+                    android:src="@drawable/auto" />
+
+                <TextView
+                    android:id="@+id/textAuto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/autoButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/saturationButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageSaturation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/saturationButton"
+                    android:src="@drawable/saturation" />
+
+                <TextView
+                    android:id="@+id/textSaturation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/saturationButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/noiseButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="2"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageNoise"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/addNoiseButton"
+                    android:src="@drawable/add_noise" />
+
+                <TextView
+                    android:id="@+id/textNoise"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/addNoiseButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/temperatureButton"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_column="3"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageTemperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/temperatureButton"
+                    android:src="@drawable/temperature" />
+
+                <TextView
+                    android:id="@+id/textTemperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:text="@string/temperatureButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tintButton"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:layout_column="4"
+                android:layout_weight="4"
+                android:background="#00000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageTint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription="@string/tintButton"
+                    android:src="@drawable/tint" />
+
+                <TextView
+                    android:id="@+id/textTint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="5dp"
+                    android:text="@string/tintButton"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+        </TableRow>
+
+    </TableLayout>
+
+    <LinearLayout
+        android:id="@+id/filtersBar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="7dp"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar2"
-        app:layout_constraintEnd_toStartOf="@+id/seekBarValue1"
-        app:layout_constraintStart_toStartOf="parent" />
+        style="@android:style/ButtonBar"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-    <SeekBar
-        android:id="@+id/seekBar2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="7dp"
-        app:layout_constraintBottom_toTopOf="@+id/switch1"
-        app:layout_constraintEnd_toStartOf="@+id/seekBarValue2"
-        app:layout_constraintStart_toStartOf="parent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:gravity="left">
 
-    <TextView
-        android:id="@+id/seekBarValue1"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toStartOf="@+id/applyButton"
-        app:layout_constraintTop_toTopOf="@+id/seekBar1" />
+            <Button
+                android:id="@+id/colorButton"
+                android:layout_width="75dp"
+                android:layout_height="wrap_content"
+                android:text="@string/colorMenu"
+                android:background="#00000000"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="@android:color/black"/>
 
-    <TextView
-        android:id="@+id/seekBarValue2"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toStartOf="@+id/applyButton"
-        app:layout_constraintTop_toTopOf="@+id/seekBar2" />
+            <Button
+                android:id="@+id/fancyButton"
+                android:layout_width="75dp"
+                android:layout_height="wrap_content"
+                android:text="@string/fancyMenu"
+                android:background="#00000000"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="@android:color/black"/>
 
-    <Switch
-        android:id="@+id/switch1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="26dp"
-        android:layout_marginBottom="8dp"
-        android:text=""
-        app:layout_constraintBottom_toTopOf="@+id/histogram"
-        app:layout_constraintStart_toStartOf="parent" />
+            <Button
+                android:id="@+id/blurButton"
+                android:layout_width="75dp"
+                android:layout_height="wrap_content"
+                android:text="@string/blurMenu"
+                android:background="#00000000"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="@android:color/black"/>
 
-    <SeekBar
-        android:id="@+id/colorSeekBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/gradient_color"
-        android:max="359"
-        android:min="0"
-        android:thumbTint="#000"
-        android:progressTint="#00000000"
-        android:progressBackgroundTint="#00000000"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar1"
-        app:layout_constraintEnd_toStartOf="@+id/applyButton"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
+            <Button
+                android:id="@+id/contourButton"
+                android:layout_width="75dp"
+                android:layout_height="wrap_content"
+                android:text="@string/contourMenu"
+                android:background="#00000000"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="@android:color/black"/>
+        </LinearLayout>
+
+        <HorizontalScrollView
+            style="@android:style/ButtonBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/colorMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:orientation="horizontal"
+                    android:visibility="visible" />
+
+                <LinearLayout
+                    android:id="@+id/fancyMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:orientation="horizontal"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/blurMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:orientation="horizontal"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/contourMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:orientation="horizontal"
+                    android:visibility="gone" />
+            </LinearLayout>
 
 
+
+        </HorizontalScrollView>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Litrato</string>
+
     <string name="loadButtonString">Load</string>
     <string name="applyButtonString">Apply</string>
     <string name="saveButtonString">Save</string>
@@ -9,4 +10,35 @@
     <string name="histogramViewDescription">It\'s the image histogram.</string>
     <string name="width">Width: </string>
     <string name="height">Height: </string>
+
+    <string name="openButtonString">Open</string>
+    <string name="oldVersionButtonString">Old Version</string>
+    <string name="presetsButton">Presets</string>
+    <string name="toolsButton">Tools</string>
+    <string name="filtersButton">Filters</string>
+
+    <string name="rotationButton">Rotation</string>
+    <string name="cropButton">Crop</string>
+    <string name="flipButton">Flip</string>
+    <string name="stickersButton">Stickers</string>
+    <string name="luminosityButton">Luminosity</string>
+    <string name="contrastButton">Contrast</string>
+    <string name="sharpnessButton">Sharpness</string>
+    <string name="autoButton">Auto</string>
+    <string name="saturationButton">Saturation</string>
+    <string name="addNoiseButton">Add Noise</string>
+    <string name="temperatureButton">Temperature</string>
+    <string name="tintButton">Tint</string>
+
+    <string name="colorMenu">Color</string>
+    <string name="fancyMenu">Fancy</string>
+    <string name="blurMenu">Blur</string>
+    <string name="contourMenu">Contour</string>
+
+    <string name="histogramImageView">Histogram</string>
+    <string name="cancelButton">Cancel</string>
+    <string name="applyButton">Apply</string>
+    <string name="pickButton">Pick</string>
+    <string name="brushButton">Brush</string>
+    <string name="histogramButton">Histogram</string>
 </resources>
