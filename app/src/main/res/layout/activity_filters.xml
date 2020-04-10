@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FiltersActivity">
+
+    <ImageView
+        android:id="@+id/histogram"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/imageView"
+        android:visibility="gone"
+        android:contentDescription="@string/histogramImageView" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@string/imageViewDescription"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayoutFilters"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/histogram"
+        app:srcCompat="@drawable/default_image" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutFilters"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/cancelButton"
+            style="@android:style/ButtonBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/cancelButton"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textColor="@android:color/black"/>
+
+        <Button
+            android:id="@+id/filterNameButton"
+            style="@android:style/ButtonBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textColor="@android:color/black"/>
+
+        <Button
+            android:id="@+id/applyButton"
+            style="@android:style/ButtonBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/applyButton"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textColor="@android:color/black"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/filtersMenu"
+        style="@android:style/ButtonBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayoutFilters"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            style="@android:style/ButtonBar"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/pickButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="#00000000"
+                android:clickable="true"
+                android:contentDescription="@string/pickButton"
+                android:src="@drawable/pick" />
+
+            <ImageView
+                android:id="@+id/brushButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="#00000000"
+                android:clickable="true"
+                android:contentDescription="@string/brushButton"
+                android:src="@drawable/brush" />
+
+            <ImageView
+                android:id="@+id/histogramButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="#00000000"
+                android:clickable="true"
+                android:contentDescription="@string/histogramButton"
+                android:src="@drawable/histogram" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:layout_margin="15dp"
+            android:layout_marginStart="40dp"
+            android:orientation="vertical">
+
+            <SeekBar
+                android:id="@+id/seekBar1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:visibility="visible" />
+
+            <SeekBar
+                android:id="@+id/seekBar2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:visibility="visible" />
+
+            <SeekBar
+                android:id="@+id/colorSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/gradient_color"
+                android:max="360"
+                android:min="0"
+                android:progressBackgroundTint="#00000000"
+                android:progressTint="#00000000"
+                android:thumbTint="#000"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:layout_margin="15dp"
+            android:layout_marginStart="40dp"
+            android:layout_weight="0">
+
+            <TextView
+                android:id="@+id/seekBarValue1"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"/>
+
+            <TextView
+                android:id="@+id/seekBarValue2"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"/>
+
+            <Switch
+                android:id="@+id/switch1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="26dp"
+                android:layout_margin="10dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

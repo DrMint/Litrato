@@ -19,6 +19,33 @@ class ImageTools {
         }
     }
 
+    static Bitmap toSquare(Bitmap bmp, int newSize) {
+
+        int currentWidth = bmp.getWidth();
+        int currentHeight =  bmp.getHeight();
+
+        int newWidth = currentWidth;
+        int newHeight = currentHeight;
+
+        int newX = 0;
+        int newY = 0;
+
+        if (currentWidth > currentHeight) {
+            newWidth = currentHeight;
+            newX = (currentWidth - currentHeight) / 2;
+        } else {
+            newHeight = currentWidth;
+            newY = (currentHeight - currentWidth) / 2;
+        }
+
+        bmp = Bitmap.createBitmap(bmp, newX, newY, newWidth, newHeight);
+
+        // L'image est maintenant un carrée
+
+        return Bitmap.createScaledBitmap(bmp, newSize, newSize, true);
+
+    }
+
     /**
      *  Generates the histogram and displays it in "histogram"
      */
