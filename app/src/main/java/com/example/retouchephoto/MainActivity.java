@@ -236,6 +236,10 @@ public class MainActivity extends AppCompatActivity {
         previewOrApply(true);
     }
 
+    /**
+     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
+     * seek bars and color bar. Refreshes the histogram and imageViewer after.
+     */
     private void previewFilter() {
         previewOrApply(false);
     }
@@ -266,7 +270,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshImageInfo() {
-
         final String infoString = String.format(
                 Locale.ENGLISH,"%s%d  |  %s%d",
                 getResources().getString(R.string.width),
@@ -276,8 +279,6 @@ public class MainActivity extends AppCompatActivity {
 
         layoutImageInfo.setText(infoString);
     }
-
-
 
     private void initializeListener() {
 

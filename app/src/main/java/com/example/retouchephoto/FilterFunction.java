@@ -65,7 +65,6 @@ class FilterFunction {
      * @param context the context
      *  @param shift the value to shift the hue with.
      */
-
     static void hueShift(final Bitmap bmp, final Context context, final float shift) {
 
         RenderScript rs = RenderScript.create(context);
