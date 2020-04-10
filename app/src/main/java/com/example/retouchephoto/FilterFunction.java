@@ -4,30 +4,31 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 
+import androidx.renderscript.Allocation;
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
-import static com.example.retouchephoto.RenderScriptTools.*;
 
-import androidx.renderscript.Allocation;
-
-import com.android.retouchephoto.ScriptC_burn;
-import com.android.retouchephoto.ScriptC_gamma;
-import com.android.retouchephoto.ScriptC_mirror;
 import com.android.retouchephoto.ScriptC_addNoise;
+import com.android.retouchephoto.ScriptC_brightness;
+import com.android.retouchephoto.ScriptC_burn;
+import com.android.retouchephoto.ScriptC_colorize;
+import com.android.retouchephoto.ScriptC_constrastExtension;
+import com.android.retouchephoto.ScriptC_convolution;
+import com.android.retouchephoto.ScriptC_gamma;
 import com.android.retouchephoto.ScriptC_gray;
+import com.android.retouchephoto.ScriptC_histogram;
 import com.android.retouchephoto.ScriptC_hueshift;
 import com.android.retouchephoto.ScriptC_invert;
+import com.android.retouchephoto.ScriptC_keepAColor;
+import com.android.retouchephoto.ScriptC_mirror;
+import com.android.retouchephoto.ScriptC_mix;
 import com.android.retouchephoto.ScriptC_posterizing;
 import com.android.retouchephoto.ScriptC_rgbWeights;
 import com.android.retouchephoto.ScriptC_saturation;
-import com.android.retouchephoto.ScriptC_brightness;
 import com.android.retouchephoto.ScriptC_threshold;
-import com.android.retouchephoto.ScriptC_colorize;
-import com.android.retouchephoto.ScriptC_keepAColor;
-import com.android.retouchephoto.ScriptC_histogram;
-import com.android.retouchephoto.ScriptC_constrastExtension;
-import com.android.retouchephoto.ScriptC_convolution;
-import com.android.retouchephoto.ScriptC_mix;
+
+import static com.example.retouchephoto.RenderScriptTools.applyConvolution;
+import static com.example.retouchephoto.RenderScriptTools.cleanRenderScript;
 
 /**
  * This class implements all the filter function.

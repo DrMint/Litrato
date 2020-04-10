@@ -20,10 +20,10 @@
         android:text="@string/saveButtonString"
         app:layout_constraintBottom_toTopOf="@+id/histogram"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/originalButton" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonOpen" />
 
     <Button
-        android:id="@+id/originalButton"
+        android:id="@+id/buttonOpen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
@@ -56,7 +56,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="24dp"
         app:layout_constraintBottom_toTopOf="@+id/colorSeekBar"
-        app:layout_constraintEnd_toStartOf="@+id/originalButton"
+        app:layout_constraintEnd_toStartOf="@+id/buttonOpen"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView

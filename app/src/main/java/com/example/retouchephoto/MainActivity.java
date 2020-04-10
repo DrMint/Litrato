@@ -1,6 +1,8 @@
 package com.example.retouchephoto;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.graphics.drawable.BitmapDrawable;
@@ -11,8 +13,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.provider.MediaStore;
 
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -21,7 +25,6 @@ import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -110,8 +113,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     private ImageViewZoomScroll layoutImageView;
-    private Button      layoutButtonOriginal;
-    private Button      oldVersion;
+    private Button      layoutButtonOpen;
+    private Button      layoutButtonSave;
+    private Button      layoutOldVersion;
     private Button      toolsButton;
     private Button      presetsButton;
     private Button      filtersButton;
@@ -119,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
     private Button      fancyButton;
     private Button      blurButton;
     private Button      contourButton;
-    private Spinner     layoutSpinner;
     private TableLayout toolsBar;
     private HorizontalScrollView presetsBar;
     private LinearLayout filtersBar;
@@ -142,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout temperatureButton;
     private LinearLayout tintButton;
 
+    //private View layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,26 +153,35 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //layout = LayoutInflater.from(this).inflate(R.layout.activity_main,null);
+
         // Sets all the layout shortcuts.
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
-        layoutButtonOriginal    = findViewById(R.id.originalButton);
-        oldVersion              = findViewById(R.id.oldVersionButton);
-        toolsButton             = findViewById(R.id.toolsButton);
-        presetsButton           = findViewById(R.id.presetsButton);
-        filtersButton           = findViewById(R.id.filtersButton);
-        colorButton             = findViewById(R.id.colorButton);
-        fancyButton             = findViewById(R.id.fancyButton);
-        blurButton              = findViewById(R.id.blurButton);
-        contourButton           = findViewById(R.id.contourButton);
-        layoutSpinner           = findViewById(R.id.spinner);
+
+        layoutButtonOpen        = findViewById(R.id.buttonOpen);
+        layoutButtonSave        = findViewById(R.id.buttonSave);
+        layoutOldVersion        = findViewById(R.id.buttonOldVersion);
+
+        toolsButton             = findViewById(R.id.buttonTools);
+        presetsButton           = findViewById(R.id.buttonPresets);
+        filtersButton           = findViewById(R.id.buttonFilters);
+
+        colorButton             = findViewById(R.id.buttonColor);
+        fancyButton             = findViewById(R.id.buttonFancy);
+        blurButton              = findViewById(R.id.buttonBlur);
+        contourButton           = findViewById(R.id.buttonContour);
+
         toolsBar                = findViewById(R.id.toolsBar);
         presetsBar              = findViewById(R.id.presetsBar);
         filtersBar              = findViewById(R.id.filtersBar);
+
         presetsLinearLayout     = findViewById(R.id.presetsLinearLayout);
+
         colorBar                = findViewById(R.id.colorMenu);
         fancyBar                = findViewById(R.id.fancyMenu);
         blurBar                 = findViewById(R.id.blurMenu);
         contourBar              = findViewById(R.id.contourMenu);
+
         rotationButton          = findViewById(R.id.rotationButton);
         cropButton              = findViewById(R.id.cropButton);
         flipButton              = findViewById(R.id.flipButton);
@@ -181,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
         addNoiseButton          = findViewById(R.id.noiseButton);
         temperatureButton       = findViewById(R.id.temperatureButton);
         tintButton              = findViewById(R.id.tintButton);
+
 
         // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
@@ -208,8 +222,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
 
-                // Puts the spinner back to the default position
-                layoutSpinner.setSelection(0);
+                /* Puts the spinner back to the default position */
+                //layoutSpinner.setSelection(0);
 
                 setBitmap(mBitmap);
 
@@ -236,8 +250,9 @@ public class MainActivity extends AppCompatActivity {
         // Resize the image before continuing, if necessary
         if (bmp.getHeight() > Settings.IMPORTED_BMP_SIZE || bmp.getWidth() > Settings.IMPORTED_BMP_SIZE) {
             bmp = ImageTools.resizeAsContainInARectangle(bmp, Settings.IMPORTED_BMP_SIZE);
+
             Snackbar sb = Snackbar.make(
-                    layoutSpinner,
+                    layoutButtonOpen,
                     "Image resized to " + bmp.getWidth() + "px by " + bmp.getHeight() + "px",
                     Snackbar.LENGTH_SHORT);
             sb.show();
@@ -248,67 +263,11 @@ public class MainActivity extends AppCompatActivity {
         resetImage();
     }
 
-    private void previewOrApply(boolean apply) {
-        // If the spinner has yet to be initialize, aborts.
-        if (layoutSpinner.getSelectedItemPosition() == -1) return;
-
-        // filteredImage is now a fresh copy of beforeLastFilterImage
-        filteredImage = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
-
-        /*Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
-
-        Bitmap result;
-        if (apply) {
-            result = selectedFilter.apply(
-                    filteredImage,
-                    getApplicationContext(),
-                    layoutColorSeekBar.getProgress(),
-                    layoutSeekBar1.getProgress(),
-                    layoutSeekBar2.getProgress(),
-                    layoutSwitch1.isChecked());
-        } else {
-            result = selectedFilter.preview(
-                    filteredImage,
-                    getApplicationContext(),
-                    layoutColorSeekBar.getProgress(),
-                    layoutSeekBar1.getProgress(),
-                    layoutSeekBar2.getProgress(),
-                    layoutSwitch1.isChecked());
-        }
-
-
-        // If the filter return a bitmap, filteredImage becomes this bitmap
-        if (result != null) {
-            filteredImage = result;
-        }*/
-
-        // Refresh the image viewer and the histogram.
-        refreshImageView();
-    }
-
-    /**
-     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
-     * seek bars and color bar. Refreshes the histogram and imageViewer after.
-     */
-    private void applyFilter() {
-        previewOrApply(true);
-    }
-
-    /**
-     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
-     * seek bars and color bar. Refreshes the histogram and imageViewer after.
-     */
-    private void previewFilter() {
-        previewOrApply(false);
-    }
-
     /**
      * Displays filteredImage on the imageView, also refreshes Histogram and ImageInfo
      */
     private void refreshImageView() {
         layoutImageView.setImageBitmap(filteredImage);
-        //refreshHistogram();
-        //refreshImageInfo();
     }
 
     /**
@@ -320,28 +279,67 @@ public class MainActivity extends AppCompatActivity {
         refreshImageView();
     }
 
-    /**
-     * Display the histogram of filteredImage on layoutHistogram
-     */
-    /*private void refreshHistogram() {
-        layoutHistogram.setImageBitmap(ImageTools.generateHistogram(filteredImage));
-    }*/
-
-    /*private void refreshImageInfo() {
-
-        final String infoString = String.format(
-                Locale.ENGLISH,"%s%d  |  %s%d",
-                getResources().getString(R.string.width),
-                filteredImage.getWidth(),
-                getResources().getString(R.string.height),
-                filteredImage.getHeight());
-
-        layoutImageInfo.setText(infoString);
-    }
-
-    }*/
-
     private void initializeListener() {
+
+        layoutButtonOpen.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // Makes sure the phone has a camera module.
+                PackageManager pm = getApplicationContext().getPackageManager();
+                if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+                    final CharSequence[] items = {"Take Photo", "Choose from Library"};
+                    android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Select a photo...");
+                    builder.setItems(items, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int item) {
+
+                            if (items[item].equals("Take Photo")) {
+
+                                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                intent.putExtra(MediaStore.EXTRA_OUTPUT, FileInputOutput.createUri(MainActivity.this));
+                                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+
+                            } else if (items[item].equals("Choose from Library")) {
+                                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(intent,PICK_IMAGE_REQUEST);
+                            }
+                        }
+                    });
+                    builder.show();
+
+                    // Else if the phone has no camera
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(intent,PICK_IMAGE_REQUEST);
+                }
+            }
+        });
+
+
+        // When the user click on the apply button, apply the selected filter in the spinner
+        layoutButtonSave.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                Log.wtf("Salut", "Je debug");
+                if (FileInputOutput.saveImage(filteredImage, MainActivity.this)) {
+                    Snackbar.make(v, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
+
+
+
+
+
+
 
         // Create the GestureDetector which handles the scrolling and double tap.
         final GestureDetector myGestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.OnGestureListener() {
@@ -411,186 +409,13 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        // When the user clicks on the reset button, puts back the original image
-        /*layoutButtonOriginal.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-
-                // If the button is displaying Load an image
-                if (((Button) v).getText().toString().equals(getResources().getString(R.string.loadButtonString))) {
-
-                    // Makes sure the phone has a camera module.
-                    PackageManager pm = getApplicationContext().getPackageManager();
-                    if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-                        final CharSequence[] items = {"Take Photo", "Choose from Library"};
-                        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
-                        builder.setTitle("Select a photo...");
-                        builder.setItems(items, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int item) {
-
-                                if (items[item].equals("Take Photo")) {
-
-                                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                    Uri newFile = FileInputOutput.createUri(MainActivity.this);
-                                    if (newFile != null) {
-                                        intent.putExtra(MediaStore.EXTRA_OUTPUT, newFile);
-                                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-                                    }
-                                } else if (items[item].equals("Choose from Library")) {
-                                    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                    startActivityForResult(intent,PICK_IMAGE_REQUEST);
-                                }
-                            }
-                        });
-                        builder.show();
-
-                        // Else if the phone has no camera
-                    } else {
-                        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        startActivityForResult(intent,PICK_IMAGE_REQUEST);
-                    }
-
-                    // Else it is a Original button
-                } else {
-                    resetImage();
-
-                    //Puts the spinner back to the default position
-                    layoutSpinner.setSelection(0);
-                    ((Button) v).setText(getResources().getString(R.string.loadButtonString));
-                }
-            }
-        });*/
-
-        oldVersion.setOnClickListener(new View.OnClickListener() {
+        layoutOldVersion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openOldActivity();
             }
         });
-
-       // layoutSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-         //   /**
-         //    * Handles when an item is selected in the spinner.
-         //    */
-          /*  @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                // This values is used to avoid applying filters while the seek bar are modified.
-                // Changing the seek bar minimum, progress or maximum values would normally call the
-                // seek bar listener, which would apply the filter 3 time for no reason.
-                inputsReady = false;
-
-                Filter selectedFilter = filters.get(position);
-
-                selectedFilter.init();
-
-                // Apply the custom filterTouchListener to layoutImageView if it exists, else revert to the default one.
-                View.OnTouchListener filterTouchListener = selectedFilter.getImageViewTouchListener();
-                if (filterTouchListener == null) {
-                    layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
-                } else {
-                    layoutImageView.setOnTouchListener(filterTouchListener);
-                }
-
-
-                if (position != 0) {
-                    layoutButtonApply.setText(getResources().getString(R.string.applyButtonString));
-                    layoutButtonOriginal.setText(getResources().getString(R.string.originalButtonString));
-                    layoutButtonApply.setEnabled(true);
-                }
-
-                if (selectedFilter.colorSeekBar) {
-                    layoutColorSeekBar.setVisibility(View.VISIBLE);
-                } else {
-                    layoutColorSeekBar.setVisibility(View.INVISIBLE);
-                }
-
-                if (selectedFilter.seekBar1) {
-                    layoutSeekBar1.setVisibility(View.VISIBLE);
-                    layoutSeekBar1.setMin(selectedFilter.seekBar1Min);
-                    layoutSeekBar1.setMax(selectedFilter.seekBar1Max);
-                    layoutSeekBar1.setProgress(selectedFilter.seekBar1Set);
-                } else {
-                    layoutSeekBar1.setVisibility(View.INVISIBLE);
-                }
-
-                if (selectedFilter.seekBar2) {
-                    layoutSeekBar2.setVisibility(View.VISIBLE);
-                    layoutSeekBar2.setMin(selectedFilter.seekBar2Min);
-                    layoutSeekBar2.setMax(selectedFilter.seekBar2Max);
-                    layoutSeekBar2.setProgress(selectedFilter.seekBar2Set);
-                } else {
-                    layoutSeekBar2.setVisibility(View.INVISIBLE);
-                }
-
-                if (selectedFilter.switch1) {
-                    layoutSwitch1.setVisibility(View.VISIBLE);
-                    layoutSwitch1.setChecked(selectedFilter.switch1Default);
-                    if (layoutSwitch1.isChecked()) {
-                        layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
-                    } else {
-                        layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
-                    }
-
-
-                    if (!selectedFilter.seekBar2) {
-                        layoutSeekBar2.setVisibility(View.INVISIBLE);
-                    }
-
-                } else {
-                    layoutSwitch1.setVisibility(View.INVISIBLE);
-
-                }
-
-                // Only shows the seekBarValues when the seekBars are visible.
-                layoutSeekBarValue1.setVisibility(layoutSeekBar1.getVisibility());
-                layoutSeekBarValue2.setVisibility(layoutSeekBar2.getVisibility());
-                layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar1.getProgress(), selectedFilter.seekBar1Unit));
-                layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar2.getProgress(), selectedFilter.seekBar2Unit));
-
-                previewFilter();
-
-                // The seek bars listener can be triggered again.
-                inputsReady = true;
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });*/
-
-
-        // When the user click on the apply button, apply the selected filter in the spinner
-       /* layoutButtonApply.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (originalImage != null) {
-
-                    // If the spinner has no filter selected, it is a save button
-                    if (layoutSpinner.getSelectedItemPosition() == 0) {
-
-                        // Did it save properly?
-                        if (FileInputOutput.saveImage(filteredImage, MainActivity.this)) {
-                            v.setEnabled(false);
-                            Snackbar.make(v, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
-                        }
-
-                        // Else it is an apply button
-                    } else {
-                        // Finds the imageView and makes it display original_image
-                        applyFilter();
-                        beforeLastFilterImage = filteredImage.copy(filteredImage.getConfig(), true);
-
-                        // Put the spinner back to the default position
-                        layoutSpinner.setSelection(0);
-                        ((Button)v).setText(getResources().getString(R.string.saveButtonString));
-                    }
-                }
-            }
-        });*/
 
         toolsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1248,10 +1073,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void generateButton(Context context){
+
         TextView textView;
         Drawable drawable;
+
         for(int i = 0; i< presets.size(); i++){
-            drawable = new BitmapDrawable(getResources(),ImageTools.toSquare(filteredImage,MINIATURE_BMP_SIZE));
+            drawable = new BitmapDrawable(getResources(),ImageTools.toSquare(filteredImage, MINIATURE_BMP_SIZE));
             drawable.setBounds(0,0,300,300);
             textView = new TextView(context);
             textView.setClickable(true);
@@ -1265,12 +1092,12 @@ public class MainActivity extends AppCompatActivity {
             textView.setLayoutParams(params);
             this.presetsLinearLayout.addView(textView);
 
-            /*textView.setOnClickListener(new View.OnClickListener() {
+            textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     openFiltersActivity();
                 }
-            });*/
+            });
 
             this.textView.add(textView);
         }
@@ -1480,7 +1307,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openFiltersActivity(){
-        Intent intent = new Intent(this,FiltersActivity.class);
+        Intent intent = new Intent(this, FiltersActivity.class);
         startActivity(intent);
     }
 

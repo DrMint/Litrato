@@ -5,16 +5,12 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.provider.MediaStore;
 
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -125,7 +121,7 @@ public class MainActivity_old extends AppCompatActivity {
         // Sets all the layout shortcuts.
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
         layoutButtonApply       = findViewById(R.id.applyButton);
-        layoutButtonOriginal    = findViewById(R.id.originalButton);
+        layoutButtonOriginal    = findViewById(R.id.buttonOpen);
         layoutHistogram         = findViewById(R.id.histogram);
         layoutImageInfo         = findViewById(R.id.imageInformation);
         layoutSeekBar1          = findViewById(R.id.seekBar1);

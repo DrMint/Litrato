@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/originalButton"
+        android:id="@+id/buttonOpen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/openButtonString"
@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <Button
-        android:id="@+id/saveButton"
+        android:id="@+id/buttonSave"
         style="@style/Widget.AppCompat.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,14 +28,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/oldVersionButton"
+        android:id="@+id/buttonOldVersion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/oldVersionButtonString"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textColor="@android:color/black"
-        app:layout_constraintEnd_toStartOf="@+id/saveButton"
-        app:layout_constraintStart_toEndOf="@+id/originalButton"
+        app:layout_constraintEnd_toStartOf="@+id/buttonSave"
+        app:layout_constraintStart_toEndOf="@+id/buttonOpen"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
@@ -48,7 +48,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/presetsButton"
+            android:id="@+id/buttonPresets"
             style="@android:style/ButtonBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             android:textColor="@android:color/black"/>
 
         <Button
-            android:id="@+id/toolsButton"
+            android:id="@+id/buttonTools"
             style="@android:style/ButtonBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
             android:textColor="@android:color/black"/>
 
         <Button
-            android:id="@+id/filtersButton"
+            android:id="@+id/buttonFilters"
             style="@android:style/ButtonBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/oldVersionButton"
+        app:layout_constraintTop_toBottomOf="@+id/buttonOldVersion"
         app:srcCompat="@drawable/default_image" />
 
     <HorizontalScrollView
@@ -530,7 +530,7 @@
             android:gravity="left">
 
             <Button
-                android:id="@+id/colorButton"
+                android:id="@+id/buttonColor"
                 android:layout_width="75dp"
                 android:layout_height="wrap_content"
                 android:text="@string/colorMenu"
@@ -539,7 +539,7 @@
                 android:textColor="@android:color/black"/>
 
             <Button
-                android:id="@+id/fancyButton"
+                android:id="@+id/buttonFancy"
                 android:layout_width="75dp"
                 android:layout_height="wrap_content"
                 android:text="@string/fancyMenu"
@@ -548,7 +548,7 @@
                 android:textColor="@android:color/black"/>
 
             <Button
-                android:id="@+id/blurButton"
+                android:id="@+id/buttonBlur"
                 android:layout_width="75dp"
                 android:layout_height="wrap_content"
                 android:text="@string/blurMenu"
@@ -557,7 +557,7 @@
                 android:textColor="@android:color/black"/>
 
             <Button
-                android:id="@+id/contourButton"
+                android:id="@+id/buttonContour"
                 android:layout_width="75dp"
                 android:layout_height="wrap_content"
                 android:text="@string/contourMenu"
