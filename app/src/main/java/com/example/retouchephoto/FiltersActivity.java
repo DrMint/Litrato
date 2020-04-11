@@ -40,7 +40,6 @@ public class FiltersActivity extends AppCompatActivity {
     private Button      layoutBrushButton;
     private Button      layoutHistogramButton;
     private ImageView   layoutHistogramView;
-    private TextView    layoutImageInfo;
     private SeekBar     layoutSeekBar1;
     private SeekBar     layoutSeekBar2;
     private SeekBar     layoutColorSeekBar;
@@ -66,7 +65,6 @@ public class FiltersActivity extends AppCompatActivity {
         layoutBrushButton       = findViewById(R.id.brushButton);
         layoutHistogramButton   = findViewById(R.id.histogramButton);
         layoutHistogramView     = findViewById(R.id.histogramView);
-        layoutImageInfo         = findViewById(R.id.imageInformation);
         layoutSeekBar1          = findViewById(R.id.seekBar1);
         layoutSeekBar2          = findViewById(R.id.seekBar2);
         layoutColorSeekBar      = findViewById(R.id.colorSeekBar);
@@ -237,6 +235,7 @@ public class FiltersActivity extends AppCompatActivity {
         }
     }
 
+    /*
     private void refreshImageInfo() {
 
         final String infoString = String.format(
@@ -248,6 +247,7 @@ public class FiltersActivity extends AppCompatActivity {
 
         layoutImageInfo.setText(infoString);
     }
+     */
 
     private void initializeListener() {
 

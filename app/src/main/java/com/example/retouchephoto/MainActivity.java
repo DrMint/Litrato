@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -132,8 +131,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout temperatureButton;
     private LinearLayout tintButton;
 
-    Typeface submenuUnselected;
-    Typeface submenuSelected;
+    private Typeface submenuUnselected;
+    private Typeface submenuSelected;
 
     boolean needToRefreshMiniature;
 
@@ -419,7 +418,6 @@ public class MainActivity extends AppCompatActivity {
         layoutOldVersion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openOldActivity();
             }
         });
 
@@ -610,18 +608,6 @@ public class MainActivity extends AppCompatActivity {
                 Bitmap texture2 = FileInputOutput.getBitmap(getResources(), R.drawable.white_noise, bmp.getWidth(), bmp.getHeight());
                 FilterFunction.applyTexture(bmp, texture, context, BlendType.MULTIPLY);
                 FilterFunction.applyTexture(bmp, texture2, context, BlendType.ADD);
-                return null;
-            }
-        });
-        filters.add(newPresets);
-
-        newPresets = new Filter("Overlay");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
-        newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
-            @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
-                Bitmap texture = FileInputOutput.getBitmap(getResources(), R.drawable.overlaytest, bmp.getWidth(), bmp.getHeight());
-                FilterFunction.applyTexture(bmp, texture, context, BlendType.OVERLAY, 0.5f);
                 return null;
             }
         });
@@ -1253,11 +1239,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, FiltersActivity.class);
         startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
 
-    }
-
-    private void openOldActivity(){
-        Intent intent = new Intent(this,MainActivity_old.class);
-        startActivity(intent);
     }
 
     static boolean isVisible(View view) {

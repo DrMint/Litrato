@@ -365,6 +365,7 @@ class FilterFunction {
      *  @param targetMinLuminosity the luminosity of the darkest pixel after linear stretching (must be between 0f and 1f)
      *  @param targetMaxLuminosity the luminosity of the brightest pixel after linear stretching (must be between 0f and 1f)
      */
+    @SuppressWarnings("SameParameterValue")
     static void toExtDyn(final Bitmap bmp, final Context context, final int targetMinLuminosity, final int targetMaxLuminosity){
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -591,6 +592,7 @@ class FilterFunction {
     }
 
 
+    @SuppressWarnings("WeakerAccess")
     static void applyTexture(final Bitmap bmp, final Bitmap texture, final Context context, final BlendType typeOfBlend, final float parameter) {
 
         RenderScript rs = RenderScript.create(context);
