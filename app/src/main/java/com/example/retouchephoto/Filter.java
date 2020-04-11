@@ -57,6 +57,12 @@ class Filter {
     String switch1UnitFalse;
     String switch1UnitTrue;
 
+    /**
+     * Only for generate Tools Button dynamically
+     */
+    private Bitmap icon;
+    private int line;
+
     private FilterApplyInterface myApplyInterface;
     private FilterPreviewInterface myPreviewInterface;
     private FilterInitInterface myInitInterface;
@@ -114,6 +120,22 @@ class Filter {
 
     void setImageViewTouchListener(final View.OnTouchListener newTouchListener) {
         this.myImageViewTouchListener = newTouchListener;
+    }
+
+    void setToolsIcon(Bitmap bmp){
+        this.icon = bmp;
+    }
+
+    Bitmap getToolsIcon(){
+        return icon;
+    }
+
+    void setToolsLine(int line){
+        this.line = line;
+    }
+
+    int getToolsline(){
+        return line;
     }
 
     FilterCategory getFilterCategory() {return this.category;}

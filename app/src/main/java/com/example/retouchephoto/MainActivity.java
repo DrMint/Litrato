@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -118,18 +119,9 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout blurBar;
     private LinearLayout contourBar;
 
-    private LinearLayout rotationButton;
-    private LinearLayout cropButton;
-    private LinearLayout flipButton;
-    private LinearLayout stickersButton;
-    private LinearLayout luminosityButton;
-    private LinearLayout contrastButton;
-    private LinearLayout sharpnessButton;
-    private LinearLayout autoButton;
-    private LinearLayout saturationButton;
-    private LinearLayout addNoiseButton;
-    private LinearLayout temperatureButton;
-    private LinearLayout tintButton;
+    private TableRow    toolsLineOne;
+    private TableRow    toolsLineTwo;
+    private TableRow    toolsLineThree;
 
     Typeface submenuUnselected;
     Typeface submenuSelected;
@@ -171,18 +163,9 @@ public class MainActivity extends AppCompatActivity {
         blurBar                 = findViewById(R.id.blurMenu);
         contourBar              = findViewById(R.id.contourMenu);
 
-        rotationButton          = findViewById(R.id.rotationButton);
-        cropButton              = findViewById(R.id.cropButton);
-        flipButton              = findViewById(R.id.flipButton);
-        stickersButton          = findViewById(R.id.stickersButton);
-        luminosityButton        = findViewById(R.id.luminosityButton);
-        contrastButton          = findViewById(R.id.contrastButton);
-        sharpnessButton         = findViewById(R.id.sharpnessButton);
-        autoButton              = findViewById(R.id.autoButton);
-        saturationButton        = findViewById(R.id.saturationButton);
-        addNoiseButton          = findViewById(R.id.noiseButton);
-        temperatureButton       = findViewById(R.id.temperatureButton);
-        tintButton              = findViewById(R.id.tintButton);
+        toolsLineOne            = findViewById(R.id.toolsLineOne);
+        toolsLineTwo            = findViewById(R.id.toolsLineTwo);
+        toolsLineThree          = findViewById(R.id.toolsLineThree);
 
         submenuSelected = colorButton.getTypeface();
         submenuUnselected = fancyButton.getTypeface();
@@ -715,6 +698,8 @@ public class MainActivity extends AppCompatActivity {
                 return FilterFunction.rotate(bmp, seekBar);
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.rotate));
+        newTools.setToolsLine(1);
         filters.add(newTools);
 
         newTools = new Filter("Crop");
@@ -766,6 +751,8 @@ public class MainActivity extends AppCompatActivity {
                 return FilterFunction.crop(bmp, cropStart, cropEnd);
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.crop));
+        newTools.setToolsLine(1);
         filters.add(newTools);
 
 
@@ -778,6 +765,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.flip));
+        newTools.setToolsLine(1);
         filters.add(newTools);
 
         //newTools = new Filter("Stickers");
@@ -796,6 +785,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.luminosity));
+        newTools.setToolsLine(2);
         filters.add(newTools);
 
         newTools = new Filter("Contrast");
@@ -810,6 +801,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.contrast));
+        newTools.setToolsLine(2);
         filters.add(newTools);
 
         newTools = new Filter("Sharpness");
@@ -822,6 +815,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.sharpness));
+        newTools.setToolsLine(2);
         filters.add(newTools);
 
         newTools = new Filter("Auto");
@@ -838,6 +833,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.auto));
+        newTools.setToolsLine(2);
         filters.add(newTools);
 
         newTools = new Filter("Saturation");
@@ -850,6 +847,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.saturation));
+        newTools.setToolsLine(3);
         filters.add(newTools);
 
         newTools = new Filter("Add noise");
@@ -863,6 +862,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.add_noise));
+        newTools.setToolsLine(3);
         filters.add(newTools);
 
         newTools = new Filter("Temperature");
@@ -875,6 +876,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.temperature));
+        newTools.setToolsLine(3);
         filters.add(newTools);
 
         newTools = new Filter("Tint");
@@ -887,6 +890,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
+        newTools.setToolsIcon(BitmapFactory.decodeResource(getResources(),R.drawable.tint));
+        newTools.setToolsLine(3);
         filters.add(newTools);
 
 
@@ -1130,17 +1135,26 @@ public class MainActivity extends AppCompatActivity {
 
             // Only generate the miniature if the displayedFilter of this category
             if (displayedFilter.filter.getFilterCategory() == onlyThisCategory) {
-                Bitmap filteredMiniature =  ImageTools.bitmapClone(resizedMiniature);
 
-                // Apply the filter to the miniature
-                Bitmap result = displayedFilter.filter.apply(filteredMiniature, getApplicationContext());
-                if (result != null) filteredMiniature = result;
+                if(onlyThisCategory == FilterCategory.TOOL) {
+                    // Add the image on top of the text
+                    Drawable drawable = new BitmapDrawable(getResources(), ImageTools.bitmapClone(displayedFilter.filter.getToolsIcon()));
+                    drawable.setBounds(0, 0, Settings.TOOL_DISPLAYED_SIZE, Settings.TOOL_DISPLAYED_SIZE);
+                    displayedFilter.textView.setCompoundDrawablePadding(25);
+                    displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
+                } else {
+                    Bitmap filteredMiniature =  ImageTools.bitmapClone(resizedMiniature);
 
-                // Add the image on top of the text
-                Drawable drawable = new BitmapDrawable(getResources(), filteredMiniature);
-                drawable.setBounds(0,0,Settings.MINIATURE_DISPLAYED_SIZE, Settings.MINIATURE_DISPLAYED_SIZE);
-                displayedFilter.textView.setCompoundDrawablePadding(25);
-                displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
+                    // Apply the filter to the miniature
+                    Bitmap result = displayedFilter.filter.apply(filteredMiniature, getApplicationContext());
+                    if (result != null) filteredMiniature = result;
+
+                    // Add the image on top of the text
+                    Drawable drawable = new BitmapDrawable(getResources(), filteredMiniature);
+                    drawable.setBounds(0, 0, Settings.MINIATURE_DISPLAYED_SIZE, Settings.MINIATURE_DISPLAYED_SIZE);
+                    displayedFilter.textView.setCompoundDrawablePadding(25);
+                    displayedFilter.textView.setCompoundDrawables(null, drawable, null, null);
+                }
             }
         }
     }
@@ -1158,9 +1172,15 @@ public class MainActivity extends AppCompatActivity {
         textView.setTextSize(12);
         textView.setHeight((int) (Settings.MINIATURE_DISPLAYED_SIZE * 1.4));
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
-        params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
-        textView.setLayoutParams(params);
+        if(filter.getFilterCategory()==FilterCategory.TOOL){
+            TableRow.LayoutParams params = new TableRow.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT,4);
+            params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
+            textView.setLayoutParams(params);
+        }else{
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
+            params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
+            textView.setLayoutParams(params);
+        }
         return textView;
     }
 
@@ -1178,7 +1198,7 @@ public class MainActivity extends AppCompatActivity {
                 case BLUR: this.blurBar.addView(textView); break;
                 case CONTOUR: this.contourBar.addView(textView); break;
                 case PRESET: this.presetsLinearLayout.addView(textView); break;
-                case TOOL: break;
+                case TOOL: addToolsButton(currentFilter, textView); break;
             }
 
             textView.setOnClickListener(new View.OnClickListener() {
@@ -1193,16 +1213,14 @@ public class MainActivity extends AppCompatActivity {
             });
             displayedFilters.add(new DisplayedFilter(textView, currentFilter));
         }
+    }
 
-        /*
-        rotationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-
-         */
+    private void addToolsButton(Filter filter, TextView textView){
+        switch (filter.getToolsline()){
+            case 1: this.toolsLineOne.addView(textView); break;
+            case 2: this.toolsLineTwo.addView(textView); break;
+            case 3: this.toolsLineThree.addView(textView); break;
+        }
     }
 
     private void closeMenus(){
@@ -1248,7 +1266,6 @@ public class MainActivity extends AppCompatActivity {
         return (view.getVisibility() == View.VISIBLE);
     }
 
-
     private void initializeRenderScriptCaching() {
         Bitmap dummyBmp = ImageTools.bitmapCreate(10,10);
         for (Filter filter:filters) {
@@ -1258,7 +1275,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
 
     private int appGetFirstTimeRun() {
         //Check if App Start First Time
