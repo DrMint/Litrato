@@ -591,7 +591,6 @@ class FilterFunction {
     }
 
 
-    @SuppressWarnings("WeakerAccess")
     static void applyTexture(final Bitmap bmp, final Bitmap texture, final Context context, final BlendType typeOfBlend, final float parameter) {
 
         RenderScript rs = RenderScript.create(context);
@@ -616,6 +615,10 @@ class FilterFunction {
                 script.set_luminositySaturation(parameter);
                 script.forEach_luminosity(input, output);
                 break;
+
+            case OVERLAY:
+                script.set_overlayTransparency(parameter);
+                script.forEach_overlay(input, output);
         }
 
 

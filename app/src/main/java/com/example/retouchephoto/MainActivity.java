@@ -615,6 +615,18 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newPresets);
 
+        newPresets = new Filter("Overlay");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
+            @Override
+            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
+                Bitmap texture = FileInputOutput.getBitmap(getResources(), R.drawable.overlaytest, bmp.getWidth(), bmp.getHeight());
+                FilterFunction.applyTexture(bmp, texture, context, BlendType.OVERLAY, 0.5f);
+                return null;
+            }
+        });
+        filters.add(newPresets);
+
         newPresets = new Filter("Tension Green");
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
