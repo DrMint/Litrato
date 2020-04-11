@@ -6,184 +6,190 @@
     android:layout_height="match_parent"
     tools:context=".FiltersActivity">
 
-    <ImageView
-        android:id="@+id/histogram"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/imageView"
-        android:visibility="gone"
-        android:contentDescription="@string/histogramImageView" />
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="0dp"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/black"
-        android:contentDescription="@string/imageViewDescription"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayoutFilters"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/histogram"
-        app:srcCompat="@drawable/default_image" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <LinearLayout
-        android:id="@+id/linearLayoutFilters"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/cancelButton"
-            style="@style/Widget.AppCompat.Button.Borderless"
+        <ImageView
+            android:id="@+id/imageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/gray"
-            android:text="@string/cancelButton"
-            android:textAllCaps="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@color/text"
-            android:textSize="18sp" />
+            android:layout_above="@id/linearLayoutFilters"
+            android:background="@color/black"
+            android:contentDescription="@string/imageViewDescription"
+            app:srcCompat="@drawable/default_image" />
 
-        <Button
-            android:id="@+id/filterNameButton"
-            style="@style/Widget.AppCompat.Button.Borderless"
+        <ImageView
+            android:id="@+id/histogramView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/selected"
-            android:textAllCaps="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@color/text"
-            android:textSize="18sp" />
-
-        <Button
-            android:id="@+id/applyButton"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/gray"
-            android:text="@string/applyButton"
-            android:textAllCaps="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@color/text"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:baselineAligned="false"
-        android:id="@+id/filtersMenu"
-        style="@android:style/ButtonBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@color/selected"
-        android:orientation="horizontal"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayoutFilters"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+            android:layout_height="100dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/histbackground"
+            android:contentDescription="@string/histogramImageView"
+            android:padding="1dp"
+            android:scaleType="fitXY"
+            android:visibility="visible"
+            tools:visibility="visible" />
 
         <LinearLayout
+            android:id="@+id/linearLayoutFilters"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/cancelButton"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/gray"
+                android:text="@string/cancelButton"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="@color/text"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/filterNameButton"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/selected"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="@color/text"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/applyButton"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/gray"
+                android:text="@string/applyButton"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="@color/text"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/filtersMenu"
             style="@android:style/ButtonBar"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:background="@color/selected"
-            android:orientation="vertical">
-
-            <Button
-                android:id="@+id/pickButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="P" />
-
-            <Button
-                android:id="@+id/brushButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="B" />
-
-            <Button
-                android:id="@+id/histogramButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="H" />
-
-        </LinearLayout>
-
-        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="15dp"
-            android:layout_marginStart="40dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_above="@id/linearLayoutFilters"
+            android:background="@color/selected"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            android:visibility="visible">
 
-            <SeekBar
-                android:id="@+id/seekBar1"
-                style="@android:style/Widget.Material.SeekBar.Discrete"
+            <LinearLayout
+                style="@android:style/ButtonBar"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:background="@color/selected"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/pickButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="P" />
+
+                <Button
+                    android:id="@+id/brushButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="B" />
+
+                <Button
+                    android:id="@+id/histogramButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="H" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:visibility="visible" />
+                android:layout_gravity="center"
+                android:layout_margin="15dp"
+                android:layout_marginStart="40dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-            <SeekBar
-                android:id="@+id/seekBar2"
-                style="@android:style/Widget.Material.SeekBar.Discrete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:visibility="visible" />
+                <SeekBar
+                    android:id="@+id/seekBar1"
+                    style="@android:style/Widget.Material.SeekBar.Discrete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:visibility="visible" />
 
-            <SeekBar
-                android:id="@+id/colorSeekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@drawable/gradient_color"
-                android:max="359"
-                android:min="0"
-                android:progressBackgroundTint="#00000000"
-                android:progressTint="#00000000"
-                android:thumbTint="#000"
-                android:visibility="visible" />
+                <SeekBar
+                    android:id="@+id/seekBar2"
+                    style="@android:style/Widget.Material.SeekBar.Discrete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:visibility="visible" />
 
-        </LinearLayout>
+                <SeekBar
+                    android:id="@+id/colorSeekBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/gradient_color"
+                    android:max="359"
+                    android:min="0"
+                    android:progressBackgroundTint="#00000000"
+                    android:progressTint="#00000000"
+                    android:thumbTint="#000"
+                    android:visibility="visible" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_margin="15dp"
-            android:layout_marginStart="40dp"
-            android:layout_weight="0"
-            android:orientation="vertical">
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/seekBarValue1"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp" />
-
-            <TextView
-                android:id="@+id/seekBarValue2"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp" />
-
-            <Switch
-                android:id="@+id/switch1"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_marginStart="26dp" />
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="15dp"
+                android:layout_marginStart="40dp"
+                android:layout_weight="0"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/seekBarValue1"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp" />
+
+                <TextView
+                    android:id="@+id/seekBarValue2"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp" />
+
+                <Switch
+                    android:id="@+id/switch1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:layout_marginStart="26dp" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

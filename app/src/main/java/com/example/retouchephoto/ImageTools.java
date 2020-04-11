@@ -75,44 +75,53 @@ class ImageTools {
             max = Math.max(max, Bvalues[i]);
         }
 
-        Bitmap hist = createBitmap(256, 200, Bitmap.Config.ARGB_8888);
+        Bitmap hist = createBitmap(256, 500, Bitmap.Config.ARGB_8888);
         int histHeight = hist.getHeight() - 1;
         int histWidth = hist.getWidth();
 
-        int[] histPixels = new int[hist.getHeight() * hist.getWidth()];
+        //ImageTools.fillWithColor(hist, Color.argb(Settings.HISTOGRAM_BACKGROUND_TRANSPARENCY, 0, 0, 0));
 
         // If the image is blank, return with a black histogram.
-        if (max == 0) {
-            for (int x = 0; x < histWidth; x++) {
-                for (int y = 0; y < histHeight; y++) {
-                    histPixels[x + ((histHeight - y) * histWidth)] = Color.rgb(0, 0, 0);
+        if (max != 0) {
+
+            int[] histPixels = new int[hist.getHeight() * hist.getWidth()];
+
+            /*
+            int rPos;
+            int gPos;
+            int bPos;
+            for (int x = 0; x < 256; x++) {
+
+                rPos = (int) Math.sqrt(Rvalues[x] * histHeight / max) * 14;
+                gPos = (int) Math.sqrt(Gvalues[x] * histHeight / max) * 14;
+                bPos = (int) Math.sqrt(Bvalues[x] * histHeight / max) * 14;
+
+                for (int shift = - 5; shift <= 0; shift++) {
+                    if (rPos + shift >= 0) histPixels[x + ((histHeight - rPos + shift) * histWidth)] = Color.rgb(255, 0, 0);
+                    if (gPos + shift >= 0) histPixels[x + ((histHeight - gPos + shift) * histWidth)] = Color.rgb(0, 255, 0);
+                    if (bPos + shift >= 0) histPixels[x + ((histHeight - bPos + shift) * histWidth)] = Color.rgb(0, 0, 255);
                 }
             }
 
-        } else {
-
-            int colorR;
-            int colorG;
-            int colorB;
+             */
 
             for (int x = 0; x < histWidth; x++) {
-                for (int y = 0; y < histHeight; y++) {
+                for (int y = 1; y < histHeight; y++) {
 
-                    colorR = 0;
-                    colorG = 0;
-                    colorB = 0;
+                    int colorR = 0;
+                    int colorG = 0;
+                    int colorB = 0;
+                    int colorA = Settings.HISTOGRAM_BACKGROUND_TRANSPARENCY;
 
-                    if (Math.sqrt(Rvalues[x] * histHeight / max) * 14 >= y) {colorR = 255;}
-                    if (Math.sqrt(Gvalues[x] * histHeight / max) * 14 >= y) {colorG = 255;}
-                    if (Math.sqrt(Bvalues[x] * histHeight / max) * 14 >= y) {colorB = 255;}
+                    if (Math.sqrt(Rvalues[x] * histHeight / max) * 14 >= y) {colorR = 255; colorA = Settings.HISTOGRAM_FOREGROUND_TRANSPARENCY;}
+                    if (Math.sqrt(Gvalues[x] * histHeight / max) * 14 >= y) {colorG = 255; colorA = Settings.HISTOGRAM_FOREGROUND_TRANSPARENCY;}
+                    if (Math.sqrt(Bvalues[x] * histHeight / max) * 14 >= y) {colorB = 255; colorA = Settings.HISTOGRAM_FOREGROUND_TRANSPARENCY;}
 
-                    histPixels[x + ((histHeight - y) * histWidth)] = Color.rgb(colorR, colorG, colorB);
-
+                    histPixels[x + ((histHeight - y) * histWidth)] = Color.argb(colorA, colorR, colorG, colorB);
                 }
             }
+            hist.setPixels(histPixels, 0, hist.getWidth(), 0, 0, hist.getWidth(), hist.getHeight());
         }
-
-        hist.setPixels(histPixels, 0, hist.getWidth(), 0, 0, hist.getWidth(), hist.getHeight());
         return hist;
     }
 

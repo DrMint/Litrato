@@ -122,7 +122,7 @@ public class MainActivity_old extends AppCompatActivity {
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
         layoutButtonApply       = findViewById(R.id.applyButton);
         layoutButtonOriginal    = findViewById(R.id.buttonOpen);
-        layoutHistogram         = findViewById(R.id.histogram);
+        layoutHistogram         = findViewById(R.id.histogramView);
         layoutImageInfo         = findViewById(R.id.imageInformation);
         layoutSeekBar1          = findViewById(R.id.seekBar1);
         layoutSeekBar2          = findViewById(R.id.seekBar2);

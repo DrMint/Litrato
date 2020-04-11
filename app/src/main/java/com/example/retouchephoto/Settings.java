@@ -58,4 +58,7 @@ class Settings {
     static final int COLOR_GREY = Color.rgb(40,40,40);
     static final int COLOR_SELECTED = Color.rgb(70,70,70);
 
+    static final int HISTOGRAM_BACKGROUND_TRANSPARENCY = 100;
+    static final int HISTOGRAM_FOREGROUND_TRANSPARENCY = 200;
+
 }
