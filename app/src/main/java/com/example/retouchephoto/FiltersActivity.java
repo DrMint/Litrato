@@ -21,6 +21,7 @@ import java.util.Locale;
 public class FiltersActivity extends AppCompatActivity {
 
     static Bitmap result;
+    static boolean hasChanged = false;
 
     private Bitmap originalImage;
     private Bitmap filteredImage;
@@ -400,6 +401,7 @@ public class FiltersActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (originalImage != null) {
                     result = filteredImage;
+                    hasChanged = true;
                     finish();
                 }
             }

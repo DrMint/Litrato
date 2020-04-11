@@ -100,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
 
     private final List<DisplayedFilter> displayedFilters = new ArrayList<>();
 
+    private final Boolean hasChanged [] = {true,true,true,true,true,true};
+
     private ImageViewZoomScroll layoutImageView;
     private Button      layoutButtonOpen;
     private Button      layoutButtonSave;
@@ -219,11 +221,17 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == FILTER_ACTIVITY_IS_FINISHED) {
             Bitmap result = FiltersActivity.result;
+            boolean change = FiltersActivity.hasChanged;
             if (result != null) {
                 layoutImageView.reset();
                 beforeLastFilterImage = ImageTools.bitmapClone(result);
                 refreshImageView();
             }
+            hasChanged[0] = change;
+            hasChanged[2] = change;
+            hasChanged[3] = change;
+            hasChanged[4] = change;
+            hasChanged[5] = change;
         }
     }
 
@@ -1114,19 +1122,25 @@ public class MainActivity extends AppCompatActivity {
      * If no menu is opened, no image is generated.
      */
     private void generateMiniatureForOpenedMenu() {
-        if (isVisible(presetsBar)) {
+        if (isVisible(presetsBar)&&hasChanged[0]) {
             generateMiniatures(FilterCategory.PRESET);
-        } else if (isVisible(toolsBar)) {
+            hasChanged[0] = false;
+        } else if (isVisible(toolsBar)&&hasChanged[1]) {
             generateMiniatures(FilterCategory.TOOL);
+            hasChanged[1] = false;
         } else if (isVisible(filtersBar)) {
-            if (isVisible(colorBar)) {
+            if (isVisible(colorBar)&&hasChanged[2]) {
                 generateMiniatures(FilterCategory.COLOR);
-            } else if (isVisible(fancyBar)) {
+                hasChanged[2] = false;
+            } else if (isVisible(fancyBar)&&hasChanged[3]) {
                 generateMiniatures(FilterCategory.FANCY);
-            } else if (isVisible(blurBar)) {
+                hasChanged[3] = false;
+            } else if (isVisible(blurBar)&&hasChanged[4]) {
                 generateMiniatures(FilterCategory.BLUR);
-            } else if (isVisible(contourBar)) {
+                hasChanged[4] = false;
+            } else if (isVisible(contourBar)&&hasChanged[5]) {
                 generateMiniatures(FilterCategory.CONTOUR);
+                hasChanged[5] = false;
             }
         }
     }
@@ -1209,6 +1223,11 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     if (currentFilter.getFilterCategory() == FilterCategory.PRESET) {
                         apply(currentFilter);
+                        hasChanged[0] = true;
+                        hasChanged[2] = true;
+                        hasChanged[3] = true;
+                        hasChanged[4] = true;
+                        hasChanged[5] = true;
                     } else {
                         openFiltersActivity(currentFilter, beforeLastFilterImage);
                     }
