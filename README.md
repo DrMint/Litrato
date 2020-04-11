@@ -321,13 +321,7 @@ Refreshing the image doesn't seem to work. we suspect this is because requestLay
 when the image refresh, it utilizes the imageView's aspect ratio before it actually changed.  
 Thus, refreshing the image will actually make the problem worse.
 
-- Right now, we only load a miniature of the image when it is taken from the camera.  We have to ask the system to create a temporary file in order to store the full image. Until then, the image is only 187px by 250px.
-
-- The implementation of Laplacian edge detection using ScriptIntrinsicConvolve3x3 has a problem when using an amount parameter above 14. The image turns very bright. I suspect the problem to be caused by kernel weights above 128 (the center weight is equal to 8 * (amount + 1) which is superior or equal to 128 when amount is above 14).
-
 - ScriptIntrinsicBlur isn’t able to handle blur radius above 25, this is not a limitation from this program, but from this library.
-
-- When loading images, the resulting image is sometimes misoriented (turned 90 degrees in one direction). This is probably due to the fact that some system saves the image rotation has a property and not directly apply it on the image. A rotation filter will be added eventually, and therefore, this problem will be fixed.
 
 - The app cannot be used in landscape mode, or else the layout gets terrible. We have lock the app in portrait mode.
 
@@ -336,17 +330,17 @@ Thus, refreshing the image will actually make the problem worse.
 ## FUTURE FEATURES
 
 The following features will **surely** be added before 04/15/2020:
- - A "Cartoon" filter that limits the number of colors and highlight the contour of the image.
- - The ability to rotate the image by 90°, -90° or 180°.
- - New presets that redirect the user to already existing filters. The preset will change the default values of this filter.
- - The ability the remove the last applied filter (currently we can only remove all applied filters).
- - Bug removal: take a picture from the camera at higher resolution than 187px by 250px.
+ - [X] A "Cartoon" filter that limits the number of colors and highlight the contour of the image.
+ - [X] The ability to rotate the image by 90°, -90° or 180°.
+ - [X] New presets that redirect the user to already existing filters. The preset will change the default values of this filter.
+ - [ ] The ability the remove the last applied filter (currently we can only remove all applied filters).
+ - [X] Bug removal: take a picture from the camera at higher resolution than 187px by 250px.
 
 The following features will **likely** be added before 04/15/2020:
-- Rotate the image at any degrees, which means that the image should also get cropped.
-- The ability to crop the image (with a switch to keep the original image ratio or not)
-- If we create the ability to crop the image, then fuse those to option in one UI (as Adobe Photoshop is doing it).
-- Save all state of the image. That way, we can have a "Filter History" and go back to any prior state.
-- An idea to keep the UI interactive while saving the image at its original resolution would be to work on a preview sized image, save all the filters applied, and then apply them again to the full size image when saving. It is okay for the user to wait a few seconds when saving, but not while using the UI.
+- [X] Rotate the image at any degrees, which means that the image should also get cropped.
+- [ ] The ability to crop the image (with a switch to keep the original image ratio or not)
+- [ ] If we create the ability to crop the image, then fuse those to option in one UI (as Adobe Photoshop is doing it).
+- [ ] Save all state of the image. That way, we can have a "Filter History" and go back to any prior state.
+- [ ] An idea to keep the UI interactive while saving the image at its original resolution would be to work on a preview sized image, save all the filters applied, and then apply them again to the full size image when saving. It is okay for the user to wait a few seconds when saving, but not while using the UI.
 
 
