@@ -2,18 +2,12 @@ package com.example.retouchephoto;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -21,8 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Locale;
 
@@ -47,8 +39,7 @@ public class FiltersActivity extends AppCompatActivity {
     private Button      layoutPickButton;
     private Button      layoutBrushButton;
     private Button      layoutHistogramButton;
-    private ImageView   layoutHistogram;
-    private TextView    layoutImageInfo;
+    private ImageView   layoutHistogramView;
     private SeekBar     layoutSeekBar1;
     private SeekBar     layoutSeekBar2;
     private SeekBar     layoutColorSeekBar;
@@ -73,8 +64,7 @@ public class FiltersActivity extends AppCompatActivity {
         layoutPickButton        = findViewById(R.id.pickButton);
         layoutBrushButton       = findViewById(R.id.brushButton);
         layoutHistogramButton   = findViewById(R.id.histogramButton);
-        layoutHistogram         = findViewById(R.id.histogram);
-        layoutImageInfo         = findViewById(R.id.imageInformation);
+        layoutHistogramView     = findViewById(R.id.histogramView);
         layoutSeekBar1          = findViewById(R.id.seekBar1);
         layoutSeekBar2          = findViewById(R.id.seekBar2);
         layoutColorSeekBar      = findViewById(R.id.colorSeekBar);
@@ -87,6 +77,8 @@ public class FiltersActivity extends AppCompatActivity {
         setBitmap(MainActivity.selectedBitmap);
         layoutImageView.setImageBitmap(filteredImage);
         layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
+
+        layoutHistogramView.setVisibility(View.GONE);
 
         selectedFilter = MainActivity.selectedFilter;
         layoutFilterName.setText(selectedFilter.getName());
@@ -230,7 +222,7 @@ public class FiltersActivity extends AppCompatActivity {
      */
     private void refreshImageView() {
         layoutImageView.setImageBitmap(filteredImage);
-        //refreshHistogram();
+        refreshHistogram();
         //refreshImageInfo();
     }
 
@@ -238,9 +230,12 @@ public class FiltersActivity extends AppCompatActivity {
      * Display the histogram of filteredImage on layoutHistogram
      */
     private void refreshHistogram() {
-        layoutHistogram.setImageBitmap(ImageTools.generateHistogram(filteredImage));
+        if(MainActivity.isVisible(layoutHistogramView)) {
+            layoutHistogramView.setImageBitmap(ImageTools.generateHistogram(filteredImage));
+        }
     }
 
+    /*
     private void refreshImageInfo() {
 
         final String infoString = String.format(
@@ -252,6 +247,7 @@ public class FiltersActivity extends AppCompatActivity {
 
         layoutImageInfo.setText(infoString);
     }
+     */
 
     private void initializeListener() {
 
@@ -423,10 +419,25 @@ public class FiltersActivity extends AppCompatActivity {
             }
         });
 
-        layoutHistogram.setOnClickListener(new View.OnClickListener() {
+        filterMenu.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+            }
+        });
+
+
+
+        layoutHistogramButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (!MainActivity.isVisible(layoutHistogramView)) {
+                    layoutHistogramView.setVisibility(View.VISIBLE);
+                    refreshHistogram();
+                } else {
+                    layoutHistogramView.setVisibility(View.GONE);
+                }
             }
         });
     }

@@ -2,7 +2,6 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.View;
 
 /**
@@ -11,12 +10,6 @@ import android.view.View;
  * @author Thomas Barillot
  * @version 1.0
  * @since   2019-01-08
- */
-
-/*  The Android Studio seems to think my function aren't use in other classes inside
-    this package. It would like me to add "protected" to my function which would
-    prevent MainActivity to use those filter...
-    I will disable this warning for now.
  */
 
 class Filter {

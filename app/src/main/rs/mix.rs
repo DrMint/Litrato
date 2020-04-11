@@ -2,6 +2,7 @@
 #pragma rs java_package_name(com.android.retouchephoto)
 
 float luminositySaturation = 0.0;
+float overlayTransparency = 0.0;
 
 rs_allocation pixels;
 
@@ -16,6 +17,13 @@ uchar4 RS_KERNEL add(const uchar4 in, uint32_t x, uint32_t y) {
     float4 dst = rsUnpackColor8888(in);
     float4 src = rsUnpackColor8888(rsGetElementAt_uchar4(pixels, x, y));
     dst = fmin(src + dst, (float) 1.0);
+    return rsPackColorTo8888(dst);
+}
+
+uchar4 RS_KERNEL overlay(const uchar4 in, uint32_t x, uint32_t y) {
+    float4 dst = rsUnpackColor8888(in);
+    float4 src = rsUnpackColor8888(rsGetElementAt_uchar4(pixels, x, y));
+    dst = src * (1 - overlayTransparency) + dst * overlayTransparency;
     return rsPackColorTo8888(dst);
 }
 

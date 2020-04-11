@@ -5,9 +5,9 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -123,8 +123,8 @@ public class MainActivity extends AppCompatActivity {
     private TableRow    toolsLineTwo;
     private TableRow    toolsLineThree;
 
-    Typeface submenuUnselected;
-    Typeface submenuSelected;
+    private Typeface submenuUnselected;
+    private Typeface submenuSelected;
 
     boolean needToRefreshMiniature;
 
@@ -289,8 +289,11 @@ public class MainActivity extends AppCompatActivity {
 
                                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                intent.putExtra(MediaStore.EXTRA_OUTPUT, FileInputOutput.createUri(MainActivity.this));
-                                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+                                Uri result = FileInputOutput.createUri(MainActivity.this);
+                                if (result != null) {
+                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, result);
+                                    startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+                                }
 
                             } else if (items[item].equals("Choose from Library")) {
                                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -398,7 +401,6 @@ public class MainActivity extends AppCompatActivity {
         layoutOldVersion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openOldActivity();
             }
         });
 
@@ -1255,11 +1257,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, FiltersActivity.class);
         startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
 
-    }
-
-    private void openOldActivity(){
-        Intent intent = new Intent(this,MainActivity_old.class);
-        startActivity(intent);
     }
 
     static boolean isVisible(View view) {
