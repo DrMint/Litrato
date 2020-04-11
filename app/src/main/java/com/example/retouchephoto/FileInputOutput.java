@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -30,6 +31,8 @@ class FileInputOutput {
         if (!askPermissionToReadWriteFiles(activity)) return false;
 
         try {
+
+            /*
             File dir = new File(Settings.SAVE_PATH);
             if (!dir.exists()) {
                 // If the directory cannot be created, aborts.
@@ -43,6 +46,10 @@ class FileInputOutput {
             bmp.compress(Bitmap.CompressFormat.JPEG, Settings.OUTPUT_JPG_QUALITY, fOut);
             fOut.flush();
             fOut.close();
+
+             */
+
+            MediaStore.Images.Media.insertImage(activity.getContentResolver(), bmp, createUniqueFileName(activity.getApplicationContext()) , "");
 
         } catch (Exception e) {
             if (e.getMessage() != null) {
