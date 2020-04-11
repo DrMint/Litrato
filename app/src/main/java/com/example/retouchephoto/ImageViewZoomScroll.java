@@ -66,7 +66,7 @@ class ImageViewZoomScroll {
 
     ImageViewZoomScroll(ImageView imageView) {
         // Generate a empty image
-        this(imageView, Bitmap.createBitmap(100,100, Bitmap.Config.ARGB_8888));
+        this(imageView, ImageTools.bitmapCreate(100,100));
     }
 
     private void refresh() {

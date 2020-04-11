@@ -147,5 +147,7 @@ class ImageTools {
         return source.copy(source.getConfig(), true);
     }
 
+    static Bitmap bitmapCreate(int width, int height) {return Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);}
+
 
 }

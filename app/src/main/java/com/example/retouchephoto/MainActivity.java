@@ -2,8 +2,10 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -132,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
     Typeface submenuUnselected;
     Typeface submenuSelected;
 
+    boolean needToRefreshMiniature;
+
     //private View layout;
 
     @Override
@@ -193,6 +197,9 @@ public class MainActivity extends AppCompatActivity {
         generatePresets();
         generateTools();
         generateFilters();
+        if (appGetFirstTimeRun() == 0) {
+            initializeRenderScriptCaching();
+        }
 
         // Initialize all the different listeners.
         initializeListener();
@@ -1239,5 +1246,41 @@ public class MainActivity extends AppCompatActivity {
     static boolean isVisible(View view) {
         return (view.getVisibility() == View.VISIBLE);
     }
+
+
+    private void initializeRenderScriptCaching() {
+        Bitmap dummyBmp = ImageTools.bitmapCreate(10,10);
+        for (Filter filter:filters) {
+            if (filter.getFilterCategory() != FilterCategory.PRESET) {
+                filter.preview(dummyBmp, getApplicationContext());
+                Log.wtf("test", "test");
+            }
+        }
+    }
+
+
+
+    private int appGetFirstTimeRun() {
+        //Check if App Start First Time
+        SharedPreferences appPreferences = getSharedPreferences("MyAPP", 0);
+        int appCurrentBuildVersion = BuildConfig.VERSION_CODE;
+        int appLastBuildVersion = appPreferences.getInt("app_first_time", 0);
+
+        if (appLastBuildVersion == appCurrentBuildVersion ) {
+            return 1; //It has being used already.
+
+        } else {
+            appPreferences.edit().putInt("app_first_time",
+                    appCurrentBuildVersion).apply();
+            if (appLastBuildVersion == 0) {
+                return 0; //Never used
+            } else {
+                return 2; //It has been used but not this version
+            }
+        }
+    }
+
+
+
 }
 
