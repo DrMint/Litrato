@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -16,7 +18,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -41,6 +42,7 @@ import com.google.android.material.snackbar.Snackbar;
         Refreshing the image doesn't seem to work. I suspect this is because requestLayout is asynchronous, and
         when the image refresh, it utilizes the imageView's aspect ratio before it actually changed.
         Thus, refreshing the image will actually make the problem worse.
+        [0002] - When swipping on the black area bellow the image when launching the app, it crashes
         -------------------------------------------------------------------------------------------
     New functions:
         - An idea to keep the UI interactive while saving the image at high resolution would be to
@@ -84,33 +86,9 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Four lists of all filters. The order is the same as shown by the spinner.
      */
-    private final List<Filter> filtersColor = new ArrayList<>();
-    private final List<Filter> filtersFancy = new ArrayList<>();
-    private final List<Filter> filtersBlur = new ArrayList<>();
-    private final List<Filter> filtersContour = new ArrayList<>();
+    private final List<Filter> filters = new ArrayList<>();
 
-    /**
-     * A list of all tools. The order is the same as shown by the spinner.
-     */
-    private final List<Filter> tools = new ArrayList<>();
-
-    /**
-     * A list of all presets. The order is the same as shown by the spinner.
-     */
-    private final List<Filter> presets = new ArrayList<>();
-
-    private final List<TextView> textView = new ArrayList<>();
-
-    private Boolean presetsOpen = false;
-    private Boolean toolsOpen = false;
-    private Boolean filtersOpen = false;
-    private Boolean colorOpen = true;
-    private Boolean fancyOpen = false;
-    private Boolean blurOpen = false;
-    private Boolean contourOpen = false;
-
-    Integer MINIATURE_BMP_SIZE = 300;
-
+    private final List<DisplayedFilter> displayedFilters = new ArrayList<>();
 
     private ImageViewZoomScroll layoutImageView;
     private Button      layoutButtonOpen;
@@ -152,8 +130,6 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //layout = LayoutInflater.from(this).inflate(R.layout.activity_main,null);
 
         // Sets all the layout shortcuts.
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
@@ -201,6 +177,9 @@ public class MainActivity extends AppCompatActivity {
         layoutImageView.setImageBitmap(filteredImage);
         layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
 
+        // Weird but you need to do this to avoid crashing.
+        layoutImageView.setZoom(1);
+
         // Create the lists of filters
         generatePresets();
         generateTools();
@@ -208,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize all the different listeners.
         initializeListener();
+
 
     }
 
@@ -267,15 +247,16 @@ public class MainActivity extends AppCompatActivity {
      * Displays filteredImage on the imageView, also refreshes Histogram and ImageInfo
      */
     private void refreshImageView() {
-        layoutImageView.setImageBitmap(filteredImage);
+        layoutImageView.setImageBitmap(beforeLastFilterImage);
+        generateMiniatureForOpenedMenu();
     }
 
     /**
      * Display the original image in "imageView" and refresh the histogram.
      */
     private void resetImage() {
-        beforeLastFilterImage = originalImage.copy(originalImage.getConfig(), true);
-        filteredImage = originalImage.copy(originalImage.getConfig(), true);
+        beforeLastFilterImage = ImageTools.bitmapClone(originalImage);
+        filteredImage = ImageTools.bitmapClone(originalImage);
         refreshImageView();
     }
 
@@ -325,16 +306,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-
-                Log.wtf("Salut", "Je debug");
-                if (FileInputOutput.saveImage(filteredImage, MainActivity.this)) {
+                if (FileInputOutput.saveImage(beforeLastFilterImage, MainActivity.this)) {
                     Snackbar.make(v, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
                 }
             }
         });
-
-
-
 
 
 
@@ -402,13 +378,14 @@ public class MainActivity extends AppCompatActivity {
         // The default behavior of imageView.
         final View.OnTouchListener defaultImageViewTouchListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
+                closeMenus();
                 myScaleDetector.onTouchEvent(event);
                 myGestureDetector.onTouchEvent(event);
                 v.performClick();
                 return true;
             }
         };
-
+        layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
 
         layoutOldVersion.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -417,28 +394,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        toolsButton.setOnClickListener(new View.OnClickListener() {
+        presetsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(toolsBar.getVisibility()==View.VISIBLE){
-                    closeMenu();
-                }else{
-                    closeMenu();
-                    toolsBar.setVisibility(View.VISIBLE);
-                    toolsOpen = true;
+                boolean visible = isVisible(presetsBar);
+                closeMenus();
+                if (!visible) {
+                    v.setBackgroundColor(Settings.COLOR_SELECTED);
+                    presetsButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                    presetsBar.setVisibility(View.VISIBLE);
+                    generateMiniatureForOpenedMenu();
                 }
             }
         });
 
-        presetsButton.setOnClickListener(new View.OnClickListener() {
+        toolsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(presetsBar.getVisibility()==View.VISIBLE){
-                    closeMenu();
-                }else{
-                    closeMenu();
-                    presetsBar.setVisibility(View.VISIBLE);
-                    presetsOpen = true;
+                boolean visible = isVisible(toolsBar);
+                closeMenus();
+                if (!visible) {
+                    v.setBackgroundColor(Settings.COLOR_SELECTED);
+                    toolsButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                    toolsBar.setVisibility(View.VISIBLE);
+                    generateMiniatureForOpenedMenu();
                 }
             }
         });
@@ -446,12 +425,13 @@ public class MainActivity extends AppCompatActivity {
         filtersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(filtersBar.getVisibility()==View.VISIBLE){
-                    closeMenu();
-                }else{
-                    closeMenu();
+                boolean visible = isVisible(filtersBar);
+                closeMenus();
+                if (!visible) {
+                    v.setBackgroundColor(Settings.COLOR_SELECTED);
+                    filtersButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
                     filtersBar.setVisibility(View.VISIBLE);
-                    filtersOpen = true;
+                    generateMiniatureForOpenedMenu();
                 }
             }
         });
@@ -459,54 +439,51 @@ public class MainActivity extends AppCompatActivity {
         colorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(colorBar.getVisibility()==View.GONE){
-                    closeSubMenu();
-                    colorBar.setVisibility(View.VISIBLE);
-                    colorOpen = true;
-                }
+                closeSubMenus();
+                colorButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                colorBar.setVisibility(View.VISIBLE);
+                generateMiniatureForOpenedMenu();
             }
         });
 
         fancyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(fancyBar.getVisibility()==View.GONE){
-                    closeSubMenu();
-                    fancyBar.setVisibility(View.VISIBLE);
-                    fancyOpen = true;
-                }
+                closeSubMenus();
+                fancyButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                fancyBar.setVisibility(View.VISIBLE);
+                generateMiniatureForOpenedMenu();
             }
         });
 
         blurButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(blurBar.getVisibility()==View.GONE){
-                    closeSubMenu();
-                    blurBar.setVisibility(View.VISIBLE);
-                    blurOpen = true;
-                }
+                closeSubMenus();
+                blurButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                blurBar.setVisibility(View.VISIBLE);
+                generateMiniatureForOpenedMenu();
             }
         });
 
         contourButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(contourBar.getVisibility()==View.GONE){
-                    closeSubMenu();
-                    contourBar.setVisibility(View.VISIBLE);
-                    contourOpen = true;
-                }
+                closeSubMenus();
+                contourButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                contourBar.setVisibility(View.VISIBLE);
+                generateMiniatureForOpenedMenu();
             }
         });
 
-        generateButton(this);
+        generateButton();
     }
 
     private void generatePresets(){
         Filter newPresets;
 
         newPresets = new Filter("2 Strip");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -517,9 +494,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);
+        filters.add(newPresets);
 
         newPresets = new Filter("Invert");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -527,9 +505,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);
+        filters.add(newPresets);
 
         newPresets = new Filter("Bleach Bypass");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -539,9 +518,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);
+        filters.add(newPresets);
 
         newPresets = new Filter("Candle light");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -550,9 +530,10 @@ public class MainActivity extends AppCompatActivity {
                 return bmp;
             }
         });
-        presets.add(newPresets);
+        filters.add(newPresets);
 
-        /*newPresets = new Filter("Crisp Warm");
+        newPresets = new Filter("Crisp Warm");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -561,9 +542,10 @@ public class MainActivity extends AppCompatActivity {
                 return bmp;
             }
         });
-        presets.add(newPresets);*/
+        filters.add(newPresets);
 
         newPresets = new Filter("Crisp Winter");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -572,9 +554,10 @@ public class MainActivity extends AppCompatActivity {
                 return bmp;
             }
         });
-        presets.add(newPresets);
+        filters.add(newPresets);
 
         newPresets = new Filter("Drop Blues");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -583,9 +566,10 @@ public class MainActivity extends AppCompatActivity {
                 return bmp;
             }
         });
-        presets.add(newPresets);
+        filters.add(newPresets);
 
-        /*newPresets = new Filter("Old analog");
+        newPresets = new Filter("Old analog");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -599,9 +583,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);*/
+        filters.add(newPresets);
 
         newPresets = new Filter("Tension Green");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -611,9 +596,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);
+        filters.add(newPresets);
 
-        /*newPresets = new Filter("Edgy Amber");
+        newPresets = new Filter("Edgy Amber");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -625,9 +611,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);*/
+        filters.add(newPresets);
 
         newPresets = new Filter("Night from Day");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -639,9 +626,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);
+        filters.add(newPresets);
 
-        /*newPresets = new Filter("Late Sunset");
+        newPresets = new Filter("Late Sunset");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -654,9 +642,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);*/
+        filters.add(newPresets);
 
-        /*newPresets = new Filter("Futuristic Bleak");
+        newPresets = new Filter("Futuristic Bleak");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -667,9 +656,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);*/
+        filters.add(newPresets);
 
-        /*newPresets = new Filter("Soft Warming");
+        newPresets = new Filter("Soft Warming");
+        newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -682,10 +672,7 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        presets.add(newPresets);*/
-
-
-        // End of Presets
+        filters.add(newPresets);
     }
 
     private void generateTools(){
@@ -694,6 +681,7 @@ public class MainActivity extends AppCompatActivity {
         // Tools
 
         newTools = new Filter("Rotation");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setSeekBar1(-180, 0, 180, "deg");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -701,9 +689,10 @@ public class MainActivity extends AppCompatActivity {
                 return FilterFunction.rotate(bmp, seekBar);
             }
         });
-        tools.add(newTools);
+        filters.add(newTools);
 
-        /*newTools = new Filter("Crop");
+        newTools = new Filter("Crop");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         final Point cropStart = new Point();
         final Point cropEnd = new Point();
 
@@ -724,7 +713,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     case MotionEvent.ACTION_UP: break;
                 }
-                previewFilter();
+                //previewFilter();
                 v.performClick();
                 return true;
             }
@@ -751,10 +740,11 @@ public class MainActivity extends AppCompatActivity {
                 return FilterFunction.crop(bmp, cropStart, cropEnd);
             }
         });
-        tools.add(newTools);*/
+        filters.add(newTools);
 
 
         newTools = new Filter("Flip");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
@@ -762,12 +752,13 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        tools.add(newTools);
+        filters.add(newTools);
 
         //newTools = new Filter("Stickers");
         //tools.add(newTools);
 
-        /*newTools = new Filter("Luminosity");
+        newTools = new Filter("Luminosity");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setSeekBar2(-100, 0, 100, "");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -779,9 +770,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        tools.add(newTools);*/
+        filters.add(newTools);
 
-        /*newTools = new Filter("Contrast");
+        newTools = new Filter("Contrast");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setSeekBar1(-50, 0, 50, "%");
         newTools.setSeekBar2(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -792,9 +784,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        tools.add(newTools);*/
+        filters.add(newTools);
 
         newTools = new Filter("Sharpness");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -803,9 +796,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        tools.add(newTools);
+        filters.add(newTools);
 
         newTools = new Filter("Auto");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setSwitch1(false, "Linear", "Dynamic");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -818,9 +812,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        tools.add(newTools);
+        filters.add(newTools);
 
         newTools = new Filter("Saturation");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setSeekBar1(0, 100, 200, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -829,9 +824,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        tools.add(newTools);
+        filters.add(newTools);
 
         newTools = new Filter("Add noise");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setSeekBar1(0, 0, 255, "");
         newTools.setSwitch1(false,"B&W Noise", "Color Noise");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -841,9 +837,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        tools.add(newTools);
+        filters.add(newTools);
 
         newTools = new Filter("Temperature");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -852,9 +849,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        tools.add(newTools);
+        filters.add(newTools);
 
         newTools = new Filter("Tint");
+        newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -863,19 +861,19 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        tools.add(newTools);
+        filters.add(newTools);
 
 
         // End of Tools
     }
 
     private void generateFilters() {
-        // Creates the filters
         Filter newFilter;
 
         // Filters > Color
 
         newFilter = new Filter("Colorize");
+        newFilter.setFilterCategory(FilterCategory.COLOR);
         newFilter.setColorSeekBar();
         newFilter.setSeekBar1(0,100,100,"");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -885,9 +883,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersColor.add(newFilter);
+        filters.add(newFilter);
 
         newFilter = new Filter("Change hue");
+        newFilter.setFilterCategory(FilterCategory.COLOR);
         newFilter.setColorSeekBar();
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -896,9 +895,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersColor.add(newFilter);
+        filters.add(newFilter);
 
         newFilter = new Filter("Selective coloring");
+        newFilter.setFilterCategory(FilterCategory.COLOR);
         newFilter.setColorSeekBar();
         newFilter.setSeekBar1(1, 25, 360, "deg");
         newFilter.setSwitch1(false, "Keep,", "Remove");
@@ -913,9 +913,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersColor.add(newFilter);
+        filters.add(newFilter);
 
         newFilter = new Filter("Hue shift");
+        newFilter.setFilterCategory(FilterCategory.COLOR);
         newFilter.setSeekBar1(-180, 0, 180, "deg");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -924,18 +925,16 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersColor.add(newFilter);
+        filters.add(newFilter);
 
 
         // End of Filters > Color
 
 
-
-
-
         // Filters > Fancy
 
         newFilter = new Filter("Threshold");
+        newFilter.setFilterCategory(FilterCategory.FANCY);
         newFilter.setSeekBar1(0, 128, 256, "");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -944,9 +943,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersFancy.add(newFilter);
+        filters.add(newFilter);
 
         newFilter = new Filter("Posterize");
+        newFilter.setFilterCategory(FilterCategory.FANCY);
         newFilter.setSeekBar1(2, 10, 32, "steps");
         newFilter.setSwitch1(true,"Color", "B&W");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -956,18 +956,15 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersFancy.add(newFilter);
+        filters.add(newFilter);
 
         // End of Filters > Fancy
-
-
-
-
 
 
         // Filters > Blur
 
         newFilter = new Filter("Average blur");
+        newFilter.setFilterCategory(FilterCategory.BLUR);
         newFilter.setSeekBar1(1, 2, 19, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -976,9 +973,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersBlur.add(newFilter);
+        filters.add(newFilter);
 
         newFilter = new Filter("Gaussian blur");
+        newFilter.setFilterCategory(FilterCategory.BLUR);
         newFilter.setSeekBar1(1, 2, 25, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -987,9 +985,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersBlur.add(newFilter);
+        filters.add(newFilter);
 
         newFilter = new Filter("Directional blur");
+        newFilter.setFilterCategory(FilterCategory.BLUR);
         newFilter.setSeekBar1(2, 2, 30, "");
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -999,17 +998,15 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersBlur.add(newFilter);
+        filters.add(newFilter);
 
         // End of Filters > Blur
-
-
-
 
 
         // Filters > Contour
 
         newFilter = new Filter("Laplacian");
+        newFilter.setFilterCategory(FilterCategory.CONTOUR);
         newFilter.setSeekBar1(1, 2, 14, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -1018,9 +1015,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersContour.add(newFilter);
+        filters.add(newFilter);
 
         newFilter = new Filter("Sobel");
+        newFilter.setFilterCategory(FilterCategory.CONTOUR);
         newFilter.setSeekBar1(1, 2, 14, "px");
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1030,9 +1028,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersContour.add(newFilter);
+        filters.add(newFilter);
 
-        /*newFilter = new Filter("Sketch");
+        newFilter = new Filter("Sketch");
+        newFilter.setFilterCategory(FilterCategory.CONTOUR);
         newFilter.setSeekBar1(1, 4, 14, "");
         newFilter.setSeekBar2(0, 20, 100, "");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1044,9 +1043,10 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersContour.add(newFilter);*/
+        filters.add(newFilter);
 
         newFilter = new Filter("Cartoon");
+        newFilter.setFilterCategory(FilterCategory.CONTOUR);
         newFilter.setSeekBar1(1, 0, 100, "px");
         newFilter.setSeekBar2(2, 4, 14, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1056,257 +1056,156 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         });
-        filtersContour.add(newFilter);
-
-        // End of Filters > Contour
-
-        /*// Adds all filter names in a array that will be used by the spinner
-        String[] arraySpinner = new String[filters.size()];
-        for (int i = 0; i < filters.size(); i++) {
-            arraySpinner[i] = filters.get(i).getName();
-        }
-
-        // Initialize the spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, arraySpinner);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        layoutSpinner.setAdapter(adapter);*/
+        filters.add(newFilter);
     }
 
-    private void generateButton(Context context){
+
+    /**
+     * Applies a filter to beforeLastFilterImage and refreshes ImageView.
+     * @param filter the filter to apply
+     */
+    private void apply(Filter filter) {
+        Bitmap result = filter.apply(beforeLastFilterImage, getApplicationContext());
+
+        // If the filter return a bitmap, filteredImage becomes this bitmap
+        if (result != null) {
+            beforeLastFilterImage = result;
+        }
+
+        refreshImageView();
+    }
+
+    /**
+     * Refreshes/Generates the miniatures of the currently opened.
+     * If no menu is opened, no image is generated.
+     */
+    private void generateMiniatureForOpenedMenu() {
+        if (isVisible(presetsBar)) {
+            generateMiniatures(FilterCategory.PRESET);
+        } else if (isVisible(toolsBar)) {
+            generateMiniatures(FilterCategory.TOOL);
+        } else if (isVisible(filtersBar)) {
+            if (isVisible(colorBar)) {
+                generateMiniatures(FilterCategory.COLOR);
+            } else if (isVisible(fancyBar)) {
+                generateMiniatures(FilterCategory.FANCY);
+            } else if (isVisible(blurBar)) {
+                generateMiniatures(FilterCategory.BLUR);
+            } else if (isVisible(contourBar)) {
+                generateMiniatures(FilterCategory.CONTOUR);
+            }
+        }
+    }
+
+    private void generateMiniatures(FilterCategory onlyThisCategory) {
+        Bitmap resizedMiniature = ImageTools.toSquare(beforeLastFilterImage, Settings.MINIATURE_BMP_SIZE);
+
+        for (DisplayedFilter displayedFilter:displayedFilters) {
+
+            // Only generate the miniature if the displayedFilter of this category
+            if (displayedFilter.filter.getFilterCategory() == onlyThisCategory) {
+                Bitmap filteredMiniature =  ImageTools.bitmapClone(resizedMiniature);
+
+                // Apply the filter to the miniature
+                Bitmap result = displayedFilter.filter.apply(filteredMiniature, getApplicationContext());
+                if (result != null) filteredMiniature = result;
+
+                // Add the image on top of the text
+                Drawable drawable = new BitmapDrawable(getResources(), filteredMiniature);
+                drawable.setBounds(0,0,Settings.MINIATURE_DISPLAYED_SIZE, Settings.MINIATURE_DISPLAYED_SIZE);
+                displayedFilter.textView.setCompoundDrawablePadding(25);
+                displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
+            }
+        }
+    }
+
+    private TextView generateATextView(Filter filter) {
+        TextView textView;
+        textView = new TextView(this);
+        textView.setClickable(true);
+        textView.setText(filter.getName());
+        textView.setAllCaps(true);
+        textView.setMaxLines(2);
+        textView.setHorizontallyScrolling(false);
+        textView.setMaxWidth(Settings.MINIATURE_DISPLAYED_SIZE);
+        textView.setTextColor(Color.WHITE);
+        textView.setTextSize(12);
+        textView.setHeight((int) (Settings.MINIATURE_DISPLAYED_SIZE * 1.4));
+        textView.setGravity(Gravity.CENTER_HORIZONTAL);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
+        params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
+        textView.setLayoutParams(params);
+        return textView;
+    }
+
+    private void generateButton(){
 
         TextView textView;
-        Drawable drawable;
 
-        for(int i = 0; i< presets.size(); i++){
-            drawable = new BitmapDrawable(getResources(),ImageTools.toSquare(filteredImage, MINIATURE_BMP_SIZE));
-            drawable.setBounds(0,0,300,300);
-            textView = new TextView(context);
-            textView.setClickable(true);
-            textView.setText(presets.get(i).getName());
-            textView.setTextAppearance(context,R.style.TextAppearance_AppCompat_Body2);
-            textView.setTextColor(getResources().getColor(R.color.black));
-            textView.setCompoundDrawables(null, drawable,null,null);
-            textView.setGravity(Gravity.CENTER_HORIZONTAL);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
-            params.setMargins(15,15,15,15);
-            textView.setLayoutParams(params);
-            this.presetsLinearLayout.addView(textView);
+        for (final Filter currentFilter:filters) {
+            textView = generateATextView(currentFilter);
+
+            // Add the filter to its right category
+            switch (currentFilter.getFilterCategory()){
+                case COLOR: this.colorBar.addView(textView); break;
+                case FANCY: this.fancyBar.addView(textView); break;
+                case BLUR: this.blurBar.addView(textView); break;
+                case CONTOUR: this.contourBar.addView(textView); break;
+                case PRESET: this.presetsLinearLayout.addView(textView); break;
+                case TOOL: break;
+            }
 
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    openFiltersActivity();
+                    if (currentFilter.getFilterCategory() == FilterCategory.PRESET) {
+                        apply(currentFilter);
+                    } else {
+                        openFiltersActivity(currentFilter);
+                    }
                 }
             });
-
-            this.textView.add(textView);
-        }
-        for(int i = 0; i< filtersColor.size(); i++){
-            drawable = new BitmapDrawable(getResources(),ImageTools.toSquare(filteredImage,MINIATURE_BMP_SIZE));
-            drawable.setBounds(0,0,300,300);
-            textView = new TextView(context);
-            textView.setClickable(true);
-            textView.setText(filtersColor.get(i).getName());
-            textView.setTextAppearance(context,R.style.TextAppearance_AppCompat_Body2);
-            textView.setTextColor(getResources().getColor(R.color.black));
-            textView.setCompoundDrawables(null, drawable,null,null);
-            textView.setGravity(Gravity.CENTER_HORIZONTAL);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
-            params.setMargins(15,15,15,15);
-            textView.setLayoutParams(params);
-            this.colorBar.addView(textView);
-
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    openFiltersActivity();
-                }
-            });
-
-            this.textView.add(textView);
-        }
-        for(int i = 0; i< filtersFancy.size(); i++){
-            drawable = new BitmapDrawable(getResources(),ImageTools.toSquare(filteredImage,MINIATURE_BMP_SIZE));
-            drawable.setBounds(0,0,300,300);
-            textView = new TextView(context);
-            textView.setClickable(true);
-            textView.setText(filtersFancy.get(i).getName());
-            textView.setTextAppearance(context,R.style.TextAppearance_AppCompat_Body2);
-            textView.setTextColor(getResources().getColor(R.color.black));
-            textView.setCompoundDrawables(null, drawable,null,null);
-            textView.setGravity(Gravity.CENTER_HORIZONTAL);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
-            params.setMargins(15,15,15,15);
-            textView.setLayoutParams(params);
-            this.fancyBar.addView(textView);
-
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    openFiltersActivity();
-                }
-            });
-
-            this.textView.add(textView);
-        }
-        for(int i = 0; i< filtersBlur.size(); i++){
-            drawable = new BitmapDrawable(getResources(),ImageTools.toSquare(filteredImage,MINIATURE_BMP_SIZE));
-            drawable.setBounds(0,0,300,300);
-            textView = new TextView(context);
-            textView.setClickable(true);
-            textView.setText(filtersBlur.get(i).getName());
-            textView.setTextAppearance(context,R.style.TextAppearance_AppCompat_Body2);
-            textView.setTextColor(getResources().getColor(R.color.black));
-            textView.setCompoundDrawables(null, drawable,null,null);
-            textView.setGravity(Gravity.CENTER_HORIZONTAL);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
-            params.setMargins(15,15,15,15);
-            textView.setLayoutParams(params);
-            this.blurBar.addView(textView);
-
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    openFiltersActivity();
-                }
-            });
-
-            this.textView.add(textView);
-        }
-        for(int i = 0; i< filtersContour.size(); i++){
-            drawable = new BitmapDrawable(getResources(),ImageTools.toSquare(filteredImage,MINIATURE_BMP_SIZE));
-            drawable.setBounds(0,0,300,300);
-            textView = new TextView(context);
-            textView.setClickable(true);
-            textView.setText(filtersContour.get(i).getName());
-            textView.setTextAppearance(context,R.style.TextAppearance_AppCompat_Body2);
-            textView.setTextColor(getResources().getColor(R.color.black));
-            textView.setCompoundDrawables(null, drawable,null,null);
-            textView.setGravity(Gravity.CENTER_HORIZONTAL);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
-            params.setMargins(15,15,15,15);
-            textView.setLayoutParams(params);
-            this.contourBar.addView(textView);
-
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    openFiltersActivity();
-                }
-            });
-
-            this.textView.add(textView);
+            displayedFilters.add(new DisplayedFilter(textView, currentFilter));
         }
 
+        /*
         rotationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openFiltersActivity();
             }
         });
-        cropButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        flipButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        stickersButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        luminosityButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        contrastButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        sharpnessButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        autoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        saturationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        addNoiseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        temperatureButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
-        tintButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFiltersActivity();
-            }
-        });
+
+         */
     }
 
-    void closeMenu(){
-        if(presetsOpen){
-            presetsBar.setVisibility(View.GONE);
-            this.presetsOpen = false;
-        }
-        if(toolsOpen){
-            toolsBar.setVisibility(View.GONE);
-            this.toolsOpen = false;
-        }
-        if (filtersOpen){
-            filtersBar.setVisibility(View.GONE);
-            this.filtersOpen = false;
-        }
+    private void closeMenus(){
+        presetsButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
+        toolsButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
+        filtersButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
+
+        presetsButton.setBackgroundColor(Settings.COLOR_GREY);
+        toolsButton.setBackgroundColor(Settings.COLOR_GREY);
+        filtersButton.setBackgroundColor(Settings.COLOR_GREY);
+
+        presetsBar.setVisibility(View.GONE);
+        toolsBar.setVisibility(View.GONE);
+        filtersBar.setVisibility(View.GONE);
     }
 
-    void closeSubMenu(){
-        if (colorOpen){
-            colorBar.setVisibility(View.GONE);
-            this.colorOpen = false;
-        }
-        if (fancyOpen){
-            fancyBar.setVisibility(View.GONE);
-            this.fancyOpen = false;
-        }
-        if (blurOpen){
-            blurBar.setVisibility(View.GONE);
-            this.blurOpen = false;
-        }
-        if (contourOpen){
-            contourBar.setVisibility(View.GONE);
-            this.contourOpen = false;
-        }
+    private void closeSubMenus(){
+        colorButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
+        fancyButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
+        blurButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
+        contourButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
+
+        colorBar.setVisibility(View.GONE);
+        fancyBar.setVisibility(View.GONE);
+        blurBar.setVisibility(View.GONE);
+        contourBar.setVisibility(View.GONE);
     }
 
-    private void openFiltersActivity(){
+    private void openFiltersActivity(Filter filter){
         Intent intent = new Intent(this, FiltersActivity.class);
         startActivity(intent);
     }
@@ -1314,6 +1213,10 @@ public class MainActivity extends AppCompatActivity {
     private void openOldActivity(){
         Intent intent = new Intent(this,MainActivity_old.class);
         startActivity(intent);
+    }
+
+    private boolean isVisible(View view) {
+        return (view.getVisibility() == View.VISIBLE);
     }
 }
 

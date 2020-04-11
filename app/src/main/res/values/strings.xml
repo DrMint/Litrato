@@ -12,7 +12,7 @@
     <string name="height">Height: </string>
 
     <string name="openButtonString">Open</string>
-    <string name="oldVersionButtonString">Old Version</string>
+    <string name="historyButtonString">History</string>
     <string name="presetsButton">Presets</string>
     <string name="toolsButton">Tools</string>
     <string name="filtersButton">Filters</string>

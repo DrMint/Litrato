@@ -62,6 +62,8 @@ class Filter {
     private FilterInitInterface myInitInterface;
     private View.OnTouchListener myImageViewTouchListener;
 
+    private FilterCategory category;
+
     Filter(String name) {
         this.name = name;
     }
@@ -92,6 +94,8 @@ class Filter {
         this.switch1UnitTrue = switch1UnitTrue;
     }
 
+    void setFilterCategory(FilterCategory category) {this.category = category;}
+
     void setColorSeekBar() {
         this.colorSeekBar = true;
     }
@@ -112,9 +116,13 @@ class Filter {
         this.myImageViewTouchListener = newTouchListener;
     }
 
+    FilterCategory getFilterCategory() {return this.category;}
+
     View.OnTouchListener getImageViewTouchListener() {
         return myImageViewTouchListener;
     }
+
+
 
     /**
      *  Start the correct filter function for that specific filter instance.
@@ -126,14 +134,21 @@ class Filter {
      *  @param seekBar2 the value of seeBar2.
      */
     Bitmap apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
-        //Log.wtf("St", name + "; " + colorSeekHue + "; " + seekBar + "; " + seekBar2 + "; " + switch1 + "; " ); // For debug only
         if (myApplyInterface != null) return myApplyInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
         return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+    }
+
+    Bitmap apply(final Bitmap bmp, final Context context) {
+        return apply(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default);
     }
 
     Bitmap preview(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
         if (myPreviewInterface != null) return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
         return null;
+    }
+
+    Bitmap preview(final Bitmap bmp, final Context context) {
+        return preview(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default);
     }
 
     void init() {

@@ -17,8 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".FiltersActivity"></activity>
-        <activity android:name=".MainActivity_old"></activity>
+        <activity android:name=".FiltersActivity" />
+        <activity android:name=".MainActivity_old" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

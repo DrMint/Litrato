@@ -495,7 +495,7 @@ public class FiltersActivity extends AppCompatActivity {
     }
 
 
-    void closeMenu(){
+    private void closeMenu(){
         if (filterOpen){
             filterMenu.setVisibility(View.GONE);
             this.filterOpen = false;

@@ -21,6 +21,7 @@
         android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/black"
         android:contentDescription="@string/imageViewDescription"
         app:layout_constraintBottom_toTopOf="@+id/linearLayoutFilters"
         app:layout_constraintEnd_toEndOf="parent"
@@ -30,8 +31,8 @@
 
     <LinearLayout
         android:id="@+id/linearLayoutFilters"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,32 +40,41 @@
 
         <Button
             android:id="@+id/cancelButton"
-            style="@android:style/ButtonBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@color/gray"
             android:text="@string/cancelButton"
+            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/text"
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/filterNameButton"
-            style="@android:style/ButtonBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@color/gray"
+            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/text"
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/applyButton"
-            style="@android:style/ButtonBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@color/gray"
             android:text="@string/applyButton"
+            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/text"
+            android:textSize="18sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -72,8 +82,9 @@
         style="@android:style/ButtonBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@color/selected"
         android:orientation="horizontal"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/linearLayoutFilters"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -82,6 +93,7 @@
             style="@android:style/ButtonBar"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
+            android:background="@color/selected"
             android:orientation="vertical">
 
             <ImageView
@@ -115,14 +127,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_gravity="center"
             android:layout_margin="15dp"
             android:layout_marginStart="40dp"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <SeekBar
                 android:id="@+id/seekBar1"
+                style="@android:style/Widget.Material.SeekBar.Discrete"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -130,6 +143,7 @@
 
             <SeekBar
                 android:id="@+id/seekBar2"
+                style="@android:style/Widget.Material.SeekBar.Discrete"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -153,30 +167,30 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="vertical"
             android:layout_gravity="center"
             android:layout_margin="15dp"
             android:layout_marginStart="40dp"
-            android:layout_weight="0">
+            android:layout_weight="0"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/seekBarValue1"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp" />
 
             <TextView
                 android:id="@+id/seekBarValue2"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp" />
 
             <Switch
                 android:id="@+id/switch1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="26dp"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:layout_marginStart="26dp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

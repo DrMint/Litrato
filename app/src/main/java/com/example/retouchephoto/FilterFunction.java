@@ -345,7 +345,7 @@ class FilterFunction {
      *  @param context the context
      */
     static void histogramEqualization(final Bitmap bmp, final Context context){
-        Bitmap res = bmp.copy(bmp.getConfig(), true);
+        Bitmap res = ImageTools.bitmapClone(bmp);
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, res);
         Allocation output = Allocation.createTyped(rs, input.getType());
@@ -550,7 +550,8 @@ class FilterFunction {
 
     static void cartoon(final Bitmap bmp, final Context context, final int contour, final int posterize) {
 
-        Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
+        Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
+
 
         // First layer
         laplacian(bmp, context, 4);
@@ -579,7 +580,7 @@ class FilterFunction {
 
     static void sketch(final Bitmap bmp, final Context context, final int contour, final float saturation) {
 
-        Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
+        Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
 
         // First layer
         laplacian(bmp, context, contour);
@@ -648,7 +649,7 @@ class FilterFunction {
 
     static void mirror(final Bitmap bmp, final Context context) {
 
-        Bitmap bmpCopy = bmp.copy(bmp.getConfig(), true);
+        Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
 
         RenderScript rs = RenderScript.create(context);
         Allocation input = Allocation.createFromBitmap(rs, bmp);

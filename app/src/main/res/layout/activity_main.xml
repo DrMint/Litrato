@@ -8,40 +8,56 @@
 
     <Button
         android:id="@+id/buttonOpen"
-        android:layout_width="wrap_content"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@color/black"
+        android:fontFamily="sans-serif"
         android:text="@string/openButtonString"
+        android:textAllCaps="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        android:textColor="@android:color/black"
+        android:textColor="@color/text"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/buttonOldVersion"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/buttonSave"
-        style="@style/Widget.AppCompat.Button"
-        android:layout_width="wrap_content"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@color/black"
+        android:fontFamily="sans-serif"
         android:text="@string/saveButtonString"
+        android:textAllCaps="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        android:textColor="@android:color/black"
+        android:textColor="@color/text"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/buttonOldVersion"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/buttonOldVersion"
-        android:layout_width="wrap_content"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/oldVersionButtonString"
+        android:background="@color/black"
+        android:fontFamily="sans-serif"
+        android:text="@string/historyButtonString"
+        android:textAllCaps="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        android:textColor="@android:color/black"
+        android:textColor="@color/text"
+        android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@+id/buttonSave"
         app:layout_constraintStart_toEndOf="@+id/buttonOpen"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -49,33 +65,45 @@
 
         <Button
             android:id="@+id/buttonPresets"
-            style="@android:style/ButtonBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@color/gray"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/presetsButton"
+            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/text"
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/buttonTools"
-            style="@android:style/ButtonBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@color/gray"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/toolsButton"
+            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/text"
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/buttonFilters"
-            style="@android:style/ButtonBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@color/gray"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/filtersButton"
+            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/text"
+            android:textSize="18sp" />
     </LinearLayout>
 
     <ImageView
@@ -83,6 +111,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:adjustViewBounds="true"
+        android:background="@color/black"
         android:contentDescription="@string/imageViewDescription"
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
@@ -96,24 +125,27 @@
         style="@android:style/ButtonBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@color/selected"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        android:scrollbars="none">
 
         <LinearLayout
             android:id="@+id/presetsLinearLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="horizontal"/>
+            android:orientation="horizontal" />
     </HorizontalScrollView>
 
     <TableLayout
         android:id="@+id/toolsBar"
         style="@android:style/ButtonBar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="400dp"
+        android:background="@color/selected"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
@@ -122,15 +154,15 @@
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:gravity="center_horizontal">
 
             <LinearLayout
                 android:id="@+id/rotationButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="1"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -138,9 +170,9 @@
                 <ImageView
                     android:id="@+id/imageRotation"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="30dp"
                     android:contentDescription="@string/rotationButton"
                     android:src="@drawable/rotate" />
 
@@ -149,19 +181,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/rotationButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/cropButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="2"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -169,9 +203,9 @@
                 <ImageView
                     android:id="@+id/imageCrop"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="30dp"
                     android:contentDescription="@string/cropButton"
                     android:src="@drawable/crop" />
 
@@ -180,19 +214,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/cropButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/flipButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="3"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -200,9 +236,9 @@
                 <ImageView
                     android:id="@+id/imageFlip"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="30dp"
                     android:contentDescription="@string/flipButton"
                     android:src="@drawable/flip" />
 
@@ -211,19 +247,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/flipButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/stickersButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="4"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -231,9 +269,9 @@
                 <ImageView
                     android:id="@+id/imageStickers"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="30dp"
                     android:contentDescription="@string/stickersButton"
                     android:src="@drawable/stickers" />
 
@@ -242,25 +280,28 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/stickersButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:gravity="center_horizontal">
 
             <LinearLayout
                 android:id="@+id/luminosityButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="1"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -268,7 +309,7 @@
                 <ImageView
                     android:id="@+id/imageLuminosity"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="5dp"
                     android:contentDescription="@string/luminosityButton"
@@ -279,19 +320,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/luminosityButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/contrastButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="2"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -299,7 +342,7 @@
                 <ImageView
                     android:id="@+id/imageContrast"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="5dp"
                     android:contentDescription="@string/contrastButton"
@@ -310,19 +353,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/contrastButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/sharpnessButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="3"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -330,7 +375,7 @@
                 <ImageView
                     android:id="@+id/imageSharpness"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="5dp"
                     android:contentDescription="@string/sharpnessButton"
@@ -341,19 +386,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/sharpnessButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/autoButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="4"
+
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -361,7 +409,7 @@
                 <ImageView
                     android:id="@+id/imageAuto"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="5dp"
                     android:contentDescription="@string/autoButton"
@@ -372,26 +420,29 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/autoButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
         </TableRow>
 
         <TableRow
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:gravity="center_horizontal"
             android:orientation="horizontal">
 
             <LinearLayout
                 android:id="@+id/saturationButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="1"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -399,7 +450,7 @@
                 <ImageView
                     android:id="@+id/imageSaturation"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="5dp"
                     android:contentDescription="@string/saturationButton"
@@ -410,19 +461,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginBottom="20dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/saturationButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/noiseButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="2"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -430,7 +484,7 @@
                 <ImageView
                     android:id="@+id/imageNoise"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="5dp"
                     android:contentDescription="@string/addNoiseButton"
@@ -441,19 +495,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginBottom="20dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/addNoiseButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/temperatureButton"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
+                android:layout_width="500dp"
+                android:layout_height="match_parent"
                 android:layout_column="3"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -461,7 +518,7 @@
                 <ImageView
                     android:id="@+id/imageTemperature"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="5dp"
                     android:contentDescription="@string/temperatureButton"
@@ -472,19 +529,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginBottom="20dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/temperatureButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/tintButton"
-                android:layout_width="150dp"
+                android:layout_width="500dp"
                 android:layout_height="match_parent"
                 android:layout_column="4"
                 android:layout_weight="4"
-                android:background="#00000000"
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="vertical">
@@ -492,7 +552,7 @@
                 <ImageView
                     android:id="@+id/imageTint"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="5dp"
                     android:contentDescription="@string/tintButton"
@@ -503,10 +563,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginBottom="20dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/tintButton"
+                    android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@color/text"
+                    android:textSize="12sp" />
             </LinearLayout>
 
         </TableRow>
@@ -515,61 +579,81 @@
 
     <LinearLayout
         android:id="@+id/filtersBar"
+        style="@android:style/ButtonBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@android:style/ButtonBar"
+        android:background="@color/selected"
+        android:orientation="vertical"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:orientation="vertical"
-        android:visibility="gone">
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:gravity="left">
+            android:gravity="start">
 
             <Button
                 android:id="@+id/buttonColor"
+                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="75dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@color/selected"
+                android:fontFamily="sans-serif-light"
                 android:text="@string/colorMenu"
-                android:background="#00000000"
+                android:textAllCaps="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@android:color/black"/>
+                android:textColor="@color/text" />
 
             <Button
                 android:id="@+id/buttonFancy"
+                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="75dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@color/selected"
+                android:fontFamily="sans-serif-light"
                 android:text="@string/fancyMenu"
-                android:background="#00000000"
+                android:textAllCaps="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@android:color/black"/>
+                android:textColor="@color/text" />
 
             <Button
                 android:id="@+id/buttonBlur"
+                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="75dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@color/selected"
+                android:fontFamily="sans-serif-light"
                 android:text="@string/blurMenu"
-                android:background="#00000000"
+                android:textAllCaps="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@android:color/black"/>
+                android:textColor="@color/text" />
 
             <Button
                 android:id="@+id/buttonContour"
+                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="75dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@color/selected"
+                android:fontFamily="sans-serif-light"
                 android:text="@string/contourMenu"
-                android:background="#00000000"
+                android:textAllCaps="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@android:color/black"/>
+                android:textColor="@color/text" />
         </LinearLayout>
 
         <HorizontalScrollView
             style="@android:style/ButtonBar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/selected"
+            android:scrollbars="none">
+
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -609,7 +693,6 @@
                     android:orientation="horizontal"
                     android:visibility="gone" />
             </LinearLayout>
-
 
 
         </HorizontalScrollView>

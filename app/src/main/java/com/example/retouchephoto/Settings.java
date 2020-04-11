@@ -1,5 +1,6 @@
 package com.example.retouchephoto;
 
+import android.graphics.Color;
 import android.os.Environment;
 
 /**
@@ -46,4 +47,15 @@ class Settings {
     static final String SAVE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "Litrato" + "/";
 
     static final String SAVE_PATH_ORIGINAL = SAVE_PATH + "Original" + "/";
+
+    static final int ITEMS_MARGIN_IN_MENU = 20;
+
+    static final int MINIATURE_BMP_SIZE = 100;
+
+    static final int MINIATURE_DISPLAYED_SIZE = 250;
+
+    static final int COLOR_BACKGROUND = Color.rgb(0,0,0);
+    static final int COLOR_GREY = Color.rgb(40,40,40);
+    static final int COLOR_SELECTED = Color.rgb(70,70,70);
+
 }

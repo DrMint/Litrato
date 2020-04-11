@@ -19,6 +19,7 @@ class ImageTools {
         }
     }
 
+    @SuppressWarnings({"SuspiciousNameCombination", "SameParameterValue"})
     static Bitmap toSquare(Bitmap bmp, int newSize) {
 
         int currentWidth = bmp.getWidth();
@@ -140,6 +141,10 @@ class ImageTools {
     @SuppressWarnings("unused")
     static void fillWithColor(final Bitmap bmp, int color) {
         drawRectangle(bmp, new Point(0,0), new Point(bmp.getWidth(), bmp.getHeight()), color);
+    }
+
+    static Bitmap bitmapClone(Bitmap source) {
+        return source.copy(source.getConfig(), true);
     }
 
 
