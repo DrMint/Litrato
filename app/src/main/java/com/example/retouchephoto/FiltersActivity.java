@@ -70,9 +70,9 @@ public class FiltersActivity extends AppCompatActivity {
         layoutButtonApply       = findViewById(R.id.applyButton);
         layoutCancel            = findViewById(R.id.cancelButton);
         layoutFilterName        = findViewById(R.id.filterNameButton);
-        //layoutPickButton        = findViewById(R.id.pickButton);
-        //layoutBrushButton        = findViewById(R.id.brushButton);
-        //layoutHistogramButton        = findViewById(R.id.histogramButton);
+        layoutPickButton        = findViewById(R.id.pickButton);
+        layoutBrushButton       = findViewById(R.id.brushButton);
+        layoutHistogramButton   = findViewById(R.id.histogramButton);
         layoutHistogram         = findViewById(R.id.histogram);
         layoutImageInfo         = findViewById(R.id.imageInformation);
         layoutSeekBar1          = findViewById(R.id.seekBar1);
@@ -94,7 +94,6 @@ public class FiltersActivity extends AppCompatActivity {
         // Initialize all the different listeners.
         initializeListener();
         initializeInterface();
-
     }
 
 
@@ -116,6 +115,7 @@ public class FiltersActivity extends AppCompatActivity {
         } else {
             layoutColorSeekBar.setVisibility(View.INVISIBLE);
         }
+        layoutPickButton.setVisibility(layoutColorSeekBar.getVisibility());
 
         if (selectedFilter.seekBar1) {
             layoutSeekBar1.setVisibility(View.VISIBLE);
@@ -254,7 +254,6 @@ public class FiltersActivity extends AppCompatActivity {
     }
 
     private void initializeListener() {
-
 
 
         // Create the GestureDetector which handles the scrolling and double tap.
@@ -407,6 +406,27 @@ public class FiltersActivity extends AppCompatActivity {
                     result = filteredImage;
                     finish();
                 }
+            }
+        });
+
+        layoutBrushButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
+        layoutPickButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
+        layoutHistogram.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
             }
         });
     }

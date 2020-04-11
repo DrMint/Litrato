@@ -187,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
         submenuSelected = colorButton.getTypeface();
         submenuUnselected = fancyButton.getTypeface();
 
-
         // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
         layoutImageView.setImageBitmap(filteredImage);
@@ -197,6 +196,8 @@ public class MainActivity extends AppCompatActivity {
         generatePresets();
         generateTools();
         generateFilters();
+
+        // If this is the first launch, compiles the RenderScript's functions
         if (appGetFirstTimeRun() == 0) {
             initializeRenderScriptCaching();
         }
@@ -1257,7 +1258,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
 
 
     private int appGetFirstTimeRun() {

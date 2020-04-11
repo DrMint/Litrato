@@ -97,33 +97,24 @@
             android:background="@color/selected"
             android:orientation="vertical">
 
-            <ImageView
+            <Button
                 android:id="@+id/pickButton"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:background="#00000000"
-                android:clickable="true"
-                android:contentDescription="@string/pickButton"
-                android:src="@drawable/pick"
-                android:drawablePadding="5dp"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="P" />
 
-            <ImageView
+            <Button
                 android:id="@+id/brushButton"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:background="#00000000"
-                android:clickable="true"
-                android:contentDescription="@string/brushButton"
-                android:src="@drawable/brush" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="B" />
 
-            <ImageView
+            <Button
                 android:id="@+id/histogramButton"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:background="#00000000"
-                android:clickable="true"
-                android:contentDescription="@string/histogramButton"
-                android:src="@drawable/histogram" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="H" />
+
         </LinearLayout>
 
         <LinearLayout
