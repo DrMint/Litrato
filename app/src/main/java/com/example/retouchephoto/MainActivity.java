@@ -62,8 +62,14 @@ import com.google.android.material.snackbar.Snackbar;
  */
 public class MainActivity extends AppCompatActivity {
 
+    static Filter selectedFilter;
+    static Bitmap selectedBitmap;
+
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
+    private final int FILTER_ACTIVITY_IS_FINISHED = 3;
+
+
 
     /**
      * This is the image as it was before applying any filter.
@@ -123,6 +129,9 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout temperatureButton;
     private LinearLayout tintButton;
 
+    Typeface submenuUnselected;
+    Typeface submenuSelected;
+
     //private View layout;
 
     @Override
@@ -171,14 +180,14 @@ public class MainActivity extends AppCompatActivity {
         temperatureButton       = findViewById(R.id.temperatureButton);
         tintButton              = findViewById(R.id.tintButton);
 
+        submenuSelected = colorButton.getTypeface();
+        submenuUnselected = fancyButton.getTypeface();
+
 
         // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
         layoutImageView.setImageBitmap(filteredImage);
         layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
-
-        // Weird but you need to do this to avoid crashing.
-        layoutImageView.setZoom(1);
 
         // Create the lists of filters
         generatePresets();
@@ -187,7 +196,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize all the different listeners.
         initializeListener();
-
 
     }
 
@@ -215,6 +223,15 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             //Load the last taken photo.
             setBitmap(FileInputOutput.getLastTakenBitmap());
+        }
+
+        if (requestCode == FILTER_ACTIVITY_IS_FINISHED) {
+            Bitmap result = FiltersActivity.result;
+            if (result != null) {
+                layoutImageView.reset();
+                beforeLastFilterImage = ImageTools.bitmapClone(result);
+                refreshImageView();
+            }
         }
     }
 
@@ -401,7 +418,7 @@ public class MainActivity extends AppCompatActivity {
                 closeMenus();
                 if (!visible) {
                     v.setBackgroundColor(Settings.COLOR_SELECTED);
-                    presetsButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                    presetsButton.setTypeface(submenuSelected);
                     presetsBar.setVisibility(View.VISIBLE);
                     generateMiniatureForOpenedMenu();
                 }
@@ -415,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
                 closeMenus();
                 if (!visible) {
                     v.setBackgroundColor(Settings.COLOR_SELECTED);
-                    toolsButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                    toolsButton.setTypeface(submenuSelected);
                     toolsBar.setVisibility(View.VISIBLE);
                     generateMiniatureForOpenedMenu();
                 }
@@ -429,7 +446,7 @@ public class MainActivity extends AppCompatActivity {
                 closeMenus();
                 if (!visible) {
                     v.setBackgroundColor(Settings.COLOR_SELECTED);
-                    filtersButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                    filtersButton.setTypeface(submenuSelected);
                     filtersBar.setVisibility(View.VISIBLE);
                     generateMiniatureForOpenedMenu();
                 }
@@ -440,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 closeSubMenus();
-                colorButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                colorButton.setTypeface(submenuSelected);
                 colorBar.setVisibility(View.VISIBLE);
                 generateMiniatureForOpenedMenu();
             }
@@ -450,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 closeSubMenus();
-                fancyButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                fancyButton.setTypeface(submenuSelected);
                 fancyBar.setVisibility(View.VISIBLE);
                 generateMiniatureForOpenedMenu();
             }
@@ -460,7 +477,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 closeSubMenus();
-                blurButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                blurButton.setTypeface(submenuSelected);
                 blurBar.setVisibility(View.VISIBLE);
                 generateMiniatureForOpenedMenu();
             }
@@ -470,13 +487,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 closeSubMenus();
-                contourButton.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
+                contourButton.setTypeface(submenuSelected);
                 contourBar.setVisibility(View.VISIBLE);
                 generateMiniatureForOpenedMenu();
             }
         });
+        initializeMenus();
 
-        generateButton();
+
     }
 
     private void generatePresets(){
@@ -1138,7 +1156,7 @@ public class MainActivity extends AppCompatActivity {
         return textView;
     }
 
-    private void generateButton(){
+    private void initializeMenus(){
 
         TextView textView;
 
@@ -1161,7 +1179,7 @@ public class MainActivity extends AppCompatActivity {
                     if (currentFilter.getFilterCategory() == FilterCategory.PRESET) {
                         apply(currentFilter);
                     } else {
-                        openFiltersActivity(currentFilter);
+                        openFiltersActivity(currentFilter, beforeLastFilterImage);
                     }
                 }
             });
@@ -1180,9 +1198,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void closeMenus(){
-        presetsButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
-        toolsButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
-        filtersButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
+        presetsButton.setTypeface(submenuUnselected);
+        toolsButton.setTypeface(submenuUnselected);
+        filtersButton.setTypeface(submenuUnselected);
 
         presetsButton.setBackgroundColor(Settings.COLOR_GREY);
         toolsButton.setBackgroundColor(Settings.COLOR_GREY);
@@ -1194,10 +1212,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void closeSubMenus(){
-        colorButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
-        fancyButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
-        blurButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
-        contourButton.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL);
+        colorButton.setTypeface(submenuUnselected);
+        fancyButton.setTypeface(submenuUnselected);
+        blurButton.setTypeface(submenuUnselected);
+        contourButton.setTypeface(submenuUnselected);
 
         colorBar.setVisibility(View.GONE);
         fancyBar.setVisibility(View.GONE);
@@ -1205,9 +1223,12 @@ public class MainActivity extends AppCompatActivity {
         contourBar.setVisibility(View.GONE);
     }
 
-    private void openFiltersActivity(Filter filter){
+    private void openFiltersActivity(Filter filter, Bitmap bmp){
+        selectedFilter = filter;
+        selectedBitmap = bmp;
         Intent intent = new Intent(this, FiltersActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
+
     }
 
     private void openOldActivity(){
@@ -1215,7 +1236,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private boolean isVisible(View view) {
+    static boolean isVisible(View view) {
         return (view.getVisibility() == View.VISIBLE);
     }
 }

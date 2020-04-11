@@ -28,23 +28,11 @@ import java.util.Locale;
 
 public class FiltersActivity extends AppCompatActivity {
 
-    /**
-     * This is the image as it was before applying any filter.
-     * The image has been resized if necessary.
-     */
+    static Bitmap result;
+
     private Bitmap originalImage;
-
-    /**
-     * This is the image as it was after the last apply button click.
-     * This is the image filter are applied to.
-     */
-    private Bitmap beforeLastFilterImage;
-
-    /**
-     * This is the image with the current changes from the filter.
-     * This is the image that is shown to the user.
-     */
     private Bitmap filteredImage;
+    private Filter selectedFilter;
 
     /**
      * A boolean to avoid applying filter because the listener have been triggered when modifying
@@ -52,11 +40,13 @@ public class FiltersActivity extends AppCompatActivity {
      */
     private boolean inputsReady = false;
 
-    private Boolean filterOpen = false;
-
     private ImageViewZoomScroll layoutImageView;
     private Button      layoutButtonApply;
-    private Button      cancelButton;
+    private Button      layoutCancel;
+    private Button      layoutFilterName;
+    private Button      layoutPickButton;
+    private Button      layoutBrushButton;
+    private Button      layoutHistogramButton;
     private ImageView   layoutHistogram;
     private TextView    layoutImageInfo;
     private SeekBar     layoutSeekBar1;
@@ -67,15 +57,22 @@ public class FiltersActivity extends AppCompatActivity {
     private Switch      layoutSwitch1;
     private LinearLayout filterMenu;
 
+    private View.OnTouchListener defaultImageViewTouchListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filters);
 
         // Sets all the layout shortcuts.
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
         layoutButtonApply       = findViewById(R.id.applyButton);
-        Button filterNameButton = findViewById(R.id.filterNameButton);
+        layoutCancel            = findViewById(R.id.cancelButton);
+        layoutFilterName        = findViewById(R.id.filterNameButton);
+        //layoutPickButton        = findViewById(R.id.pickButton);
+        //layoutBrushButton        = findViewById(R.id.brushButton);
+        //layoutHistogramButton        = findViewById(R.id.histogramButton);
         layoutHistogram         = findViewById(R.id.histogram);
         layoutImageInfo         = findViewById(R.id.imageInformation);
         layoutSeekBar1          = findViewById(R.id.seekBar1);
@@ -87,58 +84,105 @@ public class FiltersActivity extends AppCompatActivity {
         filterMenu              = findViewById(R.id.filtersMenu);
 
         // Selects the default image in the resource folder and set it
-        setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
+        setBitmap(MainActivity.selectedBitmap);
         layoutImageView.setImageBitmap(filteredImage);
         layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
 
+        selectedFilter = MainActivity.selectedFilter;
+        layoutFilterName.setText(selectedFilter.getName());
+
         // Initialize all the different listeners.
         initializeListener();
+        initializeInterface();
 
-        filterNameButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(filterMenu.getVisibility()==View.VISIBLE){
-                    closeMenu();
-                }else{
-                    closeMenu();
-                    filterMenu.setVisibility(View.VISIBLE);
-                    filterOpen = true;
-                }
+    }
+
+
+    private void initializeInterface() {
+        inputsReady = false;
+
+        selectedFilter.init();
+
+        // Apply the custom filterTouchListener to layoutImageView if it exists, else revert to the default one.
+        View.OnTouchListener filterTouchListener = selectedFilter.getImageViewTouchListener();
+        if (filterTouchListener == null) {
+            layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
+        } else {
+            layoutImageView.setOnTouchListener(filterTouchListener);
+        }
+
+        if (selectedFilter.colorSeekBar) {
+            layoutColorSeekBar.setVisibility(View.VISIBLE);
+        } else {
+            layoutColorSeekBar.setVisibility(View.INVISIBLE);
+        }
+
+        if (selectedFilter.seekBar1) {
+            layoutSeekBar1.setVisibility(View.VISIBLE);
+            layoutSeekBar1.setMin(selectedFilter.seekBar1Min);
+            layoutSeekBar1.setMax(selectedFilter.seekBar1Max);
+            layoutSeekBar1.setProgress(selectedFilter.seekBar1Set);
+        } else {
+            layoutSeekBar1.setVisibility(View.INVISIBLE);
+        }
+
+        if (selectedFilter.seekBar2) {
+            layoutSeekBar2.setVisibility(View.VISIBLE);
+            layoutSeekBar2.setMin(selectedFilter.seekBar2Min);
+            layoutSeekBar2.setMax(selectedFilter.seekBar2Max);
+            layoutSeekBar2.setProgress(selectedFilter.seekBar2Set);
+        } else {
+            layoutSeekBar2.setVisibility(View.INVISIBLE);
+        }
+
+        if (selectedFilter.switch1) {
+            layoutSwitch1.setVisibility(View.VISIBLE);
+            layoutSwitch1.setChecked(selectedFilter.switch1Default);
+            if (layoutSwitch1.isChecked()) {
+                layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
+            } else {
+                layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
             }
-        });
+
+
+            if (!selectedFilter.seekBar2) {
+                layoutSeekBar2.setVisibility(View.INVISIBLE);
+            }
+
+        } else {
+            layoutSwitch1.setVisibility(View.INVISIBLE);
+
+        }
+
+        // Only shows the seekBarValues when the seekBars are visible.
+        layoutSeekBarValue1.setVisibility(layoutSeekBar1.getVisibility());
+        layoutSeekBarValue2.setVisibility(layoutSeekBar2.getVisibility());
+        layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar1.getProgress(), selectedFilter.seekBar1Unit));
+        layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar2.getProgress(), selectedFilter.seekBar2Unit));
+
+        previewFilter();
+
+        // The seek bars listener can be triggered again.
+        inputsReady = true;
     }
 
-    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        setBitmap(FileInputOutput.getLastTakenBitmap());
-    }
+
 
     private void setBitmap(Bitmap bmp) {
 
         // If the bmp is null, aborts
         if (bmp == null) return;
 
-        /*// Resize the image before continuing, if necessary
-        if (bmp.getHeight() > Settings.IMPORTED_BMP_SIZE || bmp.getWidth() > Settings.IMPORTED_BMP_SIZE) {
-            bmp = ImageTools.resizeAsContainInARectangle(bmp, Settings.IMPORTED_BMP_SIZE);
-            Snackbar sb = Snackbar.make(
-                    layoutSpinner,
-                    "Image resized to " + bmp.getWidth() + "px by " + bmp.getHeight() + "px",
-                    Snackbar.LENGTH_SHORT);
-            sb.show();
-        }*/
-
         // Set this image as the originalImage and reset the UI
         originalImage = bmp;
-        resetImage();
+        filteredImage = ImageTools.bitmapClone(originalImage);
+        refreshImageView();
     }
 
     private void previewOrApply(boolean apply) {
 
-        // filteredImage is now a fresh copy of beforeLastFilterImage
-        filteredImage = beforeLastFilterImage.copy(beforeLastFilterImage.getConfig(), true);
-
-        /*Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
+        // filteredImage is now a fresh copy of originalImage
+        filteredImage = ImageTools.bitmapClone(originalImage);
 
         Bitmap result;
         if (apply) {
@@ -163,7 +207,7 @@ public class FiltersActivity extends AppCompatActivity {
         // If the filter return a bitmap, filteredImage becomes this bitmap
         if (result != null) {
             filteredImage = result;
-        }*/
+        }
 
         // Refresh the image viewer and the histogram.
         refreshImageView();
@@ -191,15 +235,6 @@ public class FiltersActivity extends AppCompatActivity {
     }
 
     /**
-     * Display the original image in "imageView" and refresh the histogram.
-     */
-    private void resetImage() {
-        beforeLastFilterImage = originalImage.copy(originalImage.getConfig(), true);
-        filteredImage = originalImage.copy(originalImage.getConfig(), true);
-        refreshImageView();
-    }
-
-    /**
      * Display the histogram of filteredImage on layoutHistogram
      */
     private void refreshHistogram() {
@@ -220,57 +255,7 @@ public class FiltersActivity extends AppCompatActivity {
 
     private void initializeListener() {
 
-        // Adds listener for the first seek bar
-        /*layoutSeekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (inputsReady) previewFilter();
-                Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
-                layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar1Unit));
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
-        // Adds listener for the second seek bar
-        layoutSeekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (inputsReady) previewFilter();
-                Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
-                layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar2Unit));
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });*/
-
-        // Adds listener for the color seek bar
-        layoutColorSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (inputsReady) previewFilter();
-            }
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
-        // Adds listener for the first switch
-        /*layoutSwitch1.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Filter selectedFilter = filters.get(layoutSpinner.getSelectedItemPosition());
-                if (layoutSwitch1.isChecked()) {
-                    layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
-                } else {
-                    layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
-                }
-                if (inputsReady) previewFilter();
-            }
-        });*/
 
         // Create the GestureDetector which handles the scrolling and double tap.
         final GestureDetector myGestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.OnGestureListener() {
@@ -312,7 +297,7 @@ public class FiltersActivity extends AppCompatActivity {
         });
 
         // Create the ScaleGestureDetector which handles the scaling.
-        final ScaleGestureDetector myScaleDetector = new ScaleGestureDetector(FiltersActivity.this, new ScaleGestureDetector.OnScaleGestureListener() {
+        final ScaleGestureDetector myScaleDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.OnScaleGestureListener() {
             float lastZoomFactor;
 
             public boolean onScaleBegin(ScaleGestureDetector detector) {
@@ -330,9 +315,8 @@ public class FiltersActivity extends AppCompatActivity {
             public void onScaleEnd(ScaleGestureDetector detector) {}
         });
 
-
         // The default behavior of imageView.
-        final View.OnTouchListener defaultImageViewTouchListener = new View.OnTouchListener() {
+        defaultImageViewTouchListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 myScaleDetector.onTouchEvent(event);
                 myGestureDetector.onTouchEvent(event);
@@ -340,165 +324,90 @@ public class FiltersActivity extends AppCompatActivity {
                 return true;
             }
         };
+        layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
 
 
-
-        // When the user clicks on the histogram, makes it collapse or bring it back up.
-        layoutHistogram.setOnClickListener(new View.OnClickListener() {
-
-            boolean collapsed = false;
-
+        layoutFilterName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                int dimensionInDp;
-
-                if (collapsed) {
-                    // Convert px to dp
-                    dimensionInDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, getResources().getDisplayMetrics());
-                    layoutImageInfo.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                    layoutImageInfo.setVisibility(View.VISIBLE);
+                if (!MainActivity.isVisible(filterMenu)) {
+                    layoutFilterName.setBackgroundColor(Settings.COLOR_SELECTED);
+                    filterMenu.setVisibility(View.VISIBLE);
                 } else {
-                    // Convert px to dp
-                    dimensionInDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
-                    layoutImageInfo.setVisibility(View.GONE);
+                    v.setBackgroundColor(Settings.COLOR_GREY);
+                    filterMenu.setVisibility(View.GONE);
                 }
-
-                collapsed = !collapsed;
-                v.getLayoutParams().height = dimensionInDp;
-                v.requestLayout();
-
-                //TODO: Correct bug 0001
             }
         });
 
-        // layoutSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        // Adds listener for the first seek bar
+        layoutSeekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-        //   /**
-        //    * Handles when an item is selected in the spinner.
-        //    */
-          /*  @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                // This values is used to avoid applying filters while the seek bar are modified.
-                // Changing the seek bar minimum, progress or maximum values would normally call the
-                // seek bar listener, which would apply the filter 3 time for no reason.
-                inputsReady = false;
-
-                Filter selectedFilter = filters.get(position);
-
-                selectedFilter.init();
-
-                // Apply the custom filterTouchListener to layoutImageView if it exists, else revert to the default one.
-                View.OnTouchListener filterTouchListener = selectedFilter.getImageViewTouchListener();
-                if (filterTouchListener == null) {
-                    layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
-                } else {
-                    layoutImageView.setOnTouchListener(filterTouchListener);
-                }
-
-
-                if (position != 0) {
-                    layoutButtonApply.setText(getResources().getString(R.string.applyButtonString));
-                    layoutButtonOriginal.setText(getResources().getString(R.string.originalButtonString));
-                    layoutButtonApply.setEnabled(true);
-                }
-
-                if (selectedFilter.colorSeekBar) {
-                    layoutColorSeekBar.setVisibility(View.VISIBLE);
-                } else {
-                    layoutColorSeekBar.setVisibility(View.INVISIBLE);
-                }
-
-                if (selectedFilter.seekBar1) {
-                    layoutSeekBar1.setVisibility(View.VISIBLE);
-                    layoutSeekBar1.setMin(selectedFilter.seekBar1Min);
-                    layoutSeekBar1.setMax(selectedFilter.seekBar1Max);
-                    layoutSeekBar1.setProgress(selectedFilter.seekBar1Set);
-                } else {
-                    layoutSeekBar1.setVisibility(View.INVISIBLE);
-                }
-
-                if (selectedFilter.seekBar2) {
-                    layoutSeekBar2.setVisibility(View.VISIBLE);
-                    layoutSeekBar2.setMin(selectedFilter.seekBar2Min);
-                    layoutSeekBar2.setMax(selectedFilter.seekBar2Max);
-                    layoutSeekBar2.setProgress(selectedFilter.seekBar2Set);
-                } else {
-                    layoutSeekBar2.setVisibility(View.INVISIBLE);
-                }
-
-                if (selectedFilter.switch1) {
-                    layoutSwitch1.setVisibility(View.VISIBLE);
-                    layoutSwitch1.setChecked(selectedFilter.switch1Default);
-                    if (layoutSwitch1.isChecked()) {
-                        layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
-                    } else {
-                        layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
-                    }
-
-
-                    if (!selectedFilter.seekBar2) {
-                        layoutSeekBar2.setVisibility(View.INVISIBLE);
-                    }
-
-                } else {
-                    layoutSwitch1.setVisibility(View.INVISIBLE);
-
-                }
-
-                // Only shows the seekBarValues when the seekBars are visible.
-                layoutSeekBarValue1.setVisibility(layoutSeekBar1.getVisibility());
-                layoutSeekBarValue2.setVisibility(layoutSeekBar2.getVisibility());
-                layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar1.getProgress(), selectedFilter.seekBar1Unit));
-                layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar2.getProgress(), selectedFilter.seekBar2Unit));
-
-                previewFilter();
-
-                // The seek bars listener can be triggered again.
-                inputsReady = true;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (inputsReady) previewFilter();
+                layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar1Unit));
             }
 
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });*/
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        // Adds listener for the second seek bar
+        layoutSeekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (inputsReady) previewFilter();
+                layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar2Unit));
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        // Adds listener for the color seek bar
+        layoutColorSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (inputsReady) previewFilter();
+            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        // Adds listener for the first switch
+        layoutSwitch1.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (layoutSwitch1.isChecked()) {
+                    layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
+                } else {
+                    layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
+                }
+                if (inputsReady) previewFilter();
+            }
+        });
 
 
-        // When the user click on the apply button, apply the selected filter in the spinner
+        layoutCancel.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                result = null;
+                finish();
+            }
+        });
+
        layoutButtonApply.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 if (originalImage != null) {
-
-                    // If the spinner has no filter selected, it is a save button
-                    /*if (layoutSpinner.getSelectedItemPosition() == 0) {
-
-                        // Did it save properly?
-                        if (FileInputOutput.saveImage(filteredImage, FiltersActivity.this)) {
-                            v.setEnabled(false);
-                            Snackbar.make(v, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
-                        }
-
-                        // Else it is an apply button
-                    } else {
-                        // Finds the imageView and makes it display original_image
-                        applyFilter();
-                        beforeLastFilterImage = filteredImage.copy(filteredImage.getConfig(), true);
-
-                        // Put the spinner back to the default position
-                        layoutSpinner.setSelection(0);
-                        ((Button)v).setText(getResources().getString(R.string.saveButtonString));
-                    }*/
+                    result = filteredImage;
+                    finish();
                 }
             }
         });
-    }
-
-
-    private void closeMenu(){
-        if (filterOpen){
-            filterMenu.setVisibility(View.GONE);
-            this.filterOpen = false;
-        }
     }
 }

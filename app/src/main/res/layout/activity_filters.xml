@@ -57,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@color/gray"
+            android:background="@color/selected"
             android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             android:textColor="@color/text"
@@ -78,6 +78,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:baselineAligned="false"
         android:id="@+id/filtersMenu"
         style="@android:style/ButtonBar"
         android:layout_width="0dp"
@@ -103,7 +104,8 @@
                 android:background="#00000000"
                 android:clickable="true"
                 android:contentDescription="@string/pickButton"
-                android:src="@drawable/pick" />
+                android:src="@drawable/pick"
+                android:drawablePadding="5dp"/>
 
             <ImageView
                 android:id="@+id/brushButton"
@@ -155,7 +157,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:background="@drawable/gradient_color"
-                android:max="360"
+                android:max="359"
                 android:min="0"
                 android:progressBackgroundTint="#00000000"
                 android:progressTint="#00000000"

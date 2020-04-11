@@ -601,7 +601,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:background="@color/selected"
-                android:fontFamily="sans-serif-light"
+                android:fontFamily="sans-serif-black"
                 android:text="@string/colorMenu"
                 android:textAllCaps="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"

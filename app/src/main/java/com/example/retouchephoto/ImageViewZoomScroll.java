@@ -74,7 +74,10 @@ class ImageViewZoomScroll {
         if (newWidth == 0 || newHeight == 0) {
             imageView.setImageBitmap(bmp);
         } else {
-            imageView.setImageBitmap(createBitmap(bmp, center.x, center.y, newWidth, newHeight));
+            if (center.y + newHeight <= bmp.getHeight() && center.x + newWidth <= bmp.getWidth()) {
+                imageView.setImageBitmap(createBitmap(bmp, center.x, center.y, newWidth, newHeight));
+            }
+
         }
     }
 
