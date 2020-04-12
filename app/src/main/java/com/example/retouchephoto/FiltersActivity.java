@@ -2,12 +2,18 @@ package com.example.retouchephoto;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -39,6 +45,8 @@ public class FiltersActivity extends AppCompatActivity {
      * the seeks bars minimum, progress, or maximum value.
      */
     private boolean inputsReady = false;
+    private boolean pickBool = false;
+    private boolean brushBool = false;
 
     private ImageViewZoomScroll layoutImageView;
     private Button      layoutButtonApply;
@@ -266,11 +274,23 @@ public class FiltersActivity extends AppCompatActivity {
             }
 
             //Not used
-            public boolean onDown(MotionEvent e) {return false;}
-            public void onShowPress(MotionEvent e) {}
-            public boolean onSingleTapUp(MotionEvent e) {return false;}
-            public void onLongPress(MotionEvent e) {}
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {return false;}
+            public boolean onDown(MotionEvent e) {
+                return false;
+            }
+
+            public void onShowPress(MotionEvent e) {
+            }
+
+            public boolean onSingleTapUp(MotionEvent e) {
+                return false;
+            }
+
+            public void onLongPress(MotionEvent e) {
+            }
+
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                return false;
+            }
         });
 
         //myGestureDetector.setIsLongpressEnabled(true);
@@ -290,8 +310,13 @@ public class FiltersActivity extends AppCompatActivity {
             }
 
             // Not used
-            public boolean onSingleTapConfirmed(MotionEvent e) {return false;}
-            public boolean onDoubleTapEvent(MotionEvent e) {return false;}
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                return false;
+            }
+
+            public boolean onDoubleTapEvent(MotionEvent e) {
+                return false;
+            }
 
         });
 
@@ -311,7 +336,8 @@ public class FiltersActivity extends AppCompatActivity {
             }
 
             //Not used
-            public void onScaleEnd(ScaleGestureDetector detector) {}
+            public void onScaleEnd(ScaleGestureDetector detector) {
+            }
         });
 
         // The default behavior of imageView.
@@ -345,11 +371,14 @@ public class FiltersActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (inputsReady) previewFilter();
-                layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar1Unit));
+                layoutSeekBarValue1.setText(String.format(Locale.ENGLISH, "%d%s", seekBar.getProgress(), selectedFilter.seekBar1Unit));
             }
 
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         // Adds listener for the second seek bar
@@ -358,11 +387,14 @@ public class FiltersActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (inputsReady) previewFilter();
-                layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar2Unit));
+                layoutSeekBarValue2.setText(String.format(Locale.ENGLISH, "%d%s", seekBar.getProgress(), selectedFilter.seekBar2Unit));
             }
 
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         // Adds listener for the color seek bar
@@ -371,8 +403,12 @@ public class FiltersActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (inputsReady) previewFilter();
             }
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         // Adds listener for the first switch
@@ -398,7 +434,7 @@ public class FiltersActivity extends AppCompatActivity {
             }
         });
 
-       layoutButtonApply.setOnClickListener(new View.OnClickListener() {
+        layoutButtonApply.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -410,16 +446,35 @@ public class FiltersActivity extends AppCompatActivity {
         });
 
         layoutBrushButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
             }
         });
 
         layoutPickButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
-            public void onClick(View v) {
+            public void onClick(View v){
+                pickBool=!pickBool;
+                if (pickBool) {
+                    layoutImageView.setImageBitmap(originalImage);
+                    if (layoutColorSeekBar.getVisibility() == View.VISIBLE) {
+                        layoutImageView.setOnTouchListener(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event) {
+                                Point choosedPixel = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(event.getX(), event.getY()));
+                                int newHue = layoutImageView.hueOfSelectedPixel(choosedPixel);
+                                if (newHue>=0) {
+                                    layoutColorSeekBar.setProgress(layoutImageView.hueOfSelectedPixel(choosedPixel));
+                                }
+                                return false;
+                            }
+                        });
+                    }
+                }
+                else{
+                    layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
+                    pickBool=false;
+                }
             }
         });
 
@@ -427,6 +482,7 @@ public class FiltersActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
+
             }
         });
     }

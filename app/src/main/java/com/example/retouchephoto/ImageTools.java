@@ -149,5 +149,13 @@ class ImageTools {
 
     static Bitmap bitmapCreate(int width, int height) {return Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);}
 
+    static void drawCircle(final Bitmap bmp, Point center, int radius, int color) {
+        final Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setColor(color);
+        Canvas selection = new Canvas(bmp);
+        selection.setBitmap(bmp);
+        selection.drawCircle(center.x, center.y, radius, paint);
+    }
 
 }
