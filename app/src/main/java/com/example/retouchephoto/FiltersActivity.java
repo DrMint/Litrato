@@ -340,12 +340,27 @@ public class FiltersActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
 
                 if (selectedFilter.allowScrollZoom) {
-
                     myScaleDetector.onTouchEvent(event);
                     myGestureDetector.onTouchEvent(event);
 
-                } else {
-
+                }
+                if (pickBool){
+                    layoutImageView.setImageBitmap(originalImage);
+                    if (layoutColorSeekBar.getVisibility() == View.VISIBLE) {
+                        layoutImageView.setOnTouchListener(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event) {
+                                Point choosedPixel = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(event.getX(), event.getY()));
+                                int newHue = layoutImageView.hueOfSelectedPixel(choosedPixel);
+                                if (newHue>=0) {
+                                    layoutColorSeekBar.setProgress(layoutImageView.hueOfSelectedPixel(choosedPixel));
+                                }
+                                return false;
+                            }
+                        });
+                    }
+                }
+                else {
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN: {
                             imageTouchDown.x = (int) event.getX();
@@ -474,24 +489,7 @@ public class FiltersActivity extends AppCompatActivity {
             @Override
             public void onClick(View v){
                 pickBool=!pickBool;
-                if (pickBool) {
-                    layoutImageView.setImageBitmap(originalImage);
-                    if (layoutColorSeekBar.getVisibility() == View.VISIBLE) {
-                        layoutImageView.setOnTouchListener(new View.OnTouchListener() {
-                            @Override
-                            public boolean onTouch(View v, MotionEvent event) {
-                                Point choosedPixel = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(event.getX(), event.getY()));
-                                int newHue = layoutImageView.hueOfSelectedPixel(choosedPixel);
-                                if (newHue>=0) {
-                                    layoutColorSeekBar.setProgress(layoutImageView.hueOfSelectedPixel(choosedPixel));
-                                }
-                                return false;
-                            }
-                        });
-                    }
-                }
-                else{
-                    layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
+                if (!pickBool){
                     pickBool=false;
                 }
             }
