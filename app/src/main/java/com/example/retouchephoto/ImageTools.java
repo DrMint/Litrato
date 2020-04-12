@@ -75,7 +75,7 @@ class ImageTools {
             max = Math.max(max, Bvalues[i]);
         }
 
-        Bitmap hist = createBitmap(256, 500, Bitmap.Config.ARGB_8888);
+        Bitmap hist = createBitmap(256, 200, Bitmap.Config.ARGB_8888);
         int histHeight = hist.getHeight() - 1;
         int histWidth = hist.getWidth();
 
@@ -105,6 +105,8 @@ class ImageTools {
 
              */
 
+            float ratio = (float) histHeight / max;
+
             for (int x = 0; x < histWidth; x++) {
                 for (int y = 1; y < histHeight; y++) {
 
@@ -113,9 +115,9 @@ class ImageTools {
                     int colorB = 0;
                     int colorA = Settings.HISTOGRAM_BACKGROUND_TRANSPARENCY;
 
-                    if (Math.sqrt(Rvalues[x] * histHeight / max) * 14 >= y) {colorR = 255; colorA = Settings.HISTOGRAM_FOREGROUND_TRANSPARENCY;}
-                    if (Math.sqrt(Gvalues[x] * histHeight / max) * 14 >= y) {colorG = 255; colorA = Settings.HISTOGRAM_FOREGROUND_TRANSPARENCY;}
-                    if (Math.sqrt(Bvalues[x] * histHeight / max) * 14 >= y) {colorB = 255; colorA = Settings.HISTOGRAM_FOREGROUND_TRANSPARENCY;}
+                    if (Math.sqrt(Rvalues[x] * ratio) * 14 >= y) {colorR = 255; colorA = Settings.HISTOGRAM_FOREGROUND_TRANSPARENCY;}
+                    if (Math.sqrt(Gvalues[x] * ratio) * 14 >= y) {colorG = 255; colorA = Settings.HISTOGRAM_FOREGROUND_TRANSPARENCY;}
+                    if (Math.sqrt(Bvalues[x] * ratio) * 14 >= y) {colorB = 255; colorA = Settings.HISTOGRAM_FOREGROUND_TRANSPARENCY;}
 
                     histPixels[x + ((histHeight - y) * histWidth)] = Color.argb(colorA, colorR, colorG, colorB);
                 }
@@ -158,6 +160,15 @@ class ImageTools {
     }
 
     static Bitmap bitmapCreate(int width, int height) {return Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);}
+
+    static void drawCircle(final Bitmap bmp, Point center, int radius, int color) {
+        final Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setColor(color);
+        Canvas selection = new Canvas(bmp);
+        selection.setBitmap(bmp);
+        selection.drawCircle(center.x, center.y, radius, paint);
+    }
 
     //TODO: Not working well yet
     static void forceRectangleRatio(Bitmap bmp, Point a, Point b) {

@@ -3,10 +3,14 @@ package com.example.retouchephoto;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
 
 import static android.graphics.Bitmap.createBitmap;
+import static android.graphics.Color.blue;
+import static android.graphics.Color.green;
+import static android.graphics.Color.red;
 
 /**
  * This class implements a way to zoom and scroll.
@@ -269,4 +273,15 @@ class ImageViewZoomScroll {
         selectCorrectScaleType();
     }
 
+    public int hueOfSelectedPixel(Point p){
+        if (p.x<this.bmp.getWidth() && p.y<this.bmp.getHeight()){
+            int choosedColor = this.bmp.getPixel(p.x, p.y);
+            float[] hsv = new float[3];
+            Color.RGBToHSV(red(choosedColor), green(choosedColor), blue(choosedColor), hsv);
+            return (int)hsv[0];
+        }
+        else{
+            return -1;
+        }
+    }
 }
