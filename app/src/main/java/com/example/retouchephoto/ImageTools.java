@@ -160,4 +160,26 @@ class ImageTools {
     static Bitmap bitmapCreate(int width, int height) {return Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);}
 
 
+    static void forceRectangleRatio(Bitmap bmp, Point a, Point b) {
+
+        // Negative values are not acceptable.
+        if (a.x < 0 || a.y < 0 ||b.x < 0 ||b.y < 0) return;
+
+        int rectangleWidth = Math.abs(a.x - b.x);
+        int rectangleHeight = Math.abs(a.y - b.y);
+
+        float rectangleRatio = (float) rectangleWidth / rectangleHeight;
+        float bmpRatio = (float) bmp.getWidth() / bmp.getHeight();
+
+        boolean rectangleWiderThenBmp = rectangleRatio > bmpRatio;
+
+        if (rectangleWiderThenBmp) {
+            b.x =  a.x + (int) ((b.x - a.x) * bmpRatio);
+        } else {
+            b.y =  a.y + (int) ((b.x - a.x) / bmpRatio);
+        }
+
+    }
+
+
 }

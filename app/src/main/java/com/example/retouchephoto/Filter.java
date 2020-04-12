@@ -62,7 +62,9 @@ class Filter {
     private FilterCategory category;
     boolean needFilterActivity = true;
     boolean allowMasking = true;
+    boolean allowHistogram = true;
     boolean allowScrollZoom = true;
+    boolean allowFilterMenu = true;
 
     Filter(String name) {
         this.name = name;
@@ -97,7 +99,7 @@ class Filter {
     void setColorSeekBar() {this.colorSeekBar = true;}
     void setFilterApplyFunction(final FilterApplyInterface newInterface) {this.myApplyInterface = newInterface;}
     void setFilterPreviewFunction(final FilterPreviewInterface newInterface) {this.myPreviewInterface = newInterface;}
-    void setFilterInitFunction(final FilterInitInterface newInterface) {this.myInitInterface = newInterface;}
+    //void setFilterInitFunction(final FilterInitInterface newInterface) {this.myInitInterface = newInterface;}
     void setIcon(Bitmap bmp){this.icon = bmp;}
 
     String getName() {return this.name;}
@@ -132,8 +134,10 @@ class Filter {
         return preview(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
     }
 
+    /*
     void init() {
         if (myInitInterface != null) myInitInterface.init();
     }
+     */
 }
 

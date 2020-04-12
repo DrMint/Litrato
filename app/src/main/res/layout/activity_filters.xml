@@ -105,19 +105,22 @@
                     android:id="@+id/pickButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="P" />
+                    android:text="P"
+                    android:visibility="visible" />
 
                 <Button
-                    android:id="@+id/brushButton"
+                    android:id="@+id/maskButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="B" />
+                    android:text="M"
+                    android:visibility="visible" />
 
                 <Button
                     android:id="@+id/histogramButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="H" />
+                    android:text="H"
+                    android:visibility="visible" />
 
             </LinearLayout>
 
@@ -129,6 +132,19 @@
                 android:layout_marginStart="40dp"
                 android:layout_weight="1"
                 android:orientation="vertical">
+
+                <SeekBar
+                    android:id="@+id/colorSeekBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/gradient_color"
+                    android:max="359"
+                    android:min="0"
+                    android:progressBackgroundTint="#00000000"
+                    android:progressTint="#00000000"
+                    android:thumbTint="#000"
+                    android:visibility="visible" />
 
                 <SeekBar
                     android:id="@+id/seekBar1"
@@ -146,41 +162,16 @@
                     android:layout_margin="10dp"
                     android:visibility="visible" />
 
-                <SeekBar
-                    android:id="@+id/colorSeekBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/gradient_color"
-                    android:max="359"
-                    android:min="0"
-                    android:progressBackgroundTint="#00000000"
-                    android:progressTint="#00000000"
-                    android:thumbTint="#000"
-                    android:visibility="visible" />
-
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_margin="15dp"
                 android:layout_marginStart="40dp"
                 android:layout_weight="0"
                 android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/seekBarValue1"
-                    android:layout_width="60dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp" />
-
-                <TextView
-                    android:id="@+id/seekBarValue2"
-                    android:layout_width="60dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp" />
 
                 <Switch
                     android:id="@+id/switch1"
@@ -188,6 +179,21 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
                     android:layout_marginStart="26dp" />
+
+                <TextView
+                    android:id="@+id/seekBarValue1"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/seekBarValue2"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:visibility="visible" />
+
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>

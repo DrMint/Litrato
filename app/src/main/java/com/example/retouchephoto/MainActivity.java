@@ -46,7 +46,6 @@ import com.google.android.material.snackbar.Snackbar;
         Refreshing the image doesn't seem to work. I suspect this is because requestLayout is asynchronous, and
         when the image refresh, it utilizes the imageView's aspect ratio before it actually changed.
         Thus, refreshing the image will actually make the problem worse.
-        [0002] - When swipping on the black area bellow the image when launching the app, it crashes
         -------------------------------------------------------------------------------------------
     New functions:
         - An idea to keep the UI interactive while saving the image at high resolution would be to
@@ -66,8 +65,8 @@ import com.google.android.material.snackbar.Snackbar;
  */
 public class MainActivity extends AppCompatActivity {
 
-    static Filter selectedFilter;
-    static Bitmap selectedBitmap;
+    static Filter subActivityFilter;
+    static Bitmap subActivityBitmap;
 
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
@@ -130,9 +129,6 @@ public class MainActivity extends AppCompatActivity {
     private Typeface submenuSelected;
 
     private int numberOfTools;
-
-    //boolean needToRefreshMiniature;
-    //private View layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -221,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (requestCode == FILTER_ACTIVITY_IS_FINISHED) {
-            Bitmap result = FiltersActivity.result;
+            Bitmap result = FiltersActivity.activityBitmap;
             if (result != null) {
                 layoutImageView.reset();
                 beforeLastFilterImage = ImageTools.bitmapClone(result);
@@ -337,8 +333,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
         // Create the GestureDetector which handles the scrolling and double tap.
         final GestureDetector myGestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.OnGestureListener() {
 
@@ -414,6 +408,49 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
             }
         });
+
+        presetsBar.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
+        filtersBar.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
+        toolsBar.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
+        contourBar.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
+        fancyBar.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
+        blurBar.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
 
         presetsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -607,6 +644,7 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newPresets);
 
+
         newPresets = new Filter("Tension Green");
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -697,6 +735,9 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
     }
 
+
+
+
     private void generateTools(){
         Filter newTools;
 
@@ -704,6 +745,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.rotate));
         newTools.allowMasking = false;
+        newTools.allowHistogram = false;
         newTools.setSeekBar1(-180, 0, 180, "deg");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -713,24 +755,17 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newTools);
 
-
-
-
-
-
-
-
-
-
         newTools = new Filter("Crop");
         newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.crop));
         newTools.allowMasking = false;
         newTools.allowScrollZoom = false;
-
+        newTools.allowHistogram = false;
+        newTools.setSwitch1(false, "Keep ratio", "Free ratio");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+                if (switch1) ImageTools.forceRectangleRatio(bmp, touchDown, touchUp);
                 ImageTools.drawRectangle(bmp, touchDown, touchUp, Color.argb(Settings.CROP_OPACITY, 255,255,255));
                 ImageTools.drawRectangle(bmp, touchDown, touchUp, Color.argb(Settings.CROP_OPACITY, 0,0,0), Settings.CROP_BORDER_SIZE);
                 return null;
@@ -744,19 +779,10 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newTools);
 
-
-
-
-
-
-
-
-
-
-
         newTools = new Filter("Flip");
         newTools.needFilterActivity = false;
         newTools.allowMasking = false;
+        newTools.allowHistogram = false;
         newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.flip));
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -771,6 +797,7 @@ public class MainActivity extends AppCompatActivity {
         newTools = new Filter("Stickers");
         newTools.setFilterCategory(FilterCategory.TOOL);
         newTools.allowMasking = false;
+        newTools.allowHistogram = false;
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.stickers));
         filters.add(newTools);
 
@@ -924,7 +951,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setFilterCategory(FilterCategory.COLOR);
         newFilter.setColorSeekBar();
         newFilter.setSeekBar1(1, 25, 360, "deg");
-        newFilter.setSwitch1(false, "Keep,", "Remove");
+        newFilter.setSwitch1(false, "Keep", "Remove");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -1027,7 +1054,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Filters > Contour
-
         newFilter = new Filter("Laplacian");
         newFilter.setFilterCategory(FilterCategory.CONTOUR);
         newFilter.setSeekBar1(1, 2, 14, "px");
@@ -1250,11 +1276,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openFiltersActivity(Filter filter, Bitmap bmp){
-        selectedFilter = filter;
-        selectedBitmap = bmp;
-        Intent intent = new Intent(this, FiltersActivity.class);
+        subActivityFilter = filter;
+        subActivityBitmap = bmp;
+        Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
         startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
-
     }
 
     static boolean isVisible(View view) {
@@ -1266,7 +1291,6 @@ public class MainActivity extends AppCompatActivity {
         for (Filter filter:filters) {
             if (filter.getFilterCategory() != FilterCategory.PRESET) {
                 filter.preview(dummyBmp, getApplicationContext());
-                Log.wtf("test", "test");
             }
         }
     }

@@ -1,8 +1,11 @@
 package com.example.retouchephoto;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -19,7 +22,10 @@ import java.util.Locale;
 
 public class FiltersActivity extends AppCompatActivity {
 
-    static Bitmap result;
+    static Filter subActivityFilter;
+    static Bitmap subActivityBitmap;
+
+    static Bitmap activityBitmap;
 
     private Bitmap originalImage;
     private Bitmap filteredImage;
@@ -34,9 +40,9 @@ public class FiltersActivity extends AppCompatActivity {
     private ImageViewZoomScroll layoutImageView;
     private Button      layoutButtonApply;
     private Button      layoutCancel;
-    private Button      layoutFilterName;
+    private Button      layoutFilterMenuButton;
     private Button      layoutPickButton;
-    private Button      layoutBrushButton;
+    private Button      layoutMaskButton;
     private Button      layoutHistogramButton;
     private ImageView   layoutHistogramView;
     private SeekBar     layoutSeekBar1;
@@ -60,9 +66,9 @@ public class FiltersActivity extends AppCompatActivity {
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
         layoutButtonApply       = findViewById(R.id.applyButton);
         layoutCancel            = findViewById(R.id.cancelButton);
-        layoutFilterName        = findViewById(R.id.filterNameButton);
+        layoutFilterMenuButton  = findViewById(R.id.filterNameButton);
         layoutPickButton        = findViewById(R.id.pickButton);
-        layoutBrushButton       = findViewById(R.id.brushButton);
+        layoutMaskButton        = findViewById(R.id.maskButton);
         layoutHistogramButton   = findViewById(R.id.histogramButton);
         layoutHistogramView     = findViewById(R.id.histogramView);
         layoutSeekBar1          = findViewById(R.id.seekBar1);
@@ -74,83 +80,88 @@ public class FiltersActivity extends AppCompatActivity {
         filterMenu              = findViewById(R.id.filtersMenu);
 
         // Selects the default image in the resource folder and set it
-        setBitmap(MainActivity.selectedBitmap);
+        setBitmap(MainActivity.subActivityBitmap);
         layoutImageView.setImageBitmap(filteredImage);
         layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
 
         layoutHistogramView.setVisibility(View.GONE);
 
-        selectedFilter = MainActivity.selectedFilter;
-        layoutFilterName.setText(selectedFilter.getName());
+        selectedFilter = MainActivity.subActivityFilter;
+        layoutFilterMenuButton.setText(selectedFilter.getName());
 
         // Initialize all the different listeners.
         initializeListener();
         initializeInterface();
+
+        //Intent intent = new Intent(this, FiltersActivity.class);
+        //startActivity(intent);
+
+        previewFilter();
     }
 
 
     private void initializeInterface() {
         inputsReady = false;
 
-        selectedFilter.init();
+        //selectedFilter.init();
 
-        if (selectedFilter.colorSeekBar) {
-            layoutColorSeekBar.setVisibility(View.VISIBLE);
-        } else {
+        if (selectedFilter.allowFilterMenu) {
+
+            // We make everything GONE
             layoutColorSeekBar.setVisibility(View.GONE);
-        }
-        layoutPickButton.setVisibility(layoutColorSeekBar.getVisibility());
+            layoutMaskButton.setVisibility(View.GONE);
+            layoutHistogramButton.setVisibility(View.GONE);
+            layoutSeekBar1.setVisibility(View.GONE);
+            layoutSeekBar2.setVisibility(View.GONE);
+            layoutSwitch1.setVisibility(View.GONE);
 
-        if (selectedFilter.allowMasking) {
-            layoutBrushButton.setVisibility(View.VISIBLE);
-        } else {
-            layoutBrushButton.setVisibility(View.GONE);
-        }
+            // And add anything we need.
 
-        if (selectedFilter.seekBar1) {
-            layoutSeekBar1.setVisibility(View.VISIBLE);
-            layoutSeekBar1.setMin(selectedFilter.seekBar1Min);
-            layoutSeekBar1.setMax(selectedFilter.seekBar1Max);
-            layoutSeekBar1.setProgress(selectedFilter.seekBar1Set);
-        } else {
-            layoutSeekBar1.setVisibility(View.INVISIBLE);
-        }
+            if (selectedFilter.colorSeekBar) layoutColorSeekBar.setVisibility(View.VISIBLE);
 
-        if (selectedFilter.seekBar2) {
-            layoutSeekBar2.setVisibility(View.VISIBLE);
-            layoutSeekBar2.setMin(selectedFilter.seekBar2Min);
-            layoutSeekBar2.setMax(selectedFilter.seekBar2Max);
-            layoutSeekBar2.setProgress(selectedFilter.seekBar2Set);
-        } else {
-            layoutSeekBar2.setVisibility(View.INVISIBLE);
-        }
 
-        if (selectedFilter.switch1) {
-            layoutSwitch1.setVisibility(View.VISIBLE);
-            layoutSwitch1.setChecked(selectedFilter.switch1Default);
-            if (layoutSwitch1.isChecked()) {
-                layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
-            } else {
-                layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
+            if (selectedFilter.allowMasking) layoutMaskButton.setVisibility(View.VISIBLE);
+            if (selectedFilter.allowHistogram) layoutHistogramButton.setVisibility(View.VISIBLE);
+
+            if (selectedFilter.seekBar1) {
+                layoutSeekBar1.setVisibility(View.VISIBLE);
+                layoutSeekBar1.setMin(selectedFilter.seekBar1Min);
+                layoutSeekBar1.setMax(selectedFilter.seekBar1Max);
+                layoutSeekBar1.setProgress(selectedFilter.seekBar1Set);
             }
 
-
-            if (!selectedFilter.seekBar2) {
-                layoutSeekBar2.setVisibility(View.INVISIBLE);
+            if (selectedFilter.seekBar2) {
+                layoutSeekBar2.setVisibility(View.VISIBLE);
+                layoutSeekBar2.setMin(selectedFilter.seekBar2Min);
+                layoutSeekBar2.setMax(selectedFilter.seekBar2Max);
+                layoutSeekBar2.setProgress(selectedFilter.seekBar2Set);
             }
 
+            if (selectedFilter.switch1) {
+                layoutSwitch1.setVisibility(View.VISIBLE);
+                layoutSwitch1.setChecked(selectedFilter.switch1Default);
+                if (layoutSwitch1.isChecked()) {
+                    layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
+                } else {
+                    layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
+                }
+            }
+
+            // Only shows the seekBarValues when the seekBars are visible.
+            layoutSeekBarValue1.setVisibility(layoutSeekBar1.getVisibility());
+            layoutSeekBarValue2.setVisibility(layoutSeekBar2.getVisibility());
+            layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar1.getProgress(), selectedFilter.seekBar1Unit));
+            layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar2.getProgress(), selectedFilter.seekBar2Unit));
+
+            // Only shows the pick tool if there is a seekBar
+            layoutPickButton.setVisibility(layoutColorSeekBar.getVisibility());
+
         } else {
-            layoutSwitch1.setVisibility(View.INVISIBLE);
+
+            filterMenu.setVisibility(View.GONE);
+            layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_GREY);
 
         }
-
-        // Only shows the seekBarValues when the seekBars are visible.
-        layoutSeekBarValue1.setVisibility(layoutSeekBar1.getVisibility());
-        layoutSeekBarValue2.setVisibility(layoutSeekBar2.getVisibility());
-        layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar1.getProgress(), selectedFilter.seekBar1Unit));
-        layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar2.getProgress(), selectedFilter.seekBar2Unit));
-
-        previewFilter();
 
         // The seek bars listener can be triggered again.
         inputsReady = true;
@@ -318,6 +329,7 @@ public class FiltersActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
 
                 if (selectedFilter.allowScrollZoom) {
+
                     myScaleDetector.onTouchEvent(event);
                     myGestureDetector.onTouchEvent(event);
 
@@ -348,16 +360,21 @@ public class FiltersActivity extends AppCompatActivity {
             }
         });
 
-        layoutFilterName.setOnClickListener(new View.OnClickListener() {
+        layoutFilterMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!MainActivity.isVisible(filterMenu)) {
-                    layoutFilterName.setBackgroundColor(Settings.COLOR_SELECTED);
-                    filterMenu.setVisibility(View.VISIBLE);
-                } else {
-                    v.setBackgroundColor(Settings.COLOR_GREY);
-                    filterMenu.setVisibility(View.GONE);
+
+                if (selectedFilter.allowFilterMenu) {
+                    if (!MainActivity.isVisible(filterMenu)) {
+                        layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
+                        filterMenu.setVisibility(View.VISIBLE);
+                    } else {
+                        v.setBackgroundColor(Settings.COLOR_GREY);
+                        filterMenu.setVisibility(View.GONE);
+                    }
                 }
+
+
             }
         });
 
@@ -415,7 +432,7 @@ public class FiltersActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                result = null;
+                activityBitmap = null;
                 finish();
             }
         });
@@ -426,16 +443,18 @@ public class FiltersActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (originalImage != null) {
                     applyFilter();
-                    result = filteredImage;
+                    activityBitmap = filteredImage;
                     finish();
                 }
             }
         });
 
-        layoutBrushButton.setOnClickListener(new View.OnClickListener() {
+        layoutMaskButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
+                startActivityForResult(intent, 3);
             }
         });
 
