@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -30,7 +31,6 @@ public class FiltersActivity extends AppCompatActivity {
     private Bitmap originalImage;
     private Bitmap filteredImage;
     private Bitmap maskBmp;
-    private Bitmap invertedMaskBmp;
     private Bitmap originalImageMasked;
 
     private Filter selectedFilter;
@@ -43,7 +43,7 @@ public class FiltersActivity extends AppCompatActivity {
      */
     private boolean inputsReady = false;
     private boolean pickBool = false;
-    private boolean brushBool = false;
+    private boolean shouldUseMask = false;
 
     private ImageViewZoomScroll layoutImageView;
     private Button      layoutButtonApply;
@@ -61,8 +61,8 @@ public class FiltersActivity extends AppCompatActivity {
     private Switch      layoutSwitch1;
     private LinearLayout filterMenu;
 
-    private Point imageTouchDown = new Point(0,0);
-    private Point imageTouchUp = new Point(0,0);
+    private Point imageTouchDown;
+    private Point imageTouchCurrent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,16 +108,28 @@ public class FiltersActivity extends AppCompatActivity {
 
         layoutHistogramView.setVisibility(View.GONE);
 
-
-
-        // Initialize all the different listeners.
+        // Initialize all the different listeners, the interface and the masks
         initializeListener();
         initializeInterface();
-
-        //Intent intent = new Intent(this, FiltersActivity.class);
-        //startActivity(intent);
+        generateMasks();
 
         previewFilter();
+    }
+
+    private void generateMasks(Bitmap bmp) {
+        maskBmp = bmp;
+
+        Bitmap invertedMaskBmp = ImageTools.bitmapClone(maskBmp);
+        FilterFunction.invert(invertedMaskBmp, getApplicationContext());
+
+        originalImageMasked = ImageTools.bitmapClone(originalImage);
+        FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, getApplicationContext(), BlendType.MULTIPLY);
+    }
+
+    private void generateMasks() {
+        Bitmap bmp = ImageTools.bitmapClone(originalImage);
+        ImageTools.fillWithColor(bmp, Color.BLACK);
+        generateMasks(bmp);
     }
 
 
@@ -128,15 +140,9 @@ public class FiltersActivity extends AppCompatActivity {
         if (requestCode == GET_MASK_IMAGE) {
             Bitmap result = FiltersActivity.activityBitmap;
             if (result != null) {
-
-                maskBmp = result;
-
-                invertedMaskBmp = ImageTools.bitmapClone(maskBmp);
-                FilterFunction.invert(invertedMaskBmp, getApplicationContext());
-
-                originalImageMasked = ImageTools.bitmapClone(originalImage);
-                FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, getApplicationContext(), BlendType.MULTIPLY);
-
+                shouldUseMask = true;
+                generateMasks(result);
+                previewFilter();
             }
         }
     }
@@ -238,7 +244,7 @@ public class FiltersActivity extends AppCompatActivity {
                     layoutSeekBar2.getProgress(),
                     layoutSwitch1.isChecked(),
                     imageTouchDown,
-                    imageTouchUp
+                    imageTouchCurrent
             );
         } else {
             result = selectedFilter.preview(
@@ -250,7 +256,7 @@ public class FiltersActivity extends AppCompatActivity {
                     layoutSeekBar2.getProgress(),
                     layoutSwitch1.isChecked(),
                     imageTouchDown,
-                    imageTouchUp
+                    imageTouchCurrent
             );
         }
 
@@ -260,7 +266,7 @@ public class FiltersActivity extends AppCompatActivity {
         }
 
         // Keep the filtered part only where the maskBmp is white.
-        if (maskBmp != null) {
+        if (shouldUseMask) {
             FilterFunction.applyTexture(filteredImage, maskBmp,getApplicationContext(),BlendType.MULTIPLY);
             FilterFunction.applyTexture(filteredImage, originalImageMasked, getApplicationContext(), BlendType.ADD);
         }
@@ -375,66 +381,45 @@ public class FiltersActivity extends AppCompatActivity {
         });
 
         // The default behavior of imageView.
-        layoutImageView.setOnTouchListener(new View.OnTouchListener() {
+
+        final View.OnTouchListener defaultImageViewListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
 
-                if (pickBool) {
-
-                    switch (event.getAction()) {
-
-                        case MotionEvent.ACTION_DOWN:
-                        case MotionEvent.ACTION_MOVE: {
-                            Point choosedPixel = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(event.getX(), event.getY()));
-                            int newHue = layoutImageView.hueOfSelectedPixel(choosedPixel);
-                            if (newHue >= 0) layoutColorSeekBar.setProgress(newHue);
-                            break;
-                        }
-
-                        case MotionEvent.ACTION_UP: {
-                            pickBool = false;
-                            inputsReady = true;
-                            previewFilter();
-                            break;
-                        }
-
-                    }
+                if (selectedFilter.allowScrollZoom) {
+                    myScaleDetector.onTouchEvent(event);
+                    myGestureDetector.onTouchEvent(event);
 
                 } else {
 
-                    if (selectedFilter.allowScrollZoom) {
-                        myScaleDetector.onTouchEvent(event);
-                        myGestureDetector.onTouchEvent(event);
+                    if (imageTouchDown == null) imageTouchDown = new Point();
+                    if (imageTouchCurrent == null) imageTouchCurrent = new Point();
 
-                    } else {
-
-                        switch (event.getAction()) {
-                            case MotionEvent.ACTION_DOWN: {
-                                imageTouchDown.x = (int) event.getX();
-                                imageTouchDown.y = (int) event.getY();
-                                imageTouchDown.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchDown));
-                                layoutImageView.sanitizeBmpCoordinates(imageTouchDown);
-                                break;
-                            }
-                            case MotionEvent.ACTION_MOVE: {
-                                imageTouchUp.x = (int) event.getX();
-                                imageTouchUp.y = (int) event.getY();
-                                imageTouchUp.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchUp));
-                                layoutImageView.sanitizeBmpCoordinates(imageTouchUp);
-                                break;
-                            }
-                            case MotionEvent.ACTION_UP: break;
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            imageTouchDown.x = (int) event.getX();
+                            imageTouchDown.y = (int) event.getY();
+                            imageTouchDown.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchDown));
+                            layoutImageView.sanitizeBmpCoordinates(imageTouchDown);
                         }
-
-                        previewFilter();
-
+                        case MotionEvent.ACTION_MOVE: {
+                            imageTouchCurrent.x = (int) event.getX();
+                            imageTouchCurrent.y = (int) event.getY();
+                            imageTouchCurrent.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchCurrent));
+                            layoutImageView.sanitizeBmpCoordinates(imageTouchCurrent);
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP: break;
                     }
+
+                    previewFilter();
 
                 }
 
                 v.performClick();
                 return true;
             }
-        });
+        };
+        layoutImageView.setOnTouchListener(defaultImageViewListener);
 
         layoutFilterMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -459,7 +444,7 @@ public class FiltersActivity extends AppCompatActivity {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (inputsReady) previewFilter();
+                if (inputsReady && selectedFilter.seekBar1AutoRefresh) previewFilter();
                 layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar1Unit));
             }
 
@@ -472,7 +457,7 @@ public class FiltersActivity extends AppCompatActivity {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (inputsReady) previewFilter();
+                if (inputsReady && selectedFilter.seekBar2AutoRefresh) previewFilter();
                 layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar2Unit));
             }
 
@@ -484,7 +469,7 @@ public class FiltersActivity extends AppCompatActivity {
         layoutColorSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (inputsReady) previewFilter();
+                if (inputsReady && selectedFilter.colorSeekBarAutoRefresh) previewFilter();
             }
             public void onStartTrackingTouch(SeekBar seekBar) {}
             public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -499,7 +484,7 @@ public class FiltersActivity extends AppCompatActivity {
                 } else {
                     layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
                 }
-                if (inputsReady) previewFilter();
+                if (inputsReady && selectedFilter.switch1AutoRefresh) previewFilter();
             }
         });
 
@@ -530,24 +515,24 @@ public class FiltersActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                /*
                 Filter maskFilter;
-
                 maskFilter = new Filter("Create Mask");
-                maskFilter.setFilterCategory(FilterCategory.FANCY);
                 maskFilter.allowMasking = false;
                 maskFilter.allowHistogram = false;
                 maskFilter.allowScrollZoom = false;
                 maskFilter.setSeekBar1(5,30,300, "px");
                 maskFilter.setSeekBar2(0,50,100, "%");
+                maskFilter.setSwitch1(true, "Black", "White");
+                maskFilter.seekBar1AutoRefresh = false;
+                maskFilter.seekBar2AutoRefresh = false;
+                maskFilter.switch1AutoRefresh = false;
                 maskFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
                     @Override
                     public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-                        // storageBmp = storageBmp avec du blanc / noir dans sur un circle de taille seekBar  l'emplacement de touchUp
                         if (switch1) {
-                            ImageTools.drawRectangle(bmp, touchDown, touchUp, Color.WHITE);
+                            ImageTools.drawCircle(maskBmp, touchUp, (int) seekBar, Color.WHITE);
                         } else {
-                            ImageTools.drawRectangle(bmp, touchDown, touchUp, Color.BLACK);
+                            ImageTools.drawCircle(maskBmp, touchUp, (int) seekBar, Color.BLACK);
                         }
                         FilterFunction.applyTexture(bmp, maskBmp, context, BlendType.OVERLAY, seekBar2 / 100f);
                         return null;
@@ -557,34 +542,42 @@ public class FiltersActivity extends AppCompatActivity {
                 maskFilter.setFilterApplyFunction(new FilterApplyInterface() {
                     @Override
                     public Bitmap apply(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-                        FilterFunction.applyTexture(bmp, maskBmp, context, BlendType.OVERLAY, 0);
-                        return null;
+                        return maskBmp;
                     }
                 });
 
-                 */
-
-
-
-                Filter newFilter = new Filter("Threshold");
-                newFilter.setFilterCategory(FilterCategory.FANCY);
-                newFilter.setSeekBar1(0, 128, 256, "");
-                newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
-                    @Override
-                    public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-                        FilterFunction.threshold(bmp, context, seekBar / 256f);
-                        return null;
-                    }
-                });
-
-
-
-                subActivityFilter = newFilter;
+                subActivityFilter = maskFilter;
                 subActivityBitmap = originalImage;
                 Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
                 startActivityForResult(intent, GET_MASK_IMAGE);
             }
         });
+
+
+        final View.OnTouchListener pickTouchListener = new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+
+                    case MotionEvent.ACTION_DOWN:
+                    case MotionEvent.ACTION_MOVE: {
+                        Point chosenPixel = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(event.getX(), event.getY()));
+                        int newHue = ImageTools.getHueFromColor(layoutImageView.getPixelAt(chosenPixel));
+                        if (newHue >= 0) layoutColorSeekBar.setProgress(newHue);
+                        break;
+                    }
+
+                    case MotionEvent.ACTION_UP: {
+                        layoutPickButton.performClick();
+                        break;
+                    }
+
+                }
+                v.performClick();
+                return true;
+            }
+        };
+
 
         layoutPickButton.setOnClickListener(new View.OnClickListener() {
 
@@ -594,8 +587,10 @@ public class FiltersActivity extends AppCompatActivity {
                 if (pickBool) {
                     inputsReady = false;
                     layoutImageView.setImageBitmap(originalImage);
+                    layoutImageView.setOnTouchListener(pickTouchListener);
                 } else {
                     inputsReady = true;
+                    layoutImageView.setOnTouchListener(defaultImageViewListener);
                     previewFilter();
                 }
             }
@@ -621,4 +616,10 @@ public class FiltersActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        layoutCancel.performClick();
+    }
+
 }

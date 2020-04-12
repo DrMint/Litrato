@@ -200,10 +200,6 @@ public class MainActivity extends AppCompatActivity {
             Bitmap mBitmap;
             try {
                 mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
-
-                /* Puts the spinner back to the default position */
-                //layoutSpinner.setSelection(0);
-
                 setBitmap(mBitmap);
 
             } catch (IOException e) {

@@ -82,7 +82,6 @@ class ImageViewZoomScroll {
             if (center.y + newHeight <= bmp.getHeight() && center.x + newWidth <= bmp.getWidth()) {
                 imageView.setImageBitmap(createBitmap(bmp, center.x, center.y, newWidth, newHeight));
             }
-
         }
     }
 
@@ -273,15 +272,8 @@ class ImageViewZoomScroll {
         selectCorrectScaleType();
     }
 
-    public int hueOfSelectedPixel(Point p){
-        if (p.x<this.bmp.getWidth() && p.y<this.bmp.getHeight()){
-            int choosedColor = this.bmp.getPixel(p.x, p.y);
-            float[] hsv = new float[3];
-            Color.RGBToHSV(red(choosedColor), green(choosedColor), blue(choosedColor), hsv);
-            return (int)hsv[0];
-        }
-        else{
-            return -1;
-        }
+    int getPixelAt(Point p) {
+        sanitizeBmpCoordinates(p);
+        return bmp.getPixel(p.x, p.y);
     }
 }

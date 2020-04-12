@@ -23,12 +23,14 @@ class Filter {
     /**
      * Does this filter utilize the colorSeekBar.
      */
-    boolean colorSeekBar;
+    boolean colorSeekBar = false;
+    boolean colorSeekBarAutoRefresh = true;
 
     /**
      * Does this filter utilize the first seekBar.
      */
-    boolean seekBar1;
+    boolean seekBar1 = false;
+    boolean seekBar1AutoRefresh = true;
     int seekBar1Min;
     int seekBar1Set;
     int seekBar1Max;
@@ -37,7 +39,8 @@ class Filter {
     /**
      * Does this filter utilize the second seekBar.
      */
-    boolean seekBar2;
+    boolean seekBar2 = false;
+    boolean seekBar2AutoRefresh = true;
     int seekBar2Min;
     int seekBar2Set;
     int seekBar2Max;
@@ -46,7 +49,8 @@ class Filter {
     /**
      * Does this filter utilize the first switch.
      */
-    boolean switch1;
+    boolean switch1 = false;
+    boolean switch1AutoRefresh = true;
     boolean switch1Default;
     String switch1UnitFalse;
     String switch1UnitTrue;

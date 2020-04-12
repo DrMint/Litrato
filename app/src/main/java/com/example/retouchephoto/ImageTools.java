@@ -6,6 +6,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 
 import static android.graphics.Bitmap.createBitmap;
+import static android.graphics.Color.blue;
+import static android.graphics.Color.green;
+import static android.graphics.Color.red;
 
 class ImageTools {
 
@@ -134,18 +137,20 @@ class ImageTools {
 
 
     static void drawRectangle(final Bitmap bmp, Point a, Point b, int color, int thickness) {
-        if (!a.isEquals(b)) {
-            Canvas myCanvas = new Canvas(bmp);
+        if (a != null && b!= null) {
+            if (!a.isEquals(b)) {
+                Canvas myCanvas = new Canvas(bmp);
 
-            Paint paint = new Paint();
-            if (thickness > 0) {
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(Settings.CROP_BORDER_SIZE);
-            } else {
-                paint.setStyle(Paint.Style.FILL);
+                Paint paint = new Paint();
+                if (thickness > 0) {
+                    paint.setStyle(Paint.Style.STROKE);
+                    paint.setStrokeWidth(Settings.CROP_BORDER_SIZE);
+                } else {
+                    paint.setStyle(Paint.Style.FILL);
+                }
+                paint.setColor(color);
+                myCanvas.drawRect(a.x, a.y, b.x, b.y, paint);
             }
-            paint.setColor(color);
-            myCanvas.drawRect(a.x, a.y, b.x, b.y, paint);
         }
     }
 
@@ -162,12 +167,14 @@ class ImageTools {
     static Bitmap bitmapCreate(int width, int height) {return Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);}
 
     static void drawCircle(final Bitmap bmp, Point center, int radius, int color) {
-        final Paint paint = new Paint();
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        paint.setColor(color);
-        Canvas selection = new Canvas(bmp);
-        selection.setBitmap(bmp);
-        selection.drawCircle(center.x, center.y, radius, paint);
+        if (center != null && radius > 0) {
+            final Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(color);
+            Canvas selection = new Canvas(bmp);
+            selection.setBitmap(bmp);
+            selection.drawCircle(center.x, center.y, radius, paint);
+        }
     }
 
     //TODO: Not working well yet
@@ -191,6 +198,13 @@ class ImageTools {
         }
 
     }
+
+    static int getHueFromColor(int color){
+        float[] hsv = new float[3];
+        Color.RGBToHSV(red(color), green(color), blue(color), hsv);
+        return (int) hsv[0];
+    }
+
 
 
 }
