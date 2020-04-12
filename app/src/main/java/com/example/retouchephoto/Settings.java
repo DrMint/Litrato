@@ -53,9 +53,13 @@ class Settings {
     static final int MINIATURE_BMP_SIZE = 100;
 
     static final int MINIATURE_DISPLAYED_SIZE = 250;
+    static final int TOOL_DISPLAYED_SIZE = 150;
 
     static final int COLOR_BACKGROUND = Color.rgb(0,0,0);
     static final int COLOR_GREY = Color.rgb(40,40,40);
     static final int COLOR_SELECTED = Color.rgb(70,70,70);
+
+    static final int HISTOGRAM_BACKGROUND_TRANSPARENCY = 100;
+    static final int HISTOGRAM_FOREGROUND_TRANSPARENCY = 200;
 
 }

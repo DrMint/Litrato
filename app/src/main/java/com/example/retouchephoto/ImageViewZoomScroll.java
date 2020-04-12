@@ -2,6 +2,7 @@ package com.example.retouchephoto;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
@@ -235,7 +236,11 @@ class ImageViewZoomScroll {
         int iViewHeight = imageView.getMeasuredHeight();
 
         // If iView.getMeasuredWidth returns a null value, it means the UI is still not ready. Aborts.
-        if (iViewWidth == 0 || iViewHeight == 0) return;
+        if (iViewWidth == 0 || iViewHeight == 0) {
+            newWidth = bmp.getWidth();
+            newHeight = bmp.getHeight();
+            return;
+        }
 
         // If the image ratio is taller than the imageView ratio
         if ((float) bmp.getWidth() / bmp.getHeight() > (float) (iViewWidth) / iViewHeight) {

@@ -18,7 +18,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".FiltersActivity" />
-        <activity android:name=".MainActivity_old" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

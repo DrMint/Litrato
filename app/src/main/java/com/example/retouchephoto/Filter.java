@@ -2,7 +2,6 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.View;
 
 /**
@@ -11,12 +10,6 @@ import android.view.View;
  * @author Thomas Barillot
  * @version 1.0
  * @since   2019-01-08
- */
-
-/*  The Android Studio seems to think my function aren't use in other classes inside
-    this package. It would like me to add "protected" to my function which would
-    prevent MainActivity to use those filter...
-    I will disable this warning for now.
  */
 
 class Filter {
@@ -57,19 +50,27 @@ class Filter {
     String switch1UnitFalse;
     String switch1UnitTrue;
 
+    /**
+     * Only for generate Tools Button dynamically
+     */
+    private Bitmap icon;
+
     private FilterApplyInterface myApplyInterface;
     private FilterPreviewInterface myPreviewInterface;
     private FilterInitInterface myInitInterface;
-    private View.OnTouchListener myImageViewTouchListener;
 
     private FilterCategory category;
+    boolean needFilterActivity = true;
+    boolean allowMasking = true;
+    boolean allowHistogram = true;
+    boolean allowScrollZoom = true;
+    boolean allowFilterMenu = true;
 
     Filter(String name) {
         this.name = name;
     }
 
     //Getters and Setters
-    String getName() {return this.name;}
 
     void setSeekBar1(int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Unit) {
         this.seekBar1 = true;
@@ -94,34 +95,16 @@ class Filter {
         this.switch1UnitTrue = switch1UnitTrue;
     }
 
-    void setFilterCategory(FilterCategory category) {this.category = category;}
+    void setFilterCategory(FilterCategory category) {this.category = category; if (category == FilterCategory.PRESET) needFilterActivity = false;}
+    void setColorSeekBar() {this.colorSeekBar = true;}
+    void setFilterApplyFunction(final FilterApplyInterface newInterface) {this.myApplyInterface = newInterface;}
+    void setFilterPreviewFunction(final FilterPreviewInterface newInterface) {this.myPreviewInterface = newInterface;}
+    //void setFilterInitFunction(final FilterInitInterface newInterface) {this.myInitInterface = newInterface;}
+    void setIcon(Bitmap bmp){this.icon = bmp;}
 
-    void setColorSeekBar() {
-        this.colorSeekBar = true;
-    }
-
-    void setFilterApplyFunction(final FilterApplyInterface newInterface) {
-        this.myApplyInterface = newInterface;
-    }
-
-    void setFilterPreviewFunction(final FilterPreviewInterface newInterface) {
-        this.myPreviewInterface = newInterface;
-    }
-
-    void setFilterInitFunction(final FilterInitInterface newInterface) {
-        this.myInitInterface = newInterface;
-    }
-
-    void setImageViewTouchListener(final View.OnTouchListener newTouchListener) {
-        this.myImageViewTouchListener = newTouchListener;
-    }
-
-    FilterCategory getFilterCategory() {return this.category;}
-
-    View.OnTouchListener getImageViewTouchListener() {
-        return myImageViewTouchListener;
-    }
-
+    String getName() {return this.name;}
+    Bitmap getIcon(){return icon;}
+    FilterCategory getFilterCategory() {return category;}
 
 
     /**
@@ -133,26 +116,28 @@ class Filter {
      *  @param seekBar the value of seekBar1.
      *  @param seekBar2 the value of seeBar2.
      */
-    Bitmap apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
-        if (myApplyInterface != null) return myApplyInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
-        return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+    Bitmap apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+        if (myApplyInterface != null) return myApplyInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+        return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
     }
 
     Bitmap apply(final Bitmap bmp, final Context context) {
-        return apply(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default);
+        return apply(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
     }
 
-    Bitmap preview(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
-        if (myPreviewInterface != null) return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+    Bitmap preview(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+        if (myPreviewInterface != null) return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
         return null;
     }
 
     Bitmap preview(final Bitmap bmp, final Context context) {
-        return preview(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default);
+        return preview(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
     }
 
+    /*
     void init() {
         if (myInitInterface != null) myInitInterface.init();
     }
+     */
 }
 
