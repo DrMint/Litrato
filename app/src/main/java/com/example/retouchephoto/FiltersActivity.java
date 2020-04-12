@@ -378,45 +378,56 @@ public class FiltersActivity extends AppCompatActivity {
         layoutImageView.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
 
-                if (selectedFilter.allowScrollZoom) {
-                    myScaleDetector.onTouchEvent(event);
-                    myGestureDetector.onTouchEvent(event);
+                if (pickBool) {
 
-                }
-                if (pickBool){
-                    layoutImageView.setImageBitmap(originalImage);
-                    if (layoutColorSeekBar.getVisibility() == View.VISIBLE) {
-                        layoutImageView.setOnTouchListener(new View.OnTouchListener() {
-                            @Override
-                            public boolean onTouch(View v, MotionEvent event) {
-                                Point choosedPixel = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(event.getX(), event.getY()));
-                                int newHue = layoutImageView.hueOfSelectedPixel(choosedPixel);
-                                if (newHue>=0) {
-                                    layoutColorSeekBar.setProgress(layoutImageView.hueOfSelectedPixel(choosedPixel));
-                                }
-                                return false;
-                            }
-                        });
-                    }
-                }
-                else {
                     switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN: {
-                            imageTouchDown.x = (int) event.getX();
-                            imageTouchDown.y = (int) event.getY();
-                            imageTouchDown.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchDown));
-                            layoutImageView.sanitizeBmpCoordinates(imageTouchDown);
-                        }
+
+                        case MotionEvent.ACTION_DOWN:
                         case MotionEvent.ACTION_MOVE: {
-                            imageTouchUp.x = (int) event.getX();
-                            imageTouchUp.y = (int) event.getY();
-                            imageTouchUp.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchUp));
-                            layoutImageView.sanitizeBmpCoordinates(imageTouchUp);
+                            Point choosedPixel = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(event.getX(), event.getY()));
+                            int newHue = layoutImageView.hueOfSelectedPixel(choosedPixel);
+                            if (newHue >= 0) layoutColorSeekBar.setProgress(newHue);
+                            break;
                         }
-                        case MotionEvent.ACTION_UP: break;
+
+                        case MotionEvent.ACTION_UP: {
+                            pickBool = false;
+                            inputsReady = true;
+                            previewFilter();
+                            break;
+                        }
+
                     }
 
-                    previewFilter();
+                } else {
+
+                    if (selectedFilter.allowScrollZoom) {
+                        myScaleDetector.onTouchEvent(event);
+                        myGestureDetector.onTouchEvent(event);
+
+                    } else {
+
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN: {
+                                imageTouchDown.x = (int) event.getX();
+                                imageTouchDown.y = (int) event.getY();
+                                imageTouchDown.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchDown));
+                                layoutImageView.sanitizeBmpCoordinates(imageTouchDown);
+                                break;
+                            }
+                            case MotionEvent.ACTION_MOVE: {
+                                imageTouchUp.x = (int) event.getX();
+                                imageTouchUp.y = (int) event.getY();
+                                imageTouchUp.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchUp));
+                                layoutImageView.sanitizeBmpCoordinates(imageTouchUp);
+                                break;
+                            }
+                            case MotionEvent.ACTION_UP: break;
+                        }
+
+                        previewFilter();
+
+                    }
 
                 }
 
@@ -579,9 +590,13 @@ public class FiltersActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v){
-                pickBool=!pickBool;
-                if (!pickBool){
-                    pickBool=false;
+                pickBool = !pickBool;
+                if (pickBool) {
+                    inputsReady = false;
+                    layoutImageView.setImageBitmap(originalImage);
+                } else {
+                    inputsReady = true;
+                    previewFilter();
                 }
             }
         });
