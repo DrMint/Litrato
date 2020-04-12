@@ -153,6 +153,7 @@ class ImageTools {
     }
 
     static Bitmap bitmapClone(Bitmap source) {
+        if (source == null) return null;
         return source.copy(source.getConfig(), true);
     }
 

@@ -21,7 +21,6 @@ import java.util.Locale;
 public class FiltersActivity extends AppCompatActivity {
 
     static Bitmap result;
-    static boolean hasChanged = false;
 
     private Bitmap originalImage;
     private Bitmap filteredImage;
@@ -106,9 +105,15 @@ public class FiltersActivity extends AppCompatActivity {
         if (selectedFilter.colorSeekBar) {
             layoutColorSeekBar.setVisibility(View.VISIBLE);
         } else {
-            layoutColorSeekBar.setVisibility(View.INVISIBLE);
+            layoutColorSeekBar.setVisibility(View.GONE);
         }
         layoutPickButton.setVisibility(layoutColorSeekBar.getVisibility());
+
+        if (selectedFilter.allowMasking) {
+            layoutBrushButton.setVisibility(View.VISIBLE);
+        } else {
+            layoutBrushButton.setVisibility(View.GONE);
+        }
 
         if (selectedFilter.seekBar1) {
             layoutSeekBar1.setVisibility(View.VISIBLE);
@@ -401,7 +406,6 @@ public class FiltersActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (originalImage != null) {
                     result = filteredImage;
-                    hasChanged = true;
                     finish();
                 }
             }

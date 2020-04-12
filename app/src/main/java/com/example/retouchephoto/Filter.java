@@ -54,7 +54,6 @@ class Filter {
      * Only for generate Tools Button dynamically
      */
     private Bitmap icon;
-    private int line;
 
     private FilterApplyInterface myApplyInterface;
     private FilterPreviewInterface myPreviewInterface;
@@ -62,13 +61,14 @@ class Filter {
     private View.OnTouchListener myImageViewTouchListener;
 
     private FilterCategory category;
+    boolean needFilterActivity = true;
+    boolean allowMasking = true;
 
     Filter(String name) {
         this.name = name;
     }
 
     //Getters and Setters
-    String getName() {return this.name;}
 
     void setSeekBar1(int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Unit) {
         this.seekBar1 = true;
@@ -93,50 +93,18 @@ class Filter {
         this.switch1UnitTrue = switch1UnitTrue;
     }
 
-    void setFilterCategory(FilterCategory category) {this.category = category;}
+    void setFilterCategory(FilterCategory category) {this.category = category; if (category == FilterCategory.PRESET) needFilterActivity = false;}
+    void setColorSeekBar() {this.colorSeekBar = true;}
+    void setFilterApplyFunction(final FilterApplyInterface newInterface) {this.myApplyInterface = newInterface;}
+    void setFilterPreviewFunction(final FilterPreviewInterface newInterface) {this.myPreviewInterface = newInterface;}
+    void setFilterInitFunction(final FilterInitInterface newInterface) {this.myInitInterface = newInterface;}
+    void setImageViewTouchListener(final View.OnTouchListener newTouchListener) {this.myImageViewTouchListener = newTouchListener;}
+    void setIcon(Bitmap bmp){this.icon = bmp;}
 
-    void setColorSeekBar() {
-        this.colorSeekBar = true;
-    }
-
-    void setFilterApplyFunction(final FilterApplyInterface newInterface) {
-        this.myApplyInterface = newInterface;
-    }
-
-    void setFilterPreviewFunction(final FilterPreviewInterface newInterface) {
-        this.myPreviewInterface = newInterface;
-    }
-
-    void setFilterInitFunction(final FilterInitInterface newInterface) {
-        this.myInitInterface = newInterface;
-    }
-
-    void setImageViewTouchListener(final View.OnTouchListener newTouchListener) {
-        this.myImageViewTouchListener = newTouchListener;
-    }
-
-    void setToolsIcon(Bitmap bmp){
-        this.icon = bmp;
-    }
-
-    Bitmap getToolsIcon(){
-        return icon;
-    }
-
-    void setToolsLine(int line){
-        this.line = line;
-    }
-
-    int getToolsline(){
-        return line;
-    }
-
-    FilterCategory getFilterCategory() {return this.category;}
-
-    View.OnTouchListener getImageViewTouchListener() {
-        return myImageViewTouchListener;
-    }
-
+    String getName() {return this.name;}
+    Bitmap getIcon(){return icon;}
+    FilterCategory getFilterCategory() {return category;}
+    View.OnTouchListener getImageViewTouchListener() {return myImageViewTouchListener;}
 
 
     /**
