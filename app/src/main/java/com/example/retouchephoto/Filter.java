@@ -58,11 +58,11 @@ class Filter {
     private FilterApplyInterface myApplyInterface;
     private FilterPreviewInterface myPreviewInterface;
     private FilterInitInterface myInitInterface;
-    private View.OnTouchListener myImageViewTouchListener;
 
     private FilterCategory category;
     boolean needFilterActivity = true;
     boolean allowMasking = true;
+    boolean allowScrollZoom = true;
 
     Filter(String name) {
         this.name = name;
@@ -98,13 +98,11 @@ class Filter {
     void setFilterApplyFunction(final FilterApplyInterface newInterface) {this.myApplyInterface = newInterface;}
     void setFilterPreviewFunction(final FilterPreviewInterface newInterface) {this.myPreviewInterface = newInterface;}
     void setFilterInitFunction(final FilterInitInterface newInterface) {this.myInitInterface = newInterface;}
-    void setImageViewTouchListener(final View.OnTouchListener newTouchListener) {this.myImageViewTouchListener = newTouchListener;}
     void setIcon(Bitmap bmp){this.icon = bmp;}
 
     String getName() {return this.name;}
     Bitmap getIcon(){return icon;}
     FilterCategory getFilterCategory() {return category;}
-    View.OnTouchListener getImageViewTouchListener() {return myImageViewTouchListener;}
 
 
     /**
@@ -116,22 +114,22 @@ class Filter {
      *  @param seekBar the value of seekBar1.
      *  @param seekBar2 the value of seeBar2.
      */
-    Bitmap apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
-        if (myApplyInterface != null) return myApplyInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
-        return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+    Bitmap apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+        if (myApplyInterface != null) return myApplyInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+        return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
     }
 
     Bitmap apply(final Bitmap bmp, final Context context) {
-        return apply(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default);
+        return apply(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
     }
 
-    Bitmap preview(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1) {
-        if (myPreviewInterface != null) return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1);
+    Bitmap preview(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+        if (myPreviewInterface != null) return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
         return null;
     }
 
     Bitmap preview(final Bitmap bmp, final Context context) {
-        return preview(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default);
+        return preview(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
     }
 
     void init() {

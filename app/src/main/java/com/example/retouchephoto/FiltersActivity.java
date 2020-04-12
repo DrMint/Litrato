@@ -1,7 +1,6 @@
 package com.example.retouchephoto;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.GestureDetector;
@@ -48,7 +47,8 @@ public class FiltersActivity extends AppCompatActivity {
     private Switch      layoutSwitch1;
     private LinearLayout filterMenu;
 
-    private View.OnTouchListener defaultImageViewTouchListener;
+    private Point imageTouchDown = new Point(0,0);
+    private Point imageTouchUp = new Point(0,0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,14 +93,6 @@ public class FiltersActivity extends AppCompatActivity {
         inputsReady = false;
 
         selectedFilter.init();
-
-        // Apply the custom filterTouchListener to layoutImageView if it exists, else revert to the default one.
-        View.OnTouchListener filterTouchListener = selectedFilter.getImageViewTouchListener();
-        if (filterTouchListener == null) {
-            layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
-        } else {
-            layoutImageView.setOnTouchListener(filterTouchListener);
-        }
 
         if (selectedFilter.colorSeekBar) {
             layoutColorSeekBar.setVisibility(View.VISIBLE);
@@ -190,7 +182,10 @@ public class FiltersActivity extends AppCompatActivity {
                     layoutColorSeekBar.getProgress(),
                     layoutSeekBar1.getProgress(),
                     layoutSeekBar2.getProgress(),
-                    layoutSwitch1.isChecked());
+                    layoutSwitch1.isChecked(),
+                    imageTouchDown,
+                    imageTouchUp
+            );
         } else {
             result = selectedFilter.preview(
                     filteredImage,
@@ -198,9 +193,11 @@ public class FiltersActivity extends AppCompatActivity {
                     layoutColorSeekBar.getProgress(),
                     layoutSeekBar1.getProgress(),
                     layoutSeekBar2.getProgress(),
-                    layoutSwitch1.isChecked());
+                    layoutSwitch1.isChecked(),
+                    imageTouchDown,
+                    imageTouchUp
+            );
         }
-
 
         // If the filter return a bitmap, filteredImage becomes this bitmap
         if (result != null) {
@@ -208,7 +205,7 @@ public class FiltersActivity extends AppCompatActivity {
         }
 
         // Refresh the image viewer and the histogram.
-        refreshImageView();
+        if (!apply) refreshImageView();
     }
 
     /**
@@ -317,16 +314,39 @@ public class FiltersActivity extends AppCompatActivity {
         });
 
         // The default behavior of imageView.
-        defaultImageViewTouchListener = new View.OnTouchListener() {
+        layoutImageView.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
-                myScaleDetector.onTouchEvent(event);
-                myGestureDetector.onTouchEvent(event);
+
+                if (selectedFilter.allowScrollZoom) {
+                    myScaleDetector.onTouchEvent(event);
+                    myGestureDetector.onTouchEvent(event);
+
+                } else {
+
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            imageTouchDown.x = (int) event.getX();
+                            imageTouchDown.y = (int) event.getY();
+                            imageTouchDown.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchDown));
+                            layoutImageView.sanitizeBmpCoordinates(imageTouchDown);
+                        }
+                        case MotionEvent.ACTION_MOVE: {
+                            imageTouchUp.x = (int) event.getX();
+                            imageTouchUp.y = (int) event.getY();
+                            imageTouchUp.set(layoutImageView.imageViewTouchPointToBmpCoordinates(imageTouchUp));
+                            layoutImageView.sanitizeBmpCoordinates(imageTouchUp);
+                        }
+                        case MotionEvent.ACTION_UP: break;
+                    }
+
+                    previewFilter();
+
+                }
+
                 v.performClick();
                 return true;
             }
-        };
-        layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
-
+        });
 
         layoutFilterName.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -405,6 +425,7 @@ public class FiltersActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (originalImage != null) {
+                    applyFilter();
                     result = filteredImage;
                     finish();
                 }

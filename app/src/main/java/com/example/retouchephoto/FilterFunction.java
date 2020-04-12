@@ -623,7 +623,6 @@ class FilterFunction {
                 script.forEach_overlay(input, output);
         }
 
-
         output.copyTo(bmp);
         cleanRenderScript(script, rs, input, output);
     }
