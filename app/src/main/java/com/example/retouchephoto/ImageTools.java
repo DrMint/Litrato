@@ -159,7 +159,7 @@ class ImageTools {
 
     static Bitmap bitmapCreate(int width, int height) {return Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);}
 
-
+    //TODO: Not working well yet
     static void forceRectangleRatio(Bitmap bmp, Point a, Point b) {
 
         // Negative values are not acceptable.

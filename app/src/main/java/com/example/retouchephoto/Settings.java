@@ -62,4 +62,6 @@ class Settings {
     static final int HISTOGRAM_BACKGROUND_TRANSPARENCY = 100;
     static final int HISTOGRAM_FOREGROUND_TRANSPARENCY = 200;
 
+    static final String ACTIVITY_EXTRA_CALLER = "CallerActivity";
+
 }

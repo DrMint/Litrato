@@ -545,7 +545,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.removeAColor(bmp, context, 79, 72);
                 FilterFunction.removeAColor(bmp, context, 129, 99);
                 FilterFunction.removeAColor(bmp, context, 294, 40);
@@ -559,7 +559,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.invert(bmp, context);
                 return null;
             }
@@ -570,7 +570,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.toExtDyn(bmp, context, 25, 255);
                 FilterFunction.saturation(bmp, context, 0.7f);
                 FilterFunction.brightness(bmp, context, 100);
@@ -583,7 +583,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.saturation(bmp, context, 0.4f);
                 FilterFunction.temperature(bmp, context, 5.8f);
                 return bmp;
@@ -595,7 +595,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.constrastBurn(bmp, context, 0.08f);
                 FilterFunction.temperature(bmp, context, 2f);
                 return bmp;
@@ -607,7 +607,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.brightness(bmp, context, 60);
                 FilterFunction.temperature(bmp, context, -8f);
                 return bmp;
@@ -619,7 +619,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.removeAColor(bmp, context, 232, 109);
                 FilterFunction.removeAColor(bmp, context, 189, 83);
                 return bmp;
@@ -631,7 +631,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.gaussianBlur(bmp, context, 2);
                 FilterFunction.saturation(bmp, context, 0);
                 FilterFunction.temperature(bmp, context, 10);
@@ -649,7 +649,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.removeAColor(bmp, context, 270, 108);
                 FilterFunction.saturation(bmp, context, 0.71f);
                 FilterFunction.tint(bmp, context, -3.6f);
@@ -662,7 +662,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.constrastBurn(bmp, context, -0.1f);
                 FilterFunction.burnValues(bmp, context, -0.2f);
                 FilterFunction.saturation(bmp, context, 0.4f);
@@ -677,7 +677,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.noise(bmp, context, 20, false);
                 FilterFunction.gaussianBlur(bmp, context, 2);
                 FilterFunction.saturation(bmp, context, 0.6f);
@@ -692,7 +692,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.gamma(bmp, context, 0.6f);
                 FilterFunction.saturation(bmp, context, 0.3f);
                 FilterFunction.tint(bmp, context, 2.9f);
@@ -708,7 +708,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.constrastBurn(bmp, context, -0.29f);
                 FilterFunction.saturation(bmp, context, 0.6f);
                 FilterFunction.tint(bmp, context, -1f);
@@ -722,7 +722,7 @@ public class MainActivity extends AppCompatActivity {
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.constrastBurn(bmp, context, -0.23f);
                 FilterFunction.brightness(bmp, context, 20);
                 FilterFunction.saturation(bmp, context, 0.7f);
@@ -749,7 +749,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSeekBar1(-180, 0, 180, "deg");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 return FilterFunction.rotate(bmp, seekBar);
             }
         });
@@ -764,7 +764,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSwitch1(false, "Keep ratio", "Free ratio");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 if (switch1) ImageTools.forceRectangleRatio(bmp, touchDown, touchUp);
                 ImageTools.drawRectangle(bmp, touchDown, touchUp, Color.argb(Settings.CROP_OPACITY, 255,255,255));
                 ImageTools.drawRectangle(bmp, touchDown, touchUp, Color.argb(Settings.CROP_OPACITY, 0,0,0), Settings.CROP_BORDER_SIZE);
@@ -773,7 +773,7 @@ public class MainActivity extends AppCompatActivity {
         });
         newTools.setFilterApplyFunction(new FilterApplyInterface() {
             @Override
-            public Bitmap apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap apply(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 return FilterFunction.crop(bmp, touchDown, touchUp);
             }
         });
@@ -787,7 +787,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.flip));
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.mirror(bmp, context);
                 return null;
             }
@@ -808,7 +808,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSeekBar2(-100, 0, 100, "");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 if (seekBar <= 0) seekBar *= -seekBar;
                 FilterFunction.brightness(bmp, context, seekBar * 2.55f);
                 FilterFunction.gamma(bmp, context, seekBar2 / 100f + 1f);
@@ -824,7 +824,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSeekBar2(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.constrastBurn(bmp, context, seekBar / 100f);
                 FilterFunction.burnValues(bmp, context, seekBar2 / 50f);
                 return null;
@@ -838,7 +838,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.sharpen(bmp, context, seekBar / 200f);
                 return null;
             }
@@ -851,7 +851,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSwitch1(false, "Linear", "Dynamic");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 if (switch1) {
                     FilterFunction.histogramEqualization(bmp, context);
                 } else {
@@ -868,7 +868,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSeekBar1(0, 100, 200, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.saturation(bmp, context,seekBar / 100f);
                 return null;
             }
@@ -882,7 +882,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSwitch1(false,"B&W Noise", "Color Noise");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.noise(bmp, context, (int) seekBar, switch1);
                 return null;
             }
@@ -895,7 +895,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.temperature(bmp, context, seekBar / 10f);
                 return null;
             }
@@ -908,7 +908,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.hueShift(bmp, context,seekBar);
                 return null;
             }
@@ -928,7 +928,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(0,100,100,"");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.colorize(bmp, context, colorSeekHue, seekBar / 100f, true);
                 return null;
             }
@@ -940,7 +940,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setColorSeekBar();
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.colorize(bmp, context, colorSeekHue,0, false);
                 return null;
             }
@@ -954,7 +954,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSwitch1(false, "Keep", "Remove");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 if (switch1) {
                     FilterFunction.removeAColor(bmp, context, colorSeekHue,(int)seekBar);
                 } else {
@@ -970,7 +970,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(-180, 0, 180, "deg");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.hueShift(bmp, context,seekBar);
                 return null;
             }
@@ -988,7 +988,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(0, 128, 256, "");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.threshold(bmp, context, seekBar / 256f);
                 return null;
             }
@@ -1001,7 +1001,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSwitch1(true,"Color", "B&W");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.posterize(bmp, context, (int) seekBar, switch1);
                 return null;
             }
@@ -1018,7 +1018,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(1, 2, 19, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.averageBlur(bmp, context, (int) seekBar);
                 return null;
             }
@@ -1030,7 +1030,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(1, 2, 25, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.gaussianBlur(bmp, context, (int) seekBar);
                 return null;
             }
@@ -1043,7 +1043,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.directionalBlur(bmp, context, (int) seekBar, switch1);
                 return null;
             }
@@ -1059,7 +1059,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar1(1, 2, 14, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.laplacian(bmp, context, seekBar);
                 return null;
             }
@@ -1072,7 +1072,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.sobel(bmp, context, seekBar, switch1);
                 return null;
             }
@@ -1085,7 +1085,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar2(0, 20, 100, "");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 Bitmap texture = FileInputOutput.getBitmap(getResources(), R.drawable.canvas_texture, bmp.getWidth(), bmp.getHeight());
                 FilterFunction.sketch(bmp, context, (int) seekBar, seekBar2 / 100f);
                 FilterFunction.applyTexture(bmp, texture, context);
@@ -1100,7 +1100,7 @@ public class MainActivity extends AppCompatActivity {
         newFilter.setSeekBar2(2, 4, 14, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
-            public Bitmap preview(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
                 FilterFunction.cartoon(bmp, context, (int) seekBar, (int) seekBar2);
                 return null;
             }
@@ -1279,6 +1279,7 @@ public class MainActivity extends AppCompatActivity {
         subActivityFilter = filter;
         subActivityBitmap = bmp;
         Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
+        intent.putExtra(Settings.ACTIVITY_EXTRA_CALLER, this.getClass().getName());
         startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
     }
 

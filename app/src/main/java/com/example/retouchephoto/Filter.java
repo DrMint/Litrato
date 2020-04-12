@@ -2,6 +2,7 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.view.View;
 
 /**
@@ -116,22 +117,34 @@ class Filter {
      *  @param seekBar the value of seekBar1.
      *  @param seekBar2 the value of seeBar2.
      */
-    Bitmap apply(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-        if (myApplyInterface != null) return myApplyInterface.apply(bmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
-        return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+    Bitmap apply(final Bitmap bmp, final Bitmap maskBmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+        if (myApplyInterface != null) return myApplyInterface.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+        return myPreviewInterface.preview(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+    }
+
+    Bitmap apply(final Bitmap bmp, Bitmap maskBmp, final Context context) {
+        return apply(bmp, maskBmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
     }
 
     Bitmap apply(final Bitmap bmp, final Context context) {
-        return apply(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
+        final Bitmap maskBmp = ImageTools.bitmapClone(bmp);
+        ImageTools.fillWithColor(maskBmp, Color.WHITE);
+        return apply(bmp, maskBmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
     }
 
-    Bitmap preview(final Bitmap bmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-        if (myPreviewInterface != null) return myPreviewInterface.preview(bmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+    Bitmap preview(final Bitmap bmp, final Bitmap maskBmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+        if (myPreviewInterface != null) return myPreviewInterface.preview(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
         return null;
     }
 
+    Bitmap preview(final Bitmap bmp, final Bitmap maskBmp, final Context context) {
+        return preview(bmp, maskBmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
+    }
+
     Bitmap preview(final Bitmap bmp, final Context context) {
-        return preview(bmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
+        final Bitmap maskBmp = ImageTools.bitmapClone(bmp);
+        ImageTools.fillWithColor(maskBmp, Color.WHITE);
+        return preview(bmp, maskBmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
     }
 
     /*

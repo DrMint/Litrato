@@ -2,10 +2,11 @@ package com.example.retouchephoto;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -19,17 +20,23 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class FiltersActivity extends AppCompatActivity {
 
     static Filter subActivityFilter;
     static Bitmap subActivityBitmap;
-
     static Bitmap activityBitmap;
 
     private Bitmap originalImage;
     private Bitmap filteredImage;
+    private Bitmap maskBmp;
+    private Bitmap invertedMaskBmp;
+    private Bitmap originalImageMasked;
+
     private Filter selectedFilter;
+
+    private final int GET_MASK_IMAGE = 4;
 
     /**
      * A boolean to avoid applying filter because the listener have been triggered when modifying
@@ -79,15 +86,28 @@ public class FiltersActivity extends AppCompatActivity {
         layoutSwitch1           = findViewById(R.id.switch1);
         filterMenu              = findViewById(R.id.filtersMenu);
 
+
+        if (Objects.requireNonNull(getCallingActivity()).getClassName().equals(MainActivity.class.getName())) {
+
+            setBitmap(MainActivity.subActivityBitmap);
+            selectedFilter = MainActivity.subActivityFilter;
+
+        } else if (getCallingActivity().getClassName().equals(FiltersActivity.class.getName())) {
+
+            setBitmap(FiltersActivity.subActivityBitmap);
+            selectedFilter = FiltersActivity.subActivityFilter;
+
+        }
+
+        layoutFilterMenuButton.setText(selectedFilter.getName());
+
         // Selects the default image in the resource folder and set it
-        setBitmap(MainActivity.subActivityBitmap);
         layoutImageView.setImageBitmap(filteredImage);
         layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
 
         layoutHistogramView.setVisibility(View.GONE);
 
-        selectedFilter = MainActivity.subActivityFilter;
-        layoutFilterMenuButton.setText(selectedFilter.getName());
+
 
         // Initialize all the different listeners.
         initializeListener();
@@ -97,6 +117,27 @@ public class FiltersActivity extends AppCompatActivity {
         //startActivity(intent);
 
         previewFilter();
+    }
+
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == GET_MASK_IMAGE) {
+            Bitmap result = FiltersActivity.activityBitmap;
+            if (result != null) {
+
+                maskBmp = result;
+
+                invertedMaskBmp = ImageTools.bitmapClone(maskBmp);
+                FilterFunction.invert(invertedMaskBmp, getApplicationContext());
+
+                originalImageMasked = ImageTools.bitmapClone(originalImage);
+                FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, getApplicationContext(), BlendType.MULTIPLY);
+
+            }
+        }
     }
 
 
@@ -189,6 +230,7 @@ public class FiltersActivity extends AppCompatActivity {
         if (apply) {
             result = selectedFilter.apply(
                     filteredImage,
+                    maskBmp,
                     getApplicationContext(),
                     layoutColorSeekBar.getProgress(),
                     layoutSeekBar1.getProgress(),
@@ -200,6 +242,7 @@ public class FiltersActivity extends AppCompatActivity {
         } else {
             result = selectedFilter.preview(
                     filteredImage,
+                    maskBmp,
                     getApplicationContext(),
                     layoutColorSeekBar.getProgress(),
                     layoutSeekBar1.getProgress(),
@@ -213,6 +256,12 @@ public class FiltersActivity extends AppCompatActivity {
         // If the filter return a bitmap, filteredImage becomes this bitmap
         if (result != null) {
             filteredImage = result;
+        }
+
+        // Keep the filtered part only where the maskBmp is white.
+        if (maskBmp != null) {
+            FilterFunction.applyTexture(filteredImage, maskBmp,getApplicationContext(),BlendType.MULTIPLY);
+            FilterFunction.applyTexture(filteredImage, originalImageMasked, getApplicationContext(), BlendType.ADD);
         }
 
         // Refresh the image viewer and the histogram.
@@ -453,8 +502,60 @@ public class FiltersActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
+
+                /*
+                Filter maskFilter;
+
+                maskFilter = new Filter("Create Mask");
+                maskFilter.setFilterCategory(FilterCategory.FANCY);
+                maskFilter.allowMasking = false;
+                maskFilter.allowHistogram = false;
+                maskFilter.allowScrollZoom = false;
+                maskFilter.setSeekBar1(5,30,300, "px");
+                maskFilter.setSeekBar2(0,50,100, "%");
+                maskFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
+                    @Override
+                    public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+                        // storageBmp = storageBmp avec du blanc / noir dans sur un circle de taille seekBar  l'emplacement de touchUp
+                        if (switch1) {
+                            ImageTools.drawRectangle(bmp, touchDown, touchUp, Color.WHITE);
+                        } else {
+                            ImageTools.drawRectangle(bmp, touchDown, touchUp, Color.BLACK);
+                        }
+                        FilterFunction.applyTexture(bmp, maskBmp, context, BlendType.OVERLAY, seekBar2 / 100f);
+                        return null;
+                    }
+                });
+
+                maskFilter.setFilterApplyFunction(new FilterApplyInterface() {
+                    @Override
+                    public Bitmap apply(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+                        FilterFunction.applyTexture(bmp, maskBmp, context, BlendType.OVERLAY, 0);
+                        return null;
+                    }
+                });
+
+                 */
+
+
+
+                Filter newFilter = new Filter("Threshold");
+                newFilter.setFilterCategory(FilterCategory.FANCY);
+                newFilter.setSeekBar1(0, 128, 256, "");
+                newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
+                    @Override
+                    public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+                        FilterFunction.threshold(bmp, context, seekBar / 256f);
+                        return null;
+                    }
+                });
+
+
+
+                subActivityFilter = newFilter;
+                subActivityBitmap = originalImage;
                 Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
-                startActivityForResult(intent, 3);
+                startActivityForResult(intent, GET_MASK_IMAGE);
             }
         });
 
@@ -471,8 +572,6 @@ public class FiltersActivity extends AppCompatActivity {
             public void onClick(View v) {
             }
         });
-
-
 
         layoutHistogramButton.setOnClickListener(new View.OnClickListener() {
 
