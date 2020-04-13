@@ -96,26 +96,38 @@
                 android:background="#00FFFFFF"
                 android:orientation="vertical">
 
-                <Button
+                <ImageButton
                     android:id="@+id/pickButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="P"
-                    android:visibility="visible" />
+                    android:visibility="visible"
+                    android:background="#00FFFFFF"
+                    android:src="@drawable/pick"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@string/pickButton" />
 
-                <Button
+                <ImageButton
                     android:id="@+id/maskButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="M"
-                    android:visibility="visible" />
+                    android:visibility="visible"
+                    android:background="#00FFFFFF"
+                    android:src="@drawable/mask"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@string/maskButton" />
 
-                <Button
+                <ImageButton
                     android:id="@+id/histogramButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="H"
-                    android:visibility="visible" />
+                    android:visibility="visible"
+                    android:background="#00FFFFFF"
+                    android:src="@drawable/histogram"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@string/histogramButton" />
 
             </LinearLayout>
 

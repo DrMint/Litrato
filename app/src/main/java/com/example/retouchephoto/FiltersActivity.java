@@ -8,6 +8,8 @@ import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import android.view.GestureDetector;
@@ -18,6 +20,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -56,9 +59,9 @@ public class FiltersActivity extends AppCompatActivity {
     private Button      layoutButtonApply;
     private Button      layoutCancel;
     private Button      layoutFilterMenuButton;
-    private Button      layoutPickButton;
-    private Button      layoutMaskButton;
-    private Button      layoutHistogramButton;
+    private ImageButton layoutPickButton;
+    private ImageButton layoutMaskButton;
+    private ImageButton layoutHistogramButton;
     private ImageView   layoutHistogramView;
     private SeekBar     layoutSeekBar1;
     private SeekBar     layoutSeekBar2;
@@ -221,7 +224,20 @@ public class FiltersActivity extends AppCompatActivity {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         }
 
+        lightThemeButton(layoutPickButton,R.drawable.pick);
+        lightThemeButton(layoutMaskButton,R.drawable.mask);
+        lightThemeButton(layoutHistogramButton,R.drawable.histogram);
+    }
 
+    void lightThemeButton(ImageButton button, int image){
+        Bitmap pickIcon= FileInputOutput.getBitmap(getResources(), image);
+        Bitmap icon = ImageTools.bitmapClone(pickIcon);
+        //TODO: Use invert instead but invert has to deal with transparent images.
+        if (!Settings.IS_DARK_THEME) FilterFunction.brightness(icon, getApplicationContext(), -2000);
+
+        Drawable drawable = new BitmapDrawable(getResources(), icon);
+        drawable.setBounds(0, 0, Settings.TOOL_DISPLAYED_SIZE, Settings.TOOL_DISPLAYED_SIZE);
+        button.setImageDrawable(drawable);
     }
 
 
