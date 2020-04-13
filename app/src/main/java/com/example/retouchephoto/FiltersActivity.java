@@ -144,10 +144,6 @@ public class FiltersActivity extends AppCompatActivity {
 
         layoutFilterMenuButton.setText(selectedFilter.getName());
 
-        // Selects the default image in the resource folder and set it
-        layoutImageView.setImageBitmap(filteredImage);
-        layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
-
         layoutHistogramView.setVisibility(View.GONE);
 
         // Initialize all the different listeners, the interface and the masks
@@ -162,9 +158,10 @@ public class FiltersActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            layoutImageView.setInternalValues();
+            // Selects the default image in the resource folder and set it
+            layoutImageView.setImageBitmap(filteredImage);
+            layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
         }
-
     }
 
 
@@ -477,10 +474,12 @@ public class FiltersActivity extends AppCompatActivity {
             public boolean onDoubleTap(MotionEvent e) {
 
                 // it it's zoomed
-                if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
-                    layoutImageView.reset();
+                //if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
+                if (layoutImageView.getZoom() != 1f) {
+                    layoutImageView.setZoom(1f);
                 } else {
                     Point touch = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(e.getX(), e.getY()));
+                    //layoutImageView.setZoom(layoutImageView.getZoom() * Settings.DOUBLE_TAP_ZOOM);
                     layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
                     layoutImageView.setCenter(touch);
                 }
@@ -519,6 +518,7 @@ public class FiltersActivity extends AppCompatActivity {
                 if (selectedFilter.allowScrollZoom) {
                     myScaleDetector.onTouchEvent(event);
                     myGestureDetector.onTouchEvent(event);
+                    layoutImageView.refresh();
 
                 } else {
 

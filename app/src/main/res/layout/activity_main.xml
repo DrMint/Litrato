@@ -22,19 +22,50 @@
             android:id="@+id/imageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/linearLayout"
+            android:layout_above="@id/bottomBar"
             android:layout_below="@id/toolbar"
             android:adjustViewBounds="true"
             android:contentDescription="@string/imageViewDescription"
-            android:scaleType="fitStart"
+            android:scaleType="fitCenter"
             app:srcCompat="@drawable/default_image" />
+
+        <RelativeLayout
+            android:id="@+id/historyBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/toolbar"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/historyTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="sans-serif-medium"
+                android:textAlignment="center"
+                android:textAllCaps="true"
+                android:textSize="18sp" />
+
+            <SeekBar
+                android:id="@+id/historySeekBar"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/historyTitle"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="20dp"
+                android:max="3"
+                android:progress="3" />
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/filtersBar"
             style="@android:style/ButtonBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/linearLayout"
+            android:layout_above="@id/bottomBar"
             android:orientation="vertical"
             android:visibility="gone">
 
@@ -153,7 +184,7 @@
             style="@android:style/ButtonBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/linearLayout"
+            android:layout_above="@id/bottomBar"
             android:scrollbars="none"
             android:visibility="gone">
 
@@ -170,7 +201,7 @@
             style="@android:style/ButtonBar"
             android:layout_width="match_parent"
             android:layout_height="400dp"
-            android:layout_above="@id/linearLayout"
+            android:layout_above="@id/bottomBar"
             android:collapseColumns="true"
             android:visibility="gone">
 
@@ -200,7 +231,7 @@
         </TableLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayout"
+            android:id="@+id/bottomBar"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"

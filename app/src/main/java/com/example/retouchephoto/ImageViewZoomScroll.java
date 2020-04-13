@@ -2,11 +2,11 @@ package com.example.retouchephoto;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+
+import static android.graphics.Bitmap.createBitmap;
 
 /**
  * This class implements a way to zoom and scroll.
@@ -29,28 +29,29 @@ class ImageViewZoomScroll {
      * Minimum coordinates are 0, 0.
      * Maximum coordinate on the x axis is bitmap width - newWidth.
      */
-    private final Point topLeft = new Point(0,0);
+    private final Point center = new Point(0,0);
 
     /**
      * How large can zoom be.
      */
     private float maxZoom = 5f;
-    private float minZoom;
 
-    private int bmpWidth = 0;
-    private int bmpHeight = 0;
-
-    private int viewWidth = 0;
-    private int viewHeight = 0;
-
-    boolean horizontalScroll = false;
-    boolean verticalScroll = false;
-
+    private Bitmap bmp;
 
     /**
      * The imageView on which the image will be drawn.
      */
     private final ImageView imageView;
+
+    /**
+     * The width of the rectangle.
+     */
+    private int newWidth;
+
+    /**
+     * The height of the rectangle.
+     */
+    private int newHeight;
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -58,92 +59,32 @@ class ImageViewZoomScroll {
         imageView.setOnTouchListener(myTouchListener);
     }
 
-    ImageViewZoomScroll(ImageView imageView) {
+    @SuppressWarnings("WeakerAccess")
+    ImageViewZoomScroll(ImageView imageView, Bitmap bmp) {
         this.imageView = imageView;
+        this.bmp = bmp;
     }
 
+    ImageViewZoomScroll(ImageView imageView) {
+        // Generate a empty image
+        this(imageView, ImageTools.bitmapCreate(100,100));
+    }
 
-    private void setX(int x) {
-        if (horizontalScroll) {
-            topLeft.x = x;
-            if (topLeft.x < 0 ) {
-                topLeft.x = 0;
-            } else {
-                int maxAcceptableX = (int) -(viewWidth / zoom - bmpWidth);
-                if (topLeft.x > maxAcceptableX) topLeft.x = maxAcceptableX;
+    void refresh() {
+        calculateNewBmpSize();
+        if (newWidth == 0 || newHeight == 0) {
+            imageView.setImageBitmap(bmp);
+        } else {
+            if (center.y + newHeight <= bmp.getHeight() && center.x + newWidth <= bmp.getWidth()) {
+                imageView.setImageBitmap(createBitmap(bmp, center.x, center.y, newWidth, newHeight));
             }
-        } else {
-            topLeft.x = 0;
         }
-        refresh();
-    }
-
-    private void setY(int y) {
-        if (verticalScroll) {
-            topLeft.y = y;
-            if (topLeft.y < 0 ) {
-                topLeft.y = 0;
-            } else {
-                int maxAcceptableY = (int) -(viewHeight / zoom - bmpHeight);
-                if (topLeft.y > maxAcceptableY) topLeft.y = maxAcceptableY;
-            }
-        } else {
-            topLeft.y = 0;
-        }
-        refresh();
-    }
-
-    void setTopLeft(int x, int y) {
-        setX(x);
-        setY(y);
-    }
-
-    void setTopLeft(Point p) {
-        setTopLeft(p.x, p.y);
-    }
-
-    void setCenter(Point p) {
-        p.x -= bmpWidth / zoom / 2;
-        p.y -= bmpHeight / zoom / 2;
-        setTopLeft(p);
-    }
-
-    void setZoom(float zoom) {
-        float currentZoom = this.zoom;
-        this.zoom = zoom;
-        if (zoom > maxZoom * minZoom) {
-            this.zoom = maxZoom * minZoom;
-        } else if (zoom < minZoom) {
-            this.zoom = minZoom;
-        } else {
-
-            //float diff = zoom - currentZoom;
-
-            //translate((int) (diff * (bmpWidth / zoom) / 2), (int) (diff * (bmpHeight / zoom) / 2));
-        }
-        horizontalScroll = bmpWidth * this.zoom > viewWidth;
-        verticalScroll = bmpHeight * this.zoom > viewHeight;
-        refresh();
-    }
-
-    private void refresh() {
-        Matrix test = new Matrix();
-        if (horizontalScroll) {
-            test.setTranslate(-topLeft.x, -topLeft.y);
-        } else {
-            //Log.wtf("Test", zoom + " " + bmpWidth);
-            test.setTranslate(0, -topLeft.y);
-        }
-
-        test.postScale(zoom, zoom);
-        imageView.setScaleType(ImageView.ScaleType.MATRIX);
-        imageView.setImageMatrix(test);
     }
 
     void reset() {
-        setZoom(minZoom);
-        setX(0);
-        setY(0);
+        setZoom(1.f);
+        setX(newWidth / 2);
+        setY(newHeight / 2);
         refresh();
     }
 
@@ -153,41 +94,61 @@ class ImageViewZoomScroll {
      * @param y the shift in Y axis.
      */
     void translate(int x, int y) {
-        setX(topLeft.x + x);
-        setY(topLeft.y + y);
+        setX(center.x + x);
+        setY(center.y + y);
     }
 
     void sanitizeBmpCoordinates(Point p) {
         if (p.x < 0) p.x = 0;
         if (p.y < 0) p.y = 0;
-        if (p.x > bmpWidth - 1) p.x = bmpWidth - 1;
-        if (p.y > bmpHeight - 1) p.y = bmpHeight - 1;
+        if (p.x > bmp.getWidth() - 1) p.x = bmp.getWidth() - 1;
+        if (p.y > bmp.getHeight() - 1) p.y = bmp.getHeight() - 1;
     }
 
     void setImageBitmap(Bitmap newBmp) {
-
-        int newBmpWidth = newBmp.getWidth();
-        int newBmpHeight = newBmp.getHeight();
-
-        if (newBmpWidth != bmpWidth || newBmpHeight != bmpHeight) {
-            bmpWidth = newBmpWidth;
-            bmpHeight = newBmpHeight;
-            setInternalValues();
+        if (newBmp.getWidth() != bmp.getWidth() || newBmp.getHeight() != bmp.getHeight()) {
+            reset();
         }
-
-        imageView.setImageBitmap(newBmp);
+        this.bmp = newBmp;
         refresh();
     }
 
-    void setInternalValues() {
-        viewWidth = imageView.getMeasuredWidth();
-        viewHeight = imageView.getMeasuredHeight();
+    void setZoom(float zoom) {
+        this.zoom = zoom;
+        if (zoom > maxZoom) this.zoom = maxZoom;
+        if (this.zoom < 1f) {
+            reset();
+            return;
+        }
 
-        horizontalScroll = bmpWidth * zoom > viewWidth;
-        verticalScroll = bmpHeight * zoom > viewHeight;
+        int tmpWidth = newWidth;
+        int tmpHeight = newHeight;
+        calculateNewBmpSize();
+        translate((tmpWidth - newWidth) / 2, (tmpHeight - newHeight) / 2);
+    }
 
-        minZoom = Math.min((float) viewWidth / bmpWidth, (float) viewHeight / bmpHeight);
-        reset();
+    private void setX(int x) {
+        center.x = x;
+        if (center.x < 0) center.x = 0;
+        if (center.x > bmp.getWidth()) center.x = bmp.getWidth();
+        if (center.x + newWidth > bmp.getWidth()) center.x = bmp.getWidth() - newWidth;
+    }
+
+    private void setY(int y) {
+        center.y = y;
+        if (center.y < 0) center.y = 0;
+        if (center.y > bmp.getHeight()) center.y = bmp.getHeight();
+        if (center.y + newHeight > bmp.getHeight()) center.y = bmp.getHeight() - newHeight;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    void setCenter(int x, int y) {
+        setX(x - newWidth / 2);
+        setY(y - newHeight / 2);
+    }
+
+    void setCenter(Point p) {
+        setCenter(p.x, p.y);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -198,14 +159,117 @@ class ImageViewZoomScroll {
 
     float getZoom() {return zoom;}
 
-    Point imageViewTouchPointToBmpCoordinates(Point p) {
-        p.x = (int) (topLeft.x + (p.x / zoom));
-        p.y = (int) (topLeft.y + (p.y / zoom));
-        return p;
+    /**
+     * Returns the top left point of the image.
+     * The image is scaled by the imageView to fit the imageView area without changing the aspect ratio.
+     * It makes it unintuitive to get this important points.
+     * @return the top left point of the image.
+     */
+    private Point getDisplayedImageTopLeft() {
+
+        int iViewWidth = imageView.getMeasuredWidth();
+        int iViewHeight = imageView.getMeasuredHeight();
+
+        float displayedImageRatio = (float) newWidth / newHeight;
+        float imageViewRatio = (float) iViewWidth / iViewHeight;
+
+        int x;
+        int y;
+
+        // If the displayed image's ratio is close enough to its imageView's ratio
+        if (Math.abs(displayedImageRatio - imageViewRatio) < Settings.IMAGE_RATIO_PRECISION) {
+            x = 0;
+            y = 0;
+
+            // If the displayed image's ratio is wider than its imageView's ratio
+        }  else if (displayedImageRatio > imageViewRatio) {
+            x = 0;
+            y = (int) (iViewHeight - iViewWidth / displayedImageRatio) / 2;
+
+            // If the displayed image's ratio is taller than its imageView's ratio
+        } else {
+            x = (int) (iViewWidth - iViewHeight * displayedImageRatio) / 2;
+            y = 0;
+        }
+        return new Point(x, y);
+    }
+
+    /**
+     * Returns the down right point of the image.
+     * The image is scaled by the imageView to fit the imageView area without changing the aspect ratio.
+     * It makes it unintuitive to get this important points.
+     * @return the down right point of the image.
+     */
+    private Point getDisplayedImageDownRight() {
+        Point result = getDisplayedImageTopLeft();
+        result.x = imageView.getMeasuredWidth() - result.x;
+        result.y = imageView.getMeasuredHeight() - result.y;
+        return result;
+    }
+
+    Point imageViewTouchPointToBmpCoordinates(Point touch) {
+        Point a = getDisplayedImageTopLeft();
+        Point b = getDisplayedImageDownRight();
+        Point result = new Point();
+        result.x = (touch.x - a.x) * newWidth / (b.x - a.x) + center.x;
+        result.y = (touch.y - a.y) * newHeight / (b.y - a.y) + center.y;
+        return result;
+    }
+
+    private void selectCorrectScaleType() {
+        Point p = getDisplayedImageTopLeft();
+        if (p.isEquals(0,0)) {
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+        } else {
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        }
+    }
+
+    private void calculateNewBmpSize() {
+
+        int iViewWidth = imageView.getMeasuredWidth();
+        int iViewHeight = imageView.getMeasuredHeight();
+
+        // If iView.getMeasuredWidth returns a null value, it means the UI is still not ready. Aborts.
+        if (iViewWidth == 0 || iViewHeight == 0) {
+            newWidth = bmp.getWidth();
+            newHeight = bmp.getHeight();
+            return;
+        }
+
+        // If the image ratio is taller than the imageView ratio
+        if ((float) bmp.getWidth() / bmp.getHeight() > (float) (iViewWidth) / iViewHeight) {
+
+            newWidth = (int) (1 / zoom * bmp.getWidth());
+
+            // If the image ratio (after zooming in) is still taller than the imageView ratio
+            if ((float) (newWidth) / bmp.getHeight() > (float) (iViewWidth) / iViewHeight) {
+                newHeight = bmp.getHeight();
+            } else {
+                newHeight = newWidth * iViewHeight / iViewWidth;
+            }
+
+            // If the image ratio is wider than the imageView ratio
+        } else {
+
+            newHeight = (int) (1 / zoom * bmp.getHeight());
+
+            // If the image ratio (after zooming in) is still wider than the imageView ratio
+            if ((float) (bmp.getWidth()) / newHeight < (float) (iViewWidth) / iViewHeight) {
+                newWidth = bmp.getWidth();
+            } else {
+                newWidth = newHeight * iViewWidth / iViewHeight;
+            }
+        }
+
+        // Let's sanitize the values on last time before calling createBitmap.
+        if (newWidth > bmp.getWidth()) newWidth = bmp.getWidth();
+        if (newHeight > bmp.getHeight()) newHeight = bmp.getHeight();
+        selectCorrectScaleType();
     }
 
     int getPixelAt(Point p) {
-        p = imageViewTouchPointToBmpCoordinates(p);
-        return ((BitmapDrawable)imageView.getDrawable()).getBitmap().getPixel(p.x, p.y);
+        sanitizeBmpCoordinates(p);
+        return bmp.getPixel(p.x, p.y);
     }
 }
