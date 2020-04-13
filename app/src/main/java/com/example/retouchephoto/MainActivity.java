@@ -15,10 +15,16 @@ import android.graphics.drawable.Drawable;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import android.provider.MediaStore;
+import com.example.retouchephoto.R;
 
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.Window;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -39,7 +45,6 @@ import java.util.List;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
 import com.google.android.material.snackbar.Snackbar;
 
 /*TODO:
@@ -105,9 +110,7 @@ public class MainActivity extends AppCompatActivity {
     private final Boolean[] hasChanged = {true, true, true, true, true, true};
 
     private ImageViewZoomScroll layoutImageView;
-    private Button      layoutButtonOpen;
-    private Button      layoutButtonSave;
-    private Button      layoutButtonHistory;
+    private Toolbar     layoutToolbar;
     private Button      toolsButton;
     private Button      presetsButton;
     private Button      filtersButton;
@@ -140,13 +143,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        layoutToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(layoutToolbar);
+
         // Sets all the layout shortcuts.
 
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
-
-        layoutButtonOpen        = findViewById(R.id.buttonOpen);
-        layoutButtonSave        = findViewById(R.id.buttonSave);
-        layoutButtonHistory     = findViewById(R.id.buttonHistory);
 
         toolsButton             = findViewById(R.id.buttonTools);
         presetsButton           = findViewById(R.id.buttonPresets);
@@ -200,9 +202,86 @@ public class MainActivity extends AppCompatActivity {
         initializeListener();
 
         Settings.setColorTheme(Settings.DARK_THEME);
-        applyColorTheme();
 
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        applyColorTheme();
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_history: {
+                if (Settings.IS_DARK_THEME) {
+                    Settings.setColorTheme(Settings.LIGHT_THEME);
+                } else {
+                    Settings.setColorTheme(Settings.DARK_THEME);
+                }
+                applyColorTheme();
+                break;
+            }
+            case R.id.action_open: {
+                // Makes sure the phone has a camera module.
+                PackageManager pm = getApplicationContext().getPackageManager();
+                if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+                    final CharSequence[] items = {"Take Photo", "Choose from Library"};
+                    android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Select a photo...");
+                    builder.setItems(items, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int item) {
+
+                            if (items[item].equals("Take Photo")) {
+
+                                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                Uri result = FileInputOutput.createUri(MainActivity.this);
+                                if (result != null) {
+                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, result);
+                                    startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+                                }
+
+                            } else if (items[item].equals("Choose from Library")) {
+                                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(intent,PICK_IMAGE_REQUEST);
+                            }
+                        }
+                    });
+                    builder.show();
+
+                    // Else if the phone has no camera
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(intent,PICK_IMAGE_REQUEST);
+                }
+                break;
+            }
+            case R.id.action_save: {
+                if (FileInputOutput.saveImage(beforeLastFilterImage, MainActivity.this)) {
+                    Snackbar.make(toolsBar, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
+                }
+                break;
+            }
+        }
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_history) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
@@ -213,6 +292,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void applyColorTheme() {
+        getSupportActionBar().setTitle("");
         colorBar.setBackgroundColor(Settings.COLOR_SELECTED);
         fancyBar.setBackgroundColor(Settings.COLOR_SELECTED);
         blurBar.setBackgroundColor(Settings.COLOR_SELECTED);
@@ -229,10 +309,6 @@ public class MainActivity extends AppCompatActivity {
         presetsButton.setTextColor(Settings.COLOR_TEXT);
         toolsButton.setTextColor(Settings.COLOR_TEXT);
         filtersButton.setTextColor(Settings.COLOR_TEXT);
-
-        layoutButtonOpen.setTextColor(Settings.COLOR_TEXT);
-        layoutButtonSave.setTextColor(Settings.COLOR_TEXT);
-        layoutButtonHistory.setTextColor(Settings.COLOR_TEXT);
 
         presetsButton.setTypeface(submenuUnselected);
         toolsButton.setTypeface(submenuUnselected);
@@ -274,6 +350,23 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+
+        Bitmap saveIcon = FileInputOutput.getBitmap(getResources(), R.drawable.save);
+        Bitmap openIcon = FileInputOutput.getBitmap(getResources(), R.drawable.open);
+        Bitmap historyIcon = FileInputOutput.getBitmap(getResources(), R.drawable.history);
+
+        if (!Settings.IS_DARK_THEME) {
+            FilterFunction.brightness(saveIcon, getApplicationContext(), -2000);
+            FilterFunction.brightness(openIcon, getApplicationContext(), -2000);
+            FilterFunction.brightness(historyIcon, getApplicationContext(), -2000);
+
+        }
+        Drawable drawable = new BitmapDrawable(getResources(), openIcon);
+        layoutToolbar.getMenu().getItem(0).setIcon(drawable);
+        drawable = new BitmapDrawable(getResources(), historyIcon);
+        layoutToolbar.getMenu().getItem(1).setIcon(drawable);
+        drawable = new BitmapDrawable(getResources(), saveIcon);
+        layoutToolbar.getMenu().getItem(2).setIcon(drawable);
 
     }
 
@@ -362,62 +455,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeListener() {
 
-        layoutButtonOpen.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                // Makes sure the phone has a camera module.
-                PackageManager pm = getApplicationContext().getPackageManager();
-                if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-                    final CharSequence[] items = {"Take Photo", "Choose from Library"};
-                    android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Select a photo...");
-                    builder.setItems(items, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int item) {
-
-                            if (items[item].equals("Take Photo")) {
-
-                                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                Uri result = FileInputOutput.createUri(MainActivity.this);
-                                if (result != null) {
-                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, result);
-                                    startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-                                }
-
-                            } else if (items[item].equals("Choose from Library")) {
-                                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                startActivityForResult(intent,PICK_IMAGE_REQUEST);
-                            }
-                        }
-                    });
-                    builder.show();
-
-                    // Else if the phone has no camera
-                } else {
-                    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(intent,PICK_IMAGE_REQUEST);
-                }
-            }
-        });
-
-
-        // When the user click on the apply button, apply the selected filter in the spinner
-        layoutButtonSave.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (FileInputOutput.saveImage(beforeLastFilterImage, MainActivity.this)) {
-                    Snackbar.make(v, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-
-
-
         // Create the GestureDetector which handles the scrolling and double tap.
         final GestureDetector myGestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.OnGestureListener() {
 
@@ -485,18 +522,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
-
-        layoutButtonHistory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Settings.IS_DARK_THEME) {
-                    Settings.setColorTheme(Settings.LIGHT_THEME);
-                } else {
-                    Settings.setColorTheme(Settings.DARK_THEME);
-                }
-                applyColorTheme();
-            }
-        });
 
         presetsBar.setOnClickListener(new View.OnClickListener() {
 
