@@ -19,12 +19,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.provider.MediaStore;
 
 import android.util.Log;
+import android.view.Window;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.content.Intent;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -42,7 +44,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 /*TODO:
    Bugs:
-        [0001] - When the histogram is resize, the image can get stretch because the imageView gets bigger or smaller.
+        [0001] - When the histogram is resize, the image can get lstretch because the imageView gets bigger or smaller.
         Refreshing the image doesn't seem to work. I suspect this is because requestLayout is asynchronous, and
         when the image refresh, it utilizes the imageView's aspect ratio before it actually changed.
         Thus, refreshing the image will actually make the problem worse.
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     static Filter subActivityFilter;
     static Bitmap subActivityBitmap;
+    static Bitmap subMaskBmp;
 
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
@@ -104,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageViewZoomScroll layoutImageView;
     private Button      layoutButtonOpen;
     private Button      layoutButtonSave;
-    private Button      layoutOldVersion;
+    private Button      layoutButtonHistory;
     private Button      toolsButton;
     private Button      presetsButton;
     private Button      filtersButton;
@@ -114,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
     private Button      contourButton;
     private TableLayout toolsBar;
     private HorizontalScrollView presetsBar;
+    private HorizontalScrollView buttonBar;
     private LinearLayout filtersBar;
     private LinearLayout presetsLinearLayout;
     private LinearLayout colorBar;
@@ -137,11 +141,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Sets all the layout shortcuts.
+
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
 
         layoutButtonOpen        = findViewById(R.id.buttonOpen);
         layoutButtonSave        = findViewById(R.id.buttonSave);
-        layoutOldVersion        = findViewById(R.id.buttonOldVersion);
+        layoutButtonHistory     = findViewById(R.id.buttonHistory);
 
         toolsButton             = findViewById(R.id.buttonTools);
         presetsButton           = findViewById(R.id.buttonPresets);
@@ -156,6 +161,8 @@ public class MainActivity extends AppCompatActivity {
         presetsBar              = findViewById(R.id.presetsBar);
         filtersBar              = findViewById(R.id.filtersBar);
 
+        buttonBar               = findViewById(R.id.buttonBar);
+
         presetsLinearLayout     = findViewById(R.id.presetsLinearLayout);
 
         colorBar                = findViewById(R.id.colorMenu);
@@ -169,6 +176,10 @@ public class MainActivity extends AppCompatActivity {
 
         submenuSelected = colorButton.getTypeface();
         submenuUnselected = fancyButton.getTypeface();
+
+
+        layoutImageView.reset();
+
 
         // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
@@ -188,7 +199,84 @@ public class MainActivity extends AppCompatActivity {
         // Initialize all the different listeners.
         initializeListener();
 
+        Settings.setColorTheme(Settings.DARK_THEME);
+        applyColorTheme();
+
     }
+
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            layoutImageView.setInternalValues();
+        }
+    }
+
+
+    private void applyColorTheme() {
+        colorBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        fancyBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        blurBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        contourBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        toolsBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        presetsBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        filtersBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        buttonBar.setBackgroundColor(Settings.COLOR_SELECTED);
+
+        presetsButton.setBackgroundColor(Settings.COLOR_GREY);
+        toolsButton.setBackgroundColor(Settings.COLOR_GREY);
+        filtersButton.setBackgroundColor(Settings.COLOR_GREY);
+
+        presetsButton.setTextColor(Settings.COLOR_TEXT);
+        toolsButton.setTextColor(Settings.COLOR_TEXT);
+        filtersButton.setTextColor(Settings.COLOR_TEXT);
+
+        layoutButtonOpen.setTextColor(Settings.COLOR_TEXT);
+        layoutButtonSave.setTextColor(Settings.COLOR_TEXT);
+        layoutButtonHistory.setTextColor(Settings.COLOR_TEXT);
+
+        presetsButton.setTypeface(submenuUnselected);
+        toolsButton.setTypeface(submenuUnselected);
+        filtersButton.setTypeface(submenuUnselected);
+
+        colorButton.setTextColor(Settings.COLOR_TEXT);
+        fancyButton.setTextColor(Settings.COLOR_TEXT);
+        blurButton.setTextColor(Settings.COLOR_TEXT);
+        contourButton.setTextColor(Settings.COLOR_TEXT);
+
+        colorButton.setBackgroundColor(Settings.COLOR_SELECTED);
+        fancyButton.setBackgroundColor(Settings.COLOR_SELECTED);
+        blurButton.setBackgroundColor(Settings.COLOR_SELECTED);
+        contourButton.setBackgroundColor(Settings.COLOR_SELECTED);
+
+        Window window = getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
+        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
+        if (!Settings.IS_DARK_THEME) {
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        } else {
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        }
+
+        for (DisplayedFilter displayedFilter:displayedFilters) {
+            displayedFilter.textView.setTextColor(Settings.COLOR_TEXT);
+            if (displayedFilter.filter.getFilterCategory() == FilterCategory.TOOL) {
+
+                Bitmap icon = ImageTools.bitmapClone(displayedFilter.filter.getIcon());
+                //TODO: Use invert instead but invert has to deal with transparent images.
+                if (!Settings.IS_DARK_THEME) FilterFunction.brightness(icon, getApplicationContext(), -2000);
+
+                Drawable drawable = new BitmapDrawable(getResources(), icon);
+                drawable.setBounds(0, 0, Settings.TOOL_DISPLAYED_SIZE, Settings.TOOL_DISPLAYED_SIZE);
+                displayedFilter.textView.setCompoundDrawablePadding(25);
+                displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
+
+            }
+        }
+
+    }
+
 
 
     @Override
@@ -217,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
             if (result != null) {
                 layoutImageView.reset();
                 beforeLastFilterImage = ImageTools.bitmapClone(result);
+                closeMenus();
                 refreshImageView();
             }
         }
@@ -334,7 +423,6 @@ public class MainActivity extends AppCompatActivity {
 
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 layoutImageView.translate((int) (distanceX / layoutImageView.getZoom()), (int) (distanceY / layoutImageView.getZoom()));
-                refreshImageView();
                 return false;
             }
 
@@ -351,14 +439,14 @@ public class MainActivity extends AppCompatActivity {
 
             public boolean onDoubleTap(MotionEvent e) {
 
-                if (layoutImageView.getZoom() != 1f) {
+                // it it's zoomed
+                if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
                     layoutImageView.reset();
                 } else {
                     Point touch = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(e.getX(), e.getY()));
-                    layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
+                    layoutImageView.setZoom(layoutImageView.getZoom() * Settings.DOUBLE_TAP_ZOOM);
                     layoutImageView.setCenter(touch);
                 }
-                refreshImageView();
                 return true;
             }
 
@@ -369,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Create the ScaleGestureDetector which handles the scaling.
-        final ScaleGestureDetector myScaleDetector = new ScaleGestureDetector(MainActivity.this, new ScaleGestureDetector.OnScaleGestureListener() {
+        final ScaleGestureDetector myScaleDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.OnScaleGestureListener() {
             float lastZoomFactor;
 
             public boolean onScaleBegin(ScaleGestureDetector detector) {
@@ -379,7 +467,6 @@ public class MainActivity extends AppCompatActivity {
 
             public boolean onScale(ScaleGestureDetector detector) {
                 layoutImageView.setZoom(lastZoomFactor * detector.getScaleFactor());
-                refreshImageView();
                 return false;
             }
 
@@ -399,9 +486,15 @@ public class MainActivity extends AppCompatActivity {
         };
         layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
 
-        layoutOldVersion.setOnClickListener(new View.OnClickListener() {
+        layoutButtonHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (Settings.IS_DARK_THEME) {
+                    Settings.setColorTheme(Settings.LIGHT_THEME);
+                } else {
+                    Settings.setColorTheme(Settings.DARK_THEME);
+                }
+                applyColorTheme();
             }
         });
 
@@ -1156,14 +1249,8 @@ public class MainActivity extends AppCompatActivity {
             // Only generate the miniature if the displayedFilter of this category
             if (displayedFilter.filter.getFilterCategory() == onlyThisCategory) {
 
-                if(onlyThisCategory == FilterCategory.TOOL) {
-
-                    // Add the image on top of the text
-                    Drawable drawable = new BitmapDrawable(getResources(), ImageTools.bitmapClone(displayedFilter.filter.getIcon()));
-                    drawable.setBounds(0, 0, Settings.TOOL_DISPLAYED_SIZE, Settings.TOOL_DISPLAYED_SIZE);
-                    displayedFilter.textView.setCompoundDrawablePadding(25);
-                    displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
-                } else {
+                Drawable drawable;
+                if(onlyThisCategory != FilterCategory.TOOL) {
                     Bitmap filteredMiniature =  ImageTools.bitmapClone(resizedMiniature);
 
                     // Apply the filter to the miniature
@@ -1171,10 +1258,11 @@ public class MainActivity extends AppCompatActivity {
                     if (result != null) filteredMiniature = result;
 
                     // Add the image on top of the text
-                    Drawable drawable = new BitmapDrawable(getResources(), filteredMiniature);
+                    drawable = new BitmapDrawable(getResources(), filteredMiniature);
                     drawable.setBounds(0, 0, Settings.MINIATURE_DISPLAYED_SIZE, Settings.MINIATURE_DISPLAYED_SIZE);
+
                     displayedFilter.textView.setCompoundDrawablePadding(25);
-                    displayedFilter.textView.setCompoundDrawables(null, drawable, null, null);
+                    displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
                 }
             }
         }
@@ -1188,19 +1276,27 @@ public class MainActivity extends AppCompatActivity {
         textView.setAllCaps(true);
         textView.setMaxLines(2);
         textView.setHorizontallyScrolling(false);
-        textView.setMaxWidth(Settings.MINIATURE_DISPLAYED_SIZE);
-        textView.setTextColor(Color.WHITE);
+        textView.setTextColor(Settings.COLOR_TEXT);
         textView.setTextSize(12);
-        textView.setHeight((int) (Settings.MINIATURE_DISPLAYED_SIZE * 1.4));
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        if(filter.getFilterCategory()==FilterCategory.TOOL){
+        textView.setBackgroundColor(Color.TRANSPARENT);
+
+        if (filter.getFilterCategory() == FilterCategory.TOOL) {
+
+            textView.setMaxWidth(Settings.TOOL_DISPLAYED_SIZE);
+            textView.setHeight((int) (Settings.TOOL_DISPLAYED_SIZE * 1.8));
             TableRow.LayoutParams params = new TableRow.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT,4);
             params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
             textView.setLayoutParams(params);
-        }else{
+
+        } else {
+
+            textView.setMaxWidth(Settings.MINIATURE_DISPLAYED_SIZE);
+            textView.setHeight((int) (Settings.MINIATURE_DISPLAYED_SIZE * 1.4));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
             params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
             textView.setLayoutParams(params);
+
         }
         return textView;
     }

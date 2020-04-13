@@ -1,8 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background">#464646</color>
-    <color name="selected">#464646</color>
-    <color name="gray">#282828</color>
-    <color name="black">#000000</color>
-    <color name="text">#FFFFFF</color>
 </resources>

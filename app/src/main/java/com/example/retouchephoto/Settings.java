@@ -53,11 +53,33 @@ class Settings {
     static final int MINIATURE_BMP_SIZE = 100;
 
     static final int MINIATURE_DISPLAYED_SIZE = 250;
-    static final int TOOL_DISPLAYED_SIZE = 150;
+    static final int TOOL_DISPLAYED_SIZE = 120;
 
-    static final int COLOR_BACKGROUND = Color.rgb(0,0,0);
-    static final int COLOR_GREY = Color.rgb(40,40,40);
-    static final int COLOR_SELECTED = Color.rgb(70,70,70);
+    static int COLOR_BACKGROUND;
+    static int COLOR_GREY;
+    static int COLOR_SELECTED;
+    static int COLOR_TEXT;
+
+    static final int DARK_THEME = 0;
+    static final int LIGHT_THEME = 1;
+
+    static boolean IS_DARK_THEME;
+
+    static void setColorTheme(int theme) {
+        if (theme == DARK_THEME) {
+            IS_DARK_THEME = true;
+            COLOR_BACKGROUND = Color.rgb(0,0,0);
+            COLOR_GREY = Color.rgb(40,40,40);
+            COLOR_SELECTED = Color.rgb(70,70,70);
+            COLOR_TEXT = Color.rgb(255,255,255);
+        } else {
+            IS_DARK_THEME = false;
+            COLOR_BACKGROUND = Color.rgb(255,255,255);
+            COLOR_GREY = Color.rgb(215,215,215);
+            COLOR_SELECTED = Color.rgb(190,190,190);
+            COLOR_TEXT = Color.rgb(0,0,0);
+        }
+    }
 
     static final int HISTOGRAM_BACKGROUND_TRANSPARENCY = 100;
     static final int HISTOGRAM_FOREGROUND_TRANSPARENCY = 200;

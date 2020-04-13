@@ -17,19 +17,6 @@
     <string name="toolsButton">Tools</string>
     <string name="filtersButton">Filters</string>
 
-    <string name="rotationButton">Rotation</string>
-    <string name="cropButton">Crop</string>
-    <string name="flipButton">Flip</string>
-    <string name="stickersButton">Stickers</string>
-    <string name="luminosityButton">Luminosity</string>
-    <string name="contrastButton">Contrast</string>
-    <string name="sharpnessButton">Sharpness</string>
-    <string name="autoButton">Auto</string>
-    <string name="saturationButton">Saturation</string>
-    <string name="addNoiseButton">Add Noise</string>
-    <string name="temperatureButton">Temperature</string>
-    <string name="tintButton">Tint</string>
-
     <string name="colorMenu">Color</string>
     <string name="fancyMenu">Fancy</string>
     <string name="blurMenu">Blur</string>

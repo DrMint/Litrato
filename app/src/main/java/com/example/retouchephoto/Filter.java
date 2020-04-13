@@ -3,7 +3,6 @@ package com.example.retouchephoto;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.view.View;
 
 /**
  * A instance of this class has many properties such as what kind of inputs (colorSeekBar and seekBars) should be available to the user.
@@ -100,8 +99,9 @@ class Filter {
         this.switch1UnitTrue = switch1UnitTrue;
     }
 
-    void setFilterCategory(FilterCategory category) {this.category = category; if (category == FilterCategory.PRESET) needFilterActivity = false;}
     void setColorSeekBar() {this.colorSeekBar = true;}
+
+    void setFilterCategory(FilterCategory category) {this.category = category; if (category == FilterCategory.PRESET) needFilterActivity = false;}
     void setFilterApplyFunction(final FilterApplyInterface newInterface) {this.myApplyInterface = newInterface;}
     void setFilterPreviewFunction(final FilterPreviewInterface newInterface) {this.myPreviewInterface = newInterface;}
     //void setFilterInitFunction(final FilterInitInterface newInterface) {this.myInitInterface = newInterface;}

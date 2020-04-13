@@ -4,13 +4,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -26,6 +31,8 @@ public class FiltersActivity extends AppCompatActivity {
 
     static Filter subActivityFilter;
     static Bitmap subActivityBitmap;
+    static Bitmap subMaskBmp;
+
     static Bitmap activityBitmap;
 
     private Bitmap originalImage;
@@ -88,15 +95,47 @@ public class FiltersActivity extends AppCompatActivity {
         filterMenu              = findViewById(R.id.filtersMenu);
 
 
+
+        // Gets the resources from the caller activity. If something crucial is missing aborts.
+        // Once resources have been gathered, they are deleted from they original location to avoid
+        // unwanted behavior.
         if (Objects.requireNonNull(getCallingActivity()).getClassName().equals(MainActivity.class.getName())) {
 
-            setBitmap(MainActivity.subActivityBitmap);
-            selectedFilter = MainActivity.subActivityFilter;
+            if (MainActivity.subActivityBitmap != null) {
+                setBitmap(MainActivity.subActivityBitmap);
+                MainActivity.subActivityBitmap = null;
+            } else {
+                layoutCancel.performClick();
+            }
+
+            if (MainActivity.subActivityFilter != null) {
+                selectedFilter = MainActivity.subActivityFilter;
+                MainActivity.subActivityFilter = null;
+            } else {
+                layoutCancel.performClick();
+            }
+
+            generateMasks(MainActivity.subMaskBmp);
+            MainActivity.subMaskBmp = null;
 
         } else if (getCallingActivity().getClassName().equals(FiltersActivity.class.getName())) {
 
-            setBitmap(FiltersActivity.subActivityBitmap);
-            selectedFilter = FiltersActivity.subActivityFilter;
+            if (FiltersActivity.subActivityBitmap != null) {
+                setBitmap(FiltersActivity.subActivityBitmap);
+                FiltersActivity.subActivityBitmap = null;
+            } else {
+                layoutCancel.performClick();
+            }
+
+            if (FiltersActivity.subActivityFilter != null) {
+                selectedFilter = FiltersActivity.subActivityFilter;
+                FiltersActivity.subActivityFilter = null;
+            } else {
+                layoutCancel.performClick();
+            }
+
+            generateMasks(FiltersActivity.subMaskBmp);
+            FiltersActivity.subMaskBmp = null;
 
         }
 
@@ -111,12 +150,97 @@ public class FiltersActivity extends AppCompatActivity {
         // Initialize all the different listeners, the interface and the masks
         initializeListener();
         initializeInterface();
-        generateMasks();
+
+        applyColorTheme();
 
         previewFilter();
     }
 
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            layoutImageView.setInternalValues();
+        }
+
+    }
+
+
+    private void applyColorTheme() {
+        filterMenu.setBackgroundColor(Settings.COLOR_SELECTED);
+        layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
+
+        layoutButtonApply.setBackgroundColor(Settings.COLOR_GREY);
+        layoutCancel.setBackgroundColor(Settings.COLOR_GREY);
+
+        layoutButtonApply.setTextColor(Settings.COLOR_TEXT);
+        layoutFilterMenuButton.setTextColor(Settings.COLOR_TEXT);
+        layoutCancel.setTextColor(Settings.COLOR_TEXT);
+
+        layoutSeekBarValue1.setTextColor(Settings.COLOR_TEXT);
+        layoutSeekBarValue2.setTextColor(Settings.COLOR_TEXT);
+        layoutSwitch1.setTextColor(Settings.COLOR_TEXT);
+
+        ColorStateList thumbStates = new ColorStateList(
+                new int[][]{
+                        new int[]{-android.R.attr.state_enabled},
+                        new int[]{android.R.attr.state_checked},
+                        new int[]{}
+                },
+                new int[]{
+                        Settings.COLOR_TEXT,
+                        Settings.COLOR_TEXT,
+                        Settings.COLOR_TEXT
+                }
+        );
+        layoutSwitch1.setThumbTintList(thumbStates);
+        layoutSeekBar1.setThumbTintList(thumbStates);
+        layoutSeekBar2.setThumbTintList(thumbStates);
+
+        ColorStateList trackStates = new ColorStateList(
+                new int[][]{
+                        new int[]{-android.R.attr.state_enabled},
+                        new int[]{}
+                },
+                new int[]{
+                        Settings.COLOR_BACKGROUND,
+                        Settings.COLOR_BACKGROUND
+                }
+        );
+        layoutSwitch1.setTrackTintList(trackStates);
+        layoutSwitch1.setTrackTintMode(PorterDuff.Mode.OVERLAY);
+
+        Window window = getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
+        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
+
+        if (!Settings.IS_DARK_THEME) {
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        } else {
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
     private void generateMasks(Bitmap bmp) {
+
+        if (bmp == null) {
+            bmp = ImageTools.bitmapClone(originalImage);
+            ImageTools.fillWithColor(bmp, Color.BLACK);
+        }
+
         maskBmp = bmp;
 
         Bitmap invertedMaskBmp = ImageTools.bitmapClone(maskBmp);
@@ -125,13 +249,6 @@ public class FiltersActivity extends AppCompatActivity {
         originalImageMasked = ImageTools.bitmapClone(originalImage);
         FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, getApplicationContext(), BlendType.MULTIPLY);
     }
-
-    private void generateMasks() {
-        Bitmap bmp = ImageTools.bitmapClone(originalImage);
-        ImageTools.fillWithColor(bmp, Color.BLACK);
-        generateMasks(bmp);
-    }
-
 
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
@@ -327,7 +444,6 @@ public class FiltersActivity extends AppCompatActivity {
 
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 layoutImageView.translate((int) (distanceX / layoutImageView.getZoom()), (int) (distanceY / layoutImageView.getZoom()));
-                refreshImageView();
                 return false;
             }
 
@@ -344,14 +460,14 @@ public class FiltersActivity extends AppCompatActivity {
 
             public boolean onDoubleTap(MotionEvent e) {
 
-                if (layoutImageView.getZoom() != 1f) {
+                // it it's zoomed
+                if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
                     layoutImageView.reset();
                 } else {
                     Point touch = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(e.getX(), e.getY()));
                     layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
                     layoutImageView.setCenter(touch);
                 }
-                refreshImageView();
                 return true;
             }
 
@@ -372,7 +488,6 @@ public class FiltersActivity extends AppCompatActivity {
 
             public boolean onScale(ScaleGestureDetector detector) {
                 layoutImageView.setZoom(lastZoomFactor * detector.getScaleFactor());
-                refreshImageView();
                 return false;
             }
 
@@ -524,7 +639,6 @@ public class FiltersActivity extends AppCompatActivity {
                 maskFilter.setSeekBar2(0,50,100, "%");
                 maskFilter.setSwitch1(true, "Black", "White");
                 maskFilter.seekBar1AutoRefresh = false;
-                maskFilter.seekBar2AutoRefresh = false;
                 maskFilter.switch1AutoRefresh = false;
                 maskFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
                     @Override
@@ -548,6 +662,8 @@ public class FiltersActivity extends AppCompatActivity {
 
                 subActivityFilter = maskFilter;
                 subActivityBitmap = originalImage;
+                subMaskBmp = ImageTools.bitmapClone(maskBmp);
+
                 Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
                 startActivityForResult(intent, GET_MASK_IMAGE);
             }

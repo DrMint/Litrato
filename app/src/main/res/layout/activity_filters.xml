@@ -19,8 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/linearLayoutFilters"
-            android:background="@color/black"
             android:contentDescription="@string/imageViewDescription"
+            android:scaleType="fitStart"
             app:srcCompat="@drawable/default_image" />
 
         <ImageView
@@ -50,11 +50,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/gray"
                 android:text="@string/cancelButton"
                 android:textAllCaps="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@color/text"
                 android:textSize="18sp" />
 
             <Button
@@ -63,10 +61,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/selected"
                 android:textAllCaps="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@color/text"
                 android:textSize="18sp" />
 
             <Button
@@ -75,11 +71,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/gray"
                 android:text="@string/applyButton"
                 android:textAllCaps="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@color/text"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -89,7 +83,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/linearLayoutFilters"
-            android:background="@color/selected"
             android:baselineAligned="false"
             android:orientation="horizontal"
             android:visibility="visible">
@@ -98,7 +91,7 @@
                 style="@android:style/ButtonBar"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
-                android:background="@color/selected"
+                android:background="#00FFFFFF"
                 android:orientation="vertical">
 
                 <Button
