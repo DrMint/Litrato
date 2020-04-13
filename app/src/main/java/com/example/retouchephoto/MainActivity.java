@@ -272,6 +272,19 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             }
+
+            case R.id.action_rotate_left: {
+                beforeLastFilterImage = FilterFunction.rotate(beforeLastFilterImage, 270);
+                refreshImageView();
+                break;
+            }
+
+            case R.id.action_rotate_right: {
+                beforeLastFilterImage = FilterFunction.rotate(beforeLastFilterImage, 90);
+                refreshImageView();
+                break;
+            }
+
         }
 
         //noinspection SimplifiableIfStatement
@@ -331,8 +344,10 @@ public class MainActivity extends AppCompatActivity {
         window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
         if (!Settings.IS_DARK_THEME) {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            layoutToolbar.setPopupTheme(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         } else {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            layoutToolbar.setPopupTheme(View.SYSTEM_UI_FLAG_VISIBLE);
         }
 
         for (DisplayedFilter displayedFilter:displayedFilters) {
@@ -354,12 +369,13 @@ public class MainActivity extends AppCompatActivity {
         Bitmap saveIcon = FileInputOutput.getBitmap(getResources(), R.drawable.save);
         Bitmap openIcon = FileInputOutput.getBitmap(getResources(), R.drawable.open);
         Bitmap historyIcon = FileInputOutput.getBitmap(getResources(), R.drawable.history);
+        Bitmap overflowIcon = FileInputOutput.getBitmap(getResources(), R.drawable.overflow);
 
         if (!Settings.IS_DARK_THEME) {
             FilterFunction.brightness(saveIcon, getApplicationContext(), -2000);
             FilterFunction.brightness(openIcon, getApplicationContext(), -2000);
             FilterFunction.brightness(historyIcon, getApplicationContext(), -2000);
-
+            FilterFunction.brightness(overflowIcon, getApplicationContext(), -2000);
         }
         Drawable drawable = new BitmapDrawable(getResources(), openIcon);
         layoutToolbar.getMenu().getItem(0).setIcon(drawable);
@@ -367,6 +383,8 @@ public class MainActivity extends AppCompatActivity {
         layoutToolbar.getMenu().getItem(1).setIcon(drawable);
         drawable = new BitmapDrawable(getResources(), saveIcon);
         layoutToolbar.getMenu().getItem(2).setIcon(drawable);
+        drawable = new BitmapDrawable(getResources(), overflowIcon);
+        layoutToolbar.setOverflowIcon(drawable);
 
     }
 
