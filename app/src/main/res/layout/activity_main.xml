@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/toolbar"
-            tools:visibility="visible">
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/historyTitle"
@@ -56,8 +56,18 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="30dp"
                 android:layout_marginBottom="20dp"
+                android:layout_toStartOf="@id/historyConfirmButton"
                 android:max="3"
                 android:progress="3" />
+
+            <Button
+                android:id="@+id/historyConfirmButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/historyTitle"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="30dp"
+                android:text="@string/historyConfirmButton" />
         </RelativeLayout>
 
         <LinearLayout

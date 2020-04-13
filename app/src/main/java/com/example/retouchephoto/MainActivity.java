@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout historyBar;
     private TextView    historyTitle;
     private SeekBar     historySeekBar;
+    private Button      historyConfirmButton;
 
     private TableRow    toolsLineOne;
     private TableRow    toolsLineTwo;
@@ -176,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
         historyBar              = findViewById(R.id.historyBar);
         historyTitle            = findViewById(R.id.historyTitle);
         historySeekBar          = findViewById(R.id.historySeekBar);
+        historyConfirmButton    = findViewById(R.id.historyConfirmButton);
 
         colorBar                = findViewById(R.id.colorMenu);
         fancyBar                = findViewById(R.id.fancyMenu);
@@ -230,22 +232,14 @@ public class MainActivity extends AppCompatActivity {
         switch (id) {
             case R.id.action_history: {
 
-                /*
-                if (Settings.IS_DARK_THEME) {
-                    Settings.setColorTheme(Settings.LIGHT_THEME);
-                } else {
-                    Settings.setColorTheme(Settings.DARK_THEME);
-                }
-                applyColorTheme();
-                */
-
                 if (isVisible(historyBar)) {
-                    historyBar.setVisibility(View.GONE);
+                    closeMenus();
                 } else {
                     historyBar.setVisibility(View.VISIBLE);
                 }
                 break;
             }
+
             case R.id.action_open: {
                 // Makes sure the phone has a camera module.
                 PackageManager pm = getApplicationContext().getPackageManager();
@@ -325,7 +319,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void applyColorTheme() {
 
-        historyBar.setVisibility(View.GONE);
         historyBar.setBackgroundColor(Settings.COLOR_GREY);
         historyTitle.setTextColor(Settings.COLOR_TEXT);
 
@@ -443,7 +436,7 @@ public class MainActivity extends AppCompatActivity {
                 closeMenus();
                 refreshImageView();
             }
-            if (isVisible(historyBar)) layoutToolbar.getMenu().performIdentifierAction(R.id.action_history, 0);
+            if (isVisible(historyBar)) closeHistory();
         }
     }
 
@@ -548,7 +541,7 @@ public class MainActivity extends AppCompatActivity {
         final View.OnTouchListener defaultImageViewTouchListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 closeMenus();
-                if (isVisible(historyBar)) layoutToolbar.getMenu().performIdentifierAction(R.id.action_history, 0);
+                if (isVisible(historyBar)) closeHistory();
                 myScaleDetector.onTouchEvent(event);
                 myGestureDetector.onTouchEvent(event);
                 layoutImageView.refresh();
@@ -645,11 +638,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 historyTitle.setText(history.get(progress));
+                historyConfirmButton.setEnabled(progress != seekBar.getMax());
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
             public void onStopTrackingTouch(SeekBar seekBar) {
-                //TODO: Reverts to the image at that history point.
+                if (seekBar.getProgress() != seekBar.getMax()) {
+                    //TODO: Shows what the state looked like by changing imageView's image.
+                }
+            }
+        });
+
+        historyConfirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Go back to historySeekBar.progress in the history
             }
         });
 
@@ -1402,6 +1405,11 @@ public class MainActivity extends AppCompatActivity {
         presetsBar.setVisibility(View.GONE);
         toolsBar.setVisibility(View.GONE);
         filtersBar.setVisibility(View.GONE);
+    }
+
+    private void closeHistory() {
+        historyBar.setVisibility(View.GONE);
+        historySeekBar.setProgress(historySeekBar.getMax());
     }
 
     private void closeSubMenus(){
