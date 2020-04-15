@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_history: {
 
                 if (isVisible(historyBar)) {
-                    closeMenus();
+                    closeHistory();
                 } else {
                     historyBar.setVisibility(View.VISIBLE);
                 }
