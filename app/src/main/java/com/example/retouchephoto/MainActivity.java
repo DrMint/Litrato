@@ -17,6 +17,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -153,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
 
         layoutToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(layoutToolbar);
+
+        PreferenceManager.setDefaultValues(this, R.xml.settings, false);
 
         // Sets all the layout shortcuts.
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
@@ -294,6 +297,16 @@ public class MainActivity extends AppCompatActivity {
                 currentImage = filterRotation.apply(currentImage, null, getApplicationContext(), 0, 90, 0, false, new Point(), new Point());
                 lastUsedFilter = filterRotation;
                 refreshImageView();
+                break;
+            }
+
+            case R.id.action_information: {
+                break;
+            }
+
+            case R.id.action_settings: {
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
                 break;
             }
 

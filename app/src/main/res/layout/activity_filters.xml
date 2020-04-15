@@ -46,105 +46,121 @@
             android:layout_alignParentBottom="true"
             android:orientation="horizontal">
 
-            <Button
+            <ImageButton
                 android:id="@+id/cancelButton"
-                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/cancelButton"
-                android:textAllCaps="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textSize="18sp" />
+                android:adjustViewBounds="true"
+                android:background="#00FFFFFF"
+                android:contentDescription="@string/cancelButton"
+                android:scaleType="fitCenter"
+                android:src="@drawable/cancel"
+                android:visibility="visible" />
 
             <Button
                 android:id="@+id/filterNameButton"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="0.5"
                 android:textAllCaps="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                 android:textSize="18sp" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/applyButton"
-                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/applyButton"
-                android:textAllCaps="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textSize="18sp" />
+                android:adjustViewBounds="true"
+                android:background="#00FFFFFF"
+                android:contentDescription="@string/cancelButton"
+                android:scaleType="fitCenter"
+                android:src="@drawable/valid"
+                android:visibility="visible" />
+
         </LinearLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/filtersMenu"
-            style="@android:style/ButtonBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/linearLayoutFilters"
-            android:baselineAligned="false"
-            android:orientation="horizontal"
-            android:visibility="visible">
+            android:layout_alignBottom="@+id/imageView"
+            android:layout_marginBottom="0dp">
 
-            <LinearLayout
-                style="@android:style/ButtonBar"
-                android:layout_width="50dp"
+            <ImageButton
+                android:id="@+id/pickButton"
+                android:layout_width="40dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:adjustViewBounds="true"
                 android:background="#00FFFFFF"
-                android:orientation="vertical">
+                android:contentDescription="@string/pickButton"
+                android:scaleType="fitCenter"
+                android:src="@drawable/pick"
+                android:visibility="visible" />
 
-                <ImageButton
-                    android:id="@+id/pickButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="visible"
-                    android:background="#00FFFFFF"
-                    android:src="@drawable/pick"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="@string/pickButton" />
+            <ImageButton
+                android:id="@+id/maskButton"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/pickButton"
+                android:layout_marginStart="10dp"
+                android:adjustViewBounds="true"
+                android:background="#00FFFFFF"
+                android:contentDescription="@string/maskButton"
+                android:scaleType="fitCenter"
+                android:src="@drawable/mask"
+                android:visibility="visible" />
 
-                <ImageButton
-                    android:id="@+id/maskButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="visible"
-                    android:background="#00FFFFFF"
-                    android:src="@drawable/mask"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="@string/maskButton" />
+            <ImageButton
+                android:id="@+id/histogramButton"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/maskButton"
+                android:layout_marginStart="10dp"
+                android:adjustViewBounds="true"
+                android:background="#00FFFFFF"
+                android:contentDescription="@string/histogramButton"
+                android:scaleType="fitCenter"
+                android:src="@drawable/histogram"
+                android:visibility="visible" />
 
-                <ImageButton
-                    android:id="@+id/histogramButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="visible"
-                    android:background="#00FFFFFF"
-                    android:src="@drawable/histogram"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="@string/histogramButton" />
+            <TextView
+                android:id="@+id/switchValue1"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:textAlignment="center"
+                android:visibility="visible" />
 
-            </LinearLayout>
+            <Switch
+                android:id="@+id/switch1"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/switchValue1"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:visibility="visible" />
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="15dp"
-                android:layout_marginStart="40dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@+id/switchValue1"
+                android:layout_toEndOf="@id/histogramButton">
 
                 <SeekBar
                     android:id="@+id/colorSeekBar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_marginTop="10dp"
                     android:background="@drawable/gradient_color"
                     android:max="359"
                     android:min="0"
@@ -153,12 +169,31 @@
                     android:thumbTint="#000"
                     android:visibility="visible" />
 
+                <TextView
+                    android:id="@+id/seekBarValue1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/colorSeekBar"
+                    android:layout_marginTop="10dp"
+                    android:textAlignment="center"
+                    android:visibility="visible" />
+
                 <SeekBar
                     android:id="@+id/seekBar1"
                     style="@android:style/Widget.Material.SeekBar.Discrete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_below="@id/seekBarValue1"
+                    android:layout_alignParentLeft="true"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/seekBarValue2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/seekBar1"
+                    android:layout_marginTop="10dp"
+                    android:textAlignment="center"
                     android:visibility="visible" />
 
                 <SeekBar
@@ -166,43 +201,14 @@
                     style="@android:style/Widget.Material.SeekBar.Discrete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_below="@id/seekBarValue2"
+                    android:layout_marginBottom="10dp"
                     android:visibility="visible" />
 
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="15dp"
-                android:layout_marginStart="40dp"
-                android:layout_weight="0"
-                android:orientation="vertical">
+        </RelativeLayout>
 
-                <Switch
-                    android:id="@+id/switch1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:layout_marginStart="26dp" />
-
-                <TextView
-                    android:id="@+id/seekBarValue1"
-                    android:layout_width="60dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/seekBarValue2"
-                    android:layout_width="60dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:visibility="visible" />
-
-            </LinearLayout>
-        </LinearLayout>
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
