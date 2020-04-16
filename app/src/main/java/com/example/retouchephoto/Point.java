@@ -105,4 +105,7 @@ class Point {
         return this.x == x && this.y == y;
     }
 
+    int distance(Point y){
+        return (int)Math.sqrt((this.x+y.x)*(this.x+y.x)+(this.y+y.y)*(this.y+y.y));
+    }
 }
