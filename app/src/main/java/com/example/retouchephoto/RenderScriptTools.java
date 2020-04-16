@@ -40,7 +40,7 @@ class RenderScriptTools {
         script.forEach(output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, rs, input, output);
+        cleanRenderScript(script, input, output);
     }
 
 
@@ -55,7 +55,7 @@ class RenderScriptTools {
 
         script.forEachMultiply(input, output);
 
-        cleanRenderScript(script, rs, input, output);
+        cleanRenderScript(script, input, output);
     }
 
 
@@ -64,14 +64,12 @@ class RenderScriptTools {
     /**
      * Does all the job of setting up the convolution, RenderScript stuff and then clean the mess.
      * @param bmp the image.
-     * @param context the app context
      * @param kernelWidth the width of the kernel
      * @param kernelHeight the height of the kernel
      * @param kernel the kernel to use for convolution
      */
-    static void applyConvolution(final Bitmap bmp, final Context context, final int kernelWidth, final int kernelHeight, final float[] kernel) {
+    static void applyConvolution(final Bitmap bmp, final RenderScript rs, final int kernelWidth, final int kernelHeight, final float[] kernel) {
 
-        RenderScript rs = RenderScript.create(context);
         ScriptC_convolution script = new ScriptC_convolution(rs);
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -108,7 +106,7 @@ class RenderScriptTools {
         }
 
         output.copyTo(bmp);
-        cleanRenderScript(script, rs, input, output);
+        cleanRenderScript(script, input, output);
     }
 
 
@@ -117,13 +115,12 @@ class RenderScriptTools {
      * Does all the job of setting up the convolution, RenderScript stuff and then clean the mess.
      * Without a kernel, the kernel weights will be uniform.
      * @param bmp the image.
-     * @param context the app context
      * @param kernelWidth the width of the kernel
      * @param kernelHeight the height of the kernel
      */
-    static void applyConvolution(final Bitmap bmp, final Context context, final int kernelWidth, final int kernelHeight) {
+    static void applyConvolution(final Bitmap bmp, final RenderScript rs, final int kernelWidth, final int kernelHeight) {
         final float[] kernel = {};
-        applyConvolution(bmp, context, kernelWidth, kernelHeight, kernel);
+        applyConvolution(bmp, rs, kernelWidth, kernelHeight, kernel);
     }
 
 
@@ -134,10 +131,31 @@ class RenderScriptTools {
      * @param rs the RenderScript object to destroy.
      * @param allocations an array of all the allocations to destroy.
      */
+
     static void cleanRenderScript(final Script script, final RenderScript rs, final Allocation[] allocations) {
-        script.destroy();
         rs.destroy();
+        cleanRenderScript(script, allocations);
+    }
+
+    /**
+     * Can be called after any RS function to destroy the different object used.
+     * @param script the Script object to destroy.
+     * @param allocations an array of all the allocations to destroy.
+     */
+    static void cleanRenderScript(final Script script, final Allocation[] allocations) {
+        script.destroy();
         for (Allocation allocation : allocations) allocation.destroy();
+    }
+
+    /**
+     * Can be called after any RS function to destroy the different object used.
+     * @param script the Script object to destroy.
+     * @param input the Allocations to destroy.
+     * @param output the Allocations to destroy.
+     */
+    static void cleanRenderScript(final Script script, Allocation input, Allocation output) {
+        Allocation[] allocations = {input, output};
+        cleanRenderScript(script, allocations);
     }
 
     /**
@@ -151,4 +169,6 @@ class RenderScriptTools {
         Allocation[] allocations = {input, output};
         cleanRenderScript(script, rs, allocations);
     }
+
+
 }

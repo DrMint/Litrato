@@ -252,10 +252,10 @@ public class FiltersActivity extends AppCompatActivity {
         maskBmp = bmp;
 
         Bitmap invertedMaskBmp = ImageTools.bitmapClone(maskBmp);
-        FilterFunction.invert(invertedMaskBmp, getApplicationContext());
+        FilterFunction.invert(invertedMaskBmp);
 
         originalImageMasked = ImageTools.bitmapClone(originalImage);
-        FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, getApplicationContext(), BlendType.MULTIPLY);
+        FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, BlendType.MULTIPLY);
     }
 
     @Override
@@ -400,8 +400,8 @@ public class FiltersActivity extends AppCompatActivity {
 
         // Keep the filtered part only where the maskBmp is white.
         if (shouldUseMask) {
-            FilterFunction.applyTexture(filteredImage, maskBmp,getApplicationContext(),BlendType.MULTIPLY);
-            FilterFunction.applyTexture(filteredImage, originalImageMasked, getApplicationContext(), BlendType.ADD);
+            FilterFunction.applyTexture(filteredImage, maskBmp,BlendType.MULTIPLY);
+            FilterFunction.applyTexture(filteredImage, originalImageMasked, BlendType.ADD);
         }
 
         // Refresh the image viewer and the histogram.
@@ -653,7 +653,7 @@ public class FiltersActivity extends AppCompatActivity {
                         } else {
                             ImageTools.drawCircle(maskBmp, touchUp, (int) seekBar, Color.BLACK);
                         }
-                        FilterFunction.applyTexture(bmp, maskBmp, context, BlendType.OVERLAY, seekBar2 / 100f);
+                        FilterFunction.applyTexture(bmp, maskBmp, BlendType.OVERLAY, seekBar2 / 100f);
                         return null;
                     }
                 });
