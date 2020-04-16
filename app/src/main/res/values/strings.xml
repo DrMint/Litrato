@@ -28,4 +28,7 @@
     <string name="pickButton">Pick</string>
     <string name="brushButton">Brush</string>
     <string name="histogramButton">Histogram</string>
+    <string name="maskButton">Mask</string>
+    <string name="historyConfirmButton">Confirm</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

@@ -15,10 +15,12 @@ import android.graphics.drawable.Drawable;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.provider.MediaStore;
-
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.Window;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -32,14 +34,15 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
 import com.google.android.material.snackbar.Snackbar;
 
 /*TODO:
@@ -71,11 +74,13 @@ public class MainActivity extends AppCompatActivity {
     static Bitmap subActivityBitmap;
     static Bitmap subMaskBmp;
 
+    static SharedPreferences preferences;
+
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
     private final int FILTER_ACTIVITY_IS_FINISHED = 3;
-
-
+    private final int CONFIG_REQUEST = 4;
+    private final int EXIF_REQUEST = 5;
 
     /**
      * This is the image as it was before applying any filter.
@@ -87,13 +92,7 @@ public class MainActivity extends AppCompatActivity {
      * This is the image as it was after the last apply button click.
      * This is the image filter are applied to.
      */
-    private Bitmap beforeLastFilterImage;
-
-    /**
-     * This is the image with the current changes from the filter.
-     * This is the image that is shown to the user.
-     */
-    private Bitmap filteredImage;
+    private Bitmap currentImage;
 
     /**
      * Four lists of all filters. The order is the same as shown by the spinner.
@@ -102,12 +101,15 @@ public class MainActivity extends AppCompatActivity {
 
     private final List<DisplayedFilter> displayedFilters = new ArrayList<>();
 
+    private final List<String> history = new ArrayList<>();
+    private Filter lastUsedFilter;
+
+    private Filter filterRotation;
+
     private final Boolean[] hasChanged = {true, true, true, true, true, true};
 
     private ImageViewZoomScroll layoutImageView;
-    private Button      layoutButtonOpen;
-    private Button      layoutButtonSave;
-    private Button      layoutButtonHistory;
+    private Toolbar     layoutToolbar;
     private Button      toolsButton;
     private Button      presetsButton;
     private Button      filtersButton;
@@ -125,6 +127,11 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout blurBar;
     private LinearLayout contourBar;
 
+    private RelativeLayout historyBar;
+    private TextView    historyTitle;
+    private SeekBar     historySeekBar;
+    private Button      historyConfirmButton;
+
     private TableRow    toolsLineOne;
     private TableRow    toolsLineTwo;
     private TableRow    toolsLineThree;
@@ -140,13 +147,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        layoutToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(layoutToolbar);
+
+        preferences = getSharedPreferences(Settings.PREFERENCE_NAME, 0);
+
         // Sets all the layout shortcuts.
-
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
-
-        layoutButtonOpen        = findViewById(R.id.buttonOpen);
-        layoutButtonSave        = findViewById(R.id.buttonSave);
-        layoutButtonHistory     = findViewById(R.id.buttonHistory);
 
         toolsButton             = findViewById(R.id.buttonTools);
         presetsButton           = findViewById(R.id.buttonPresets);
@@ -165,6 +172,11 @@ public class MainActivity extends AppCompatActivity {
 
         presetsLinearLayout     = findViewById(R.id.presetsLinearLayout);
 
+        historyBar              = findViewById(R.id.historyBar);
+        historyTitle            = findViewById(R.id.historyTitle);
+        historySeekBar          = findViewById(R.id.historySeekBar);
+        historyConfirmButton    = findViewById(R.id.historyConfirmButton);
+
         colorBar                = findViewById(R.id.colorMenu);
         fancyBar                = findViewById(R.id.fancyMenu);
         blurBar                 = findViewById(R.id.blurMenu);
@@ -177,196 +189,52 @@ public class MainActivity extends AppCompatActivity {
         submenuSelected = colorButton.getTypeface();
         submenuUnselected = fancyButton.getTypeface();
 
-
-        layoutImageView.reset();
-
-
-        // Selects the default image in the resource folder and set it
-        setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
-        layoutImageView.setImageBitmap(filteredImage);
-        layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
+        // If this is the first launch, compiles the RenderScript's functions
+        if (appGetFirstTimeRun() == 0) {
+            initializeRenderScriptCaching();
+        }
 
         // Create the lists of filters
         generatePresets();
         generateTools();
         generateFilters();
 
-        // If this is the first launch, compiles the RenderScript's functions
-        if (appGetFirstTimeRun() == 0) {
-            initializeRenderScriptCaching();
-        }
-
         // Initialize all the different listeners.
+        // The filters / tools / presets must already be ready
         initializeListener();
 
-        Settings.setColorTheme(Settings.DARK_THEME);
-        applyColorTheme();
+        // Selects the default image in the resource folder and set it
+        setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
 
     }
-
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            layoutImageView.setInternalValues();
-        }
-    }
-
-
-    private void applyColorTheme() {
-        colorBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        fancyBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        blurBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        contourBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        toolsBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        presetsBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        filtersBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        buttonBar.setBackgroundColor(Settings.COLOR_SELECTED);
-
-        presetsButton.setBackgroundColor(Settings.COLOR_GREY);
-        toolsButton.setBackgroundColor(Settings.COLOR_GREY);
-        filtersButton.setBackgroundColor(Settings.COLOR_GREY);
-
-        presetsButton.setTextColor(Settings.COLOR_TEXT);
-        toolsButton.setTextColor(Settings.COLOR_TEXT);
-        filtersButton.setTextColor(Settings.COLOR_TEXT);
-
-        layoutButtonOpen.setTextColor(Settings.COLOR_TEXT);
-        layoutButtonSave.setTextColor(Settings.COLOR_TEXT);
-        layoutButtonHistory.setTextColor(Settings.COLOR_TEXT);
-
-        presetsButton.setTypeface(submenuUnselected);
-        toolsButton.setTypeface(submenuUnselected);
-        filtersButton.setTypeface(submenuUnselected);
-
-        colorButton.setTextColor(Settings.COLOR_TEXT);
-        fancyButton.setTextColor(Settings.COLOR_TEXT);
-        blurButton.setTextColor(Settings.COLOR_TEXT);
-        contourButton.setTextColor(Settings.COLOR_TEXT);
-
-        colorButton.setBackgroundColor(Settings.COLOR_SELECTED);
-        fancyButton.setBackgroundColor(Settings.COLOR_SELECTED);
-        blurButton.setBackgroundColor(Settings.COLOR_SELECTED);
-        contourButton.setBackgroundColor(Settings.COLOR_SELECTED);
-
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
-        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
-        if (!Settings.IS_DARK_THEME) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        } else {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-        }
-
-        for (DisplayedFilter displayedFilter:displayedFilters) {
-            displayedFilter.textView.setTextColor(Settings.COLOR_TEXT);
-            if (displayedFilter.filter.getFilterCategory() == FilterCategory.TOOL) {
-
-                Bitmap icon = ImageTools.bitmapClone(displayedFilter.filter.getIcon());
-                //TODO: Use invert instead but invert has to deal with transparent images.
-                if (!Settings.IS_DARK_THEME) FilterFunction.brightness(icon, getApplicationContext(), -2000);
-
-                Drawable drawable = new BitmapDrawable(getResources(), icon);
-                drawable.setBounds(0, 0, Settings.TOOL_DISPLAYED_SIZE, Settings.TOOL_DISPLAYED_SIZE);
-                displayedFilter.textView.setCompoundDrawablePadding(25);
-                displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
-
-            }
-        }
-
-    }
-
-
 
     @Override
-    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        applyColorTheme();
+        return true;
+    }
 
-        // After the user as selected an image, loads it and stores it in this.original_image
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Bitmap mBitmap;
-            try {
-                mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
-                setBitmap(mBitmap);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
 
-            } catch (IOException e) {
-                e.printStackTrace();
+        switch (id) {
+            case R.id.action_history: {
+
+                if (isVisible(historyBar)) {
+                    closeHistory();
+                } else {
+                    historyBar.setVisibility(View.VISIBLE);
+                }
+                break;
             }
-        }
 
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            //Load the last taken photo.
-            setBitmap(FileInputOutput.getLastTakenBitmap());
-        }
-
-        if (requestCode == FILTER_ACTIVITY_IS_FINISHED) {
-            Bitmap result = FiltersActivity.activityBitmap;
-            if (result != null) {
-                layoutImageView.reset();
-                beforeLastFilterImage = ImageTools.bitmapClone(result);
-                closeMenus();
-                refreshImageView();
-            }
-        }
-    }
-
-    /**
-     * Function called when a new image is loaded by the program.
-     * @param bmp the image to load
-     */
-    private void setBitmap(Bitmap bmp) {
-
-        // If the bmp is null, aborts
-        if (bmp == null) return;
-
-        // Resize the image before continuing, if necessary
-        if (bmp.getHeight() > Settings.IMPORTED_BMP_SIZE || bmp.getWidth() > Settings.IMPORTED_BMP_SIZE) {
-            bmp = ImageTools.resizeAsContainInARectangle(bmp, Settings.IMPORTED_BMP_SIZE);
-
-            /*
-            Snackbar sb = Snackbar.make(
-                    layoutButtonOpen,
-                    "Image resized to " + bmp.getWidth() + "px by " + bmp.getHeight() + "px",
-                    Snackbar.LENGTH_SHORT);
-            sb.show();
-             */
-        }
-
-        // Set this image as the originalImage and reset the UI
-        originalImage = bmp;
-        resetImage();
-    }
-
-    /**
-     * Displays filteredImage on the imageView, also refreshes Histogram and ImageInfo
-     */
-    private void refreshImageView() {
-        layoutImageView.setImageBitmap(beforeLastFilterImage);
-        hasChanged[0] = true;
-        hasChanged[2] = true;
-        hasChanged[3] = true;
-        hasChanged[4] = true;
-        hasChanged[5] = true;
-        generateMiniatureForOpenedMenu();
-    }
-
-    /**
-     * Display the original image in "imageView" and refresh the histogram.
-     */
-    private void resetImage() {
-        beforeLastFilterImage = ImageTools.bitmapClone(originalImage);
-        filteredImage = ImageTools.bitmapClone(originalImage);
-        refreshImageView();
-    }
-
-    private void initializeListener() {
-
-        layoutButtonOpen.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
+            case R.id.action_open: {
                 // Makes sure the phone has a camera module.
                 PackageManager pm = getApplicationContext().getPackageManager();
                 if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
@@ -400,23 +268,220 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(intent,PICK_IMAGE_REQUEST);
                 }
+                break;
             }
-        });
-
-
-        // When the user click on the apply button, apply the selected filter in the spinner
-        layoutButtonSave.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (FileInputOutput.saveImage(beforeLastFilterImage, MainActivity.this)) {
-                    Snackbar.make(v, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
+            case R.id.action_save: {
+                if (FileInputOutput.saveImageToGallery(currentImage, MainActivity.this)) {
+                    Snackbar.make(toolsBar, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
                 }
+                break;
             }
-        });
+
+            case R.id.action_rotate_left: {
+                currentImage = filterRotation.apply(currentImage, null, getApplicationContext(), 0, 270, 0, false, new Point(), new Point());
+                lastUsedFilter = filterRotation;
+                refreshImageView();
+                break;
+            }
+
+            case R.id.action_rotate_right: {
+                currentImage = filterRotation.apply(currentImage, null, getApplicationContext(), 0, 90, 0, false, new Point(), new Point());
+                lastUsedFilter = filterRotation;
+                refreshImageView();
+                break;
+            }
+
+            case R.id.action_settings: {
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivityForResult(intent, CONFIG_REQUEST);
+                break;
+            }
+
+            case R.id.action_exif: {
+                //Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                //startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(), ExifActivity.class);
+                startActivityForResult(intent, EXIF_REQUEST);
+                break;
+            }
+
+        }
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_history) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
 
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            layoutImageView.setImageBitmap(currentImage);
+            layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
+        }
+    }
 
+
+    private void applyColorTheme() {
+
+        Settings.setColorTheme(MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE));
+
+        historyBar.setBackgroundColor(Settings.COLOR_GREY);
+        historyTitle.setTextColor(Settings.COLOR_TEXT);
+
+        Objects.requireNonNull(getSupportActionBar()).setTitle("");
+        colorBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        fancyBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        blurBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        contourBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        toolsBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        presetsBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        filtersBar.setBackgroundColor(Settings.COLOR_SELECTED);
+        buttonBar.setBackgroundColor(Settings.COLOR_SELECTED);
+
+        presetsButton.setBackgroundColor(Settings.COLOR_GREY);
+        toolsButton.setBackgroundColor(Settings.COLOR_GREY);
+        filtersButton.setBackgroundColor(Settings.COLOR_GREY);
+
+        presetsButton.setTextColor(Settings.COLOR_TEXT);
+        toolsButton.setTextColor(Settings.COLOR_TEXT);
+        filtersButton.setTextColor(Settings.COLOR_TEXT);
+
+        presetsButton.setTypeface(submenuUnselected);
+        toolsButton.setTypeface(submenuUnselected);
+        filtersButton.setTypeface(submenuUnselected);
+
+        colorButton.setTextColor(Settings.COLOR_TEXT);
+        fancyButton.setTextColor(Settings.COLOR_TEXT);
+        blurButton.setTextColor(Settings.COLOR_TEXT);
+        contourButton.setTextColor(Settings.COLOR_TEXT);
+
+        colorButton.setBackgroundColor(Settings.COLOR_SELECTED);
+        fancyButton.setBackgroundColor(Settings.COLOR_SELECTED);
+        blurButton.setBackgroundColor(Settings.COLOR_SELECTED);
+        contourButton.setBackgroundColor(Settings.COLOR_SELECTED);
+
+        Window window = getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
+        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
+
+        if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            layoutToolbar.setPopupTheme(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        } else {
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            layoutToolbar.setPopupTheme(View.SYSTEM_UI_FLAG_VISIBLE);
+        }
+
+        for (DisplayedFilter displayedFilter:displayedFilters) {
+            displayedFilter.textView.setTextColor(Settings.COLOR_TEXT);
+            if (displayedFilter.filter.getFilterCategory() == FilterCategory.TOOL) {
+                Drawable drawable = ImageTools.getThemedIcon(getApplicationContext(), displayedFilter.filter.getIcon());
+                displayedFilter.textView.setCompoundDrawablePadding(25);
+                displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
+            }
+        }
+
+        layoutToolbar.getMenu().getItem(0).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.open));
+        layoutToolbar.getMenu().getItem(1).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.history));
+        layoutToolbar.getMenu().getItem(2).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.save));
+        layoutToolbar.getMenu().getItem(4).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.rotateleft));
+        layoutToolbar.getMenu().getItem(5).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.rotateright));
+        layoutToolbar.setOverflowIcon(ImageTools.getThemedIcon(this, R.drawable.overflow));
+
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case CONFIG_REQUEST:
+                hasChanged[0] = true;
+                hasChanged[2] = true;
+                hasChanged[3] = true;
+                hasChanged[4] = true;
+                hasChanged[5] = true;
+                closeHistory();
+                closeMenus();
+                applyColorTheme();
+                break;
+
+            case PICK_IMAGE_REQUEST:
+
+                if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                    setBitmap(FileInputOutput.getBitmap(data.getData()));
+                    layoutToolbar.getMenu().getItem(7).setEnabled(true);
+                }
+
+                break;
+
+            case REQUEST_IMAGE_CAPTURE:
+                //Load the last taken photo.
+                setBitmap(FileInputOutput.getLastTakenBitmap());
+                layoutToolbar.getMenu().getItem(7).setEnabled(true);
+                break;
+
+            case FILTER_ACTIVITY_IS_FINISHED:
+                Bitmap result = FiltersActivity.activityBitmap;
+                if (result != null) {
+                    layoutImageView.reset();
+                    currentImage = ImageTools.bitmapClone(result);
+                    closeMenus();
+                    refreshImageView();
+                }
+                if (isVisible(historyBar)) closeHistory();
+
+                break;
+        }
+    }
+
+    /**
+     * Function called when a new image is loaded by the program.
+     * @param bmp the image to load
+     */
+    private void setBitmap(Bitmap bmp) {
+
+        // If the bmp is null, aborts
+        if (bmp == null) return;
+
+        int importedBmpSize = MainActivity.preferences.getInt(Settings.PREFERENCE_IMPORTED_BMP_SIZE, Settings.DEFAULT_IMPORTED_BMP_SIZE);
+
+        // Resize the image before continuing, if necessary
+        if (bmp.getHeight() > importedBmpSize || bmp.getWidth() > importedBmpSize) {
+            bmp = ImageTools.resizeAsContainInARectangle(bmp, importedBmpSize);
+        }
+
+        // Set this image as the originalImage and reset the UI
+        originalImage = bmp;
+        currentImage = ImageTools.bitmapClone(originalImage);
+
+        lastUsedFilter = new Filter("Original");
+        history.clear();
+
+        refreshImageView();
+    }
+
+    /**
+     * Displays currentImage on the imageView, also refreshes Histogram and ImageInfo
+     */
+    private void refreshImageView() {
+        layoutImageView.setImageBitmap(currentImage);
+        hasChanged[0] = true;
+        hasChanged[2] = true;
+        hasChanged[3] = true;
+        hasChanged[4] = true;
+        hasChanged[5] = true;
+        generateMiniatureForOpenedMenu();
+        addToHistory(lastUsedFilter);
+    }
+
+    private void initializeListener() {
 
         // Create the GestureDetector which handles the scrolling and double tap.
         final GestureDetector myGestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.OnGestureListener() {
@@ -440,11 +505,12 @@ public class MainActivity extends AppCompatActivity {
             public boolean onDoubleTap(MotionEvent e) {
 
                 // it it's zoomed
-                if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
+                //if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
+                if (layoutImageView.getZoom() != 1f) {
                     layoutImageView.reset();
                 } else {
                     Point touch = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(e.getX(), e.getY()));
-                    layoutImageView.setZoom(layoutImageView.getZoom() * Settings.DOUBLE_TAP_ZOOM);
+                    layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
                     layoutImageView.setCenter(touch);
                 }
                 return true;
@@ -478,68 +544,15 @@ public class MainActivity extends AppCompatActivity {
         final View.OnTouchListener defaultImageViewTouchListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 closeMenus();
+                if (isVisible(historyBar)) closeHistory();
                 myScaleDetector.onTouchEvent(event);
                 myGestureDetector.onTouchEvent(event);
+                layoutImageView.refresh();
                 v.performClick();
                 return true;
             }
         };
         layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
-
-        layoutButtonHistory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Settings.IS_DARK_THEME) {
-                    Settings.setColorTheme(Settings.LIGHT_THEME);
-                } else {
-                    Settings.setColorTheme(Settings.DARK_THEME);
-                }
-                applyColorTheme();
-            }
-        });
-
-        presetsBar.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
-        filtersBar.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
-        toolsBar.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
-        contourBar.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
-        fancyBar.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
-        blurBar.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
 
         presetsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -624,7 +637,38 @@ public class MainActivity extends AppCompatActivity {
         });
         initializeMenus();
 
+        historySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                historyTitle.setText(history.get(progress));
+                historyConfirmButton.setEnabled(progress != seekBar.getMax());
+            }
 
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (seekBar.getProgress() != seekBar.getMax()) {
+                    //TODO: Shows what the state looked like by changing imageView's image.
+                }
+            }
+        });
+
+        historyConfirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Go back to historySeekBar.progress in the history
+            }
+        });
+
+
+        // We leave those because if no onClickListener is set, there are permeable to touch events.
+        // That means that clicking on the their background will trigger an event to the object behind.
+        presetsBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
+        filtersBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
+        toolsBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
+        contourBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
+        fancyBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
+        blurBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
+        historyBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
     }
 
     private void generatePresets(){
@@ -843,6 +887,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         filters.add(newTools);
+        filterRotation = newTools;
 
         newTools = new Filter("Crop");
         newTools.setFilterCategory(FilterCategory.TOOL);
@@ -1203,15 +1248,25 @@ public class MainActivity extends AppCompatActivity {
      * @param filter the filter to apply
      */
     private void apply(Filter filter) {
-        Bitmap result = filter.apply(beforeLastFilterImage, getApplicationContext());
+        lastUsedFilter = filter;
 
-        // If the filter return a bitmap, filteredImage becomes this bitmap
+        Bitmap result = filter.apply(currentImage, getApplicationContext());
+
+        // If the filter return a bitmap, currentImage becomes this bitmap
         if (result != null) {
-            beforeLastFilterImage = result;
+            currentImage = result;
         }
 
         refreshImageView();
     }
+
+    private void addToHistory(Filter filter) {
+        //TODO: To add way more than just the name.
+        history.add(filter.getName());
+        historySeekBar.setMax(history.size() - 1);
+        historySeekBar.setProgress(history.size() - 1);
+    }
+
 
     /**
      * Refreshes/Generates the miniatures of the currently opened.
@@ -1242,7 +1297,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void generateMiniatures(FilterCategory onlyThisCategory) {
-        Bitmap resizedMiniature = ImageTools.toSquare(beforeLastFilterImage, Settings.MINIATURE_BMP_SIZE);
+        Bitmap resizedMiniature = ImageTools.toSquare(
+                currentImage,
+                MainActivity.preferences.getInt(Settings.PREFERENCE_MINIATURE_BMP_SIZE, Settings.DEFAULT_MINIATURE_BMP_SIZE)
+        );
 
         for (DisplayedFilter displayedFilter:displayedFilters) {
 
@@ -1322,7 +1380,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     if (currentFilter.needFilterActivity) {
-                        openFiltersActivity(currentFilter, beforeLastFilterImage);
+                        openFiltersActivity(currentFilter, currentImage);
                     } else {
                         apply(currentFilter);
                     }
@@ -1355,6 +1413,11 @@ public class MainActivity extends AppCompatActivity {
         filtersBar.setVisibility(View.GONE);
     }
 
+    private void closeHistory() {
+        historyBar.setVisibility(View.GONE);
+        historySeekBar.setProgress(historySeekBar.getMax());
+    }
+
     private void closeSubMenus(){
         colorButton.setTypeface(submenuUnselected);
         fancyButton.setTypeface(submenuUnselected);
@@ -1370,6 +1433,7 @@ public class MainActivity extends AppCompatActivity {
     private void openFiltersActivity(Filter filter, Bitmap bmp){
         subActivityFilter = filter;
         subActivityBitmap = bmp;
+        lastUsedFilter = filter;
         Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
         intent.putExtra(Settings.ACTIVITY_EXTRA_CALLER, this.getClass().getName());
         startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
@@ -1407,8 +1471,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
-
 }
-

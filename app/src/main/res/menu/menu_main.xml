@@ -1,0 +1,58 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+    <!--
+        Menu item's that displayed on Toolbar.
+    -->
+    <item
+        android:id="@+id/action_open"
+        android:orderInCategory="0"
+        android:icon="@drawable/open"
+        android:title="Open"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_history"
+        android:icon="@drawable/history"
+        android:orderInCategory="1"
+        android:title="History"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_save"
+        android:orderInCategory="2"
+        android:icon="@drawable/save"
+        android:title="Save"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_seperator"
+        android:enabled="false"
+        android:orderInCategory="2"
+        android:title=""
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_rotate_left"
+        android:orderInCategory="2"
+        android:icon="@drawable/rotateleft"
+        android:title="Save"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_rotate_right"
+        android:orderInCategory="2"
+        android:icon="@drawable/rotateright"
+        android:title="Save"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="3"
+        android:title="Settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_exif"
+        android:enabled="false"
+        android:orderInCategory="4"
+        android:title="Exif Viewer"
+        app:showAsAction="never" />
+
+
+
+</menu>

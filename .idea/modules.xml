@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/RetouchePhoto.iml" filepath="$PROJECT_DIR$/RetouchePhoto.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RetouchePhoto.iml" filepath="$PROJECT_DIR$/RetouchePhoto.iml" group="RetouchePhoto" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="RetouchePhoto/app" />
     </modules>
   </component>
 </project>

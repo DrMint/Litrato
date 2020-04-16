@@ -1,9 +1,13 @@
 package com.example.retouchephoto;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 
 import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.blue;
@@ -203,6 +207,23 @@ class ImageTools {
         float[] hsv = new float[3];
         Color.RGBToHSV(red(color), green(color), blue(color), hsv);
         return (int) hsv[0];
+    }
+
+    static Drawable getThemedIcon(Context context, int index){
+        Bitmap bmp = FileInputOutput.getBitmap(context.getResources(), index);
+        return getThemedIcon(context, bmp);
+    }
+
+    static Drawable getThemedIcon(Context context, Bitmap icon){
+
+        //TODO: Use invert instead but invert has to deal with transparent images.
+        if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
+            FilterFunction.brightness(icon, context, -2000);
+        }
+
+        Drawable drawable = new BitmapDrawable(context.getResources(), icon);
+        drawable.setBounds(0, 0, Settings.TOOL_DISPLAYED_SIZE, Settings.TOOL_DISPLAYED_SIZE);
+        return drawable;
     }
 
 

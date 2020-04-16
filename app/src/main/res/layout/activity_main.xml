@@ -6,280 +6,284 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/buttonOpen"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:text="@string/openButtonString"
-        android:textAllCaps="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@+id/buttonHistory"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/buttonSave"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:text="@string/saveButtonString"
-        android:textAllCaps="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/buttonHistory"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/buttonHistory"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:text="@string/historyButtonString"
-        android:textAllCaps="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@+id/buttonSave"
-        app:layout_constraintStart_toEndOf="@+id/buttonOpen"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/buttonPresets"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:fontFamily="sans-serif-medium"
-            android:text="@string/presetsButton"
-            android:textAllCaps="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textSize="18sp" />
-
-        <Button
-            android:id="@+id/buttonTools"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:fontFamily="sans-serif-medium"
-            android:text="@string/toolsButton"
-            android:textAllCaps="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textSize="18sp" />
-
-        <Button
-            android:id="@+id/buttonFilters"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:fontFamily="sans-serif-medium"
-            android:text="@string/filtersButton"
-            android:textAllCaps="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/imageViewDescription"
-        android:scaleType="fitStart"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonHistory"
-        app:srcCompat="@drawable/default_image" />
-
-    <HorizontalScrollView
-        android:id="@+id/presetsBar"
-        style="@android:style/ButtonBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <LinearLayout
-            android:id="@+id/presetsLinearLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal" />
-    </HorizontalScrollView>
-
-    <TableLayout
-        android:id="@+id/toolsBar"
-        style="@android:style/ButtonBar"
-        android:layout_width="0dp"
-        android:layout_height="400dp"
-        android:collapseColumns="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <TableRow
-            android:id="@+id/toolsLineOne"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_weight="1"
-            android:gravity="center_horizontal" />
-
-        <TableRow
-            android:id="@+id/toolsLineTwo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_horizontal" />
-
-        <TableRow
-            android:id="@+id/toolsLineThree"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_weight="1"
-            android:gravity="center_horizontal" />
-
-    </TableLayout>
-
-    <LinearLayout
-        android:id="@+id/filtersBar"
-        style="@android:style/ButtonBar"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/bottomBar"
+            android:layout_below="@id/toolbar"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/imageViewDescription"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/default_image" />
+
+        <RelativeLayout
+            android:id="@+id/historyBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/toolbar"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/historyTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="sans-serif-medium"
+                android:textAlignment="center"
+                android:textAllCaps="true"
+                android:textSize="18sp" />
+
+            <SeekBar
+                android:id="@+id/historySeekBar"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/historyTitle"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="20dp"
+                android:layout_toStartOf="@id/historyConfirmButton"
+                android:max="3"
+                android:progress="3" />
+
+            <Button
+                android:id="@+id/historyConfirmButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/historyTitle"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="30dp"
+                android:text="@string/historyConfirmButton" />
+        </RelativeLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:gravity="start">
-
-            <Button
-                android:id="@+id/buttonColor"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="75dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@android:color/black"
-                android:fontFamily="sans-serif-black"
-                android:text="@string/colorMenu"
-                android:textAllCaps="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@android:color/white" />
-
-            <Button
-                android:id="@+id/buttonFancy"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="75dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@android:color/black"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/fancyMenu"
-                android:textAllCaps="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@android:color/white" />
-
-            <Button
-                android:id="@+id/buttonBlur"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="75dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@android:color/black"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/blurMenu"
-                android:textAllCaps="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@android:color/white" />
-
-            <Button
-                android:id="@+id/buttonContour"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="75dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@android:color/black"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/contourMenu"
-                android:textAllCaps="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@android:color/white" />
-
-        </LinearLayout>
-
-        <HorizontalScrollView
-            android:id="@+id/buttonBar"
+            android:id="@+id/filtersBar"
             style="@android:style/ButtonBar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="none">
-
+            android:layout_height="wrap_content"
+            android:layout_above="@id/bottomBar"
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:focusable="true"
-                android:orientation="horizontal">
+                android:layout_height="30dp"
+                android:gravity="start">
 
-                <LinearLayout
-                    android:id="@+id/colorMenu"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/buttonColor"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="75dp"
                     android:layout_height="wrap_content"
-                    android:focusable="true"
-                    android:orientation="horizontal"
-                    android:visibility="visible" />
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/black"
+                    android:fontFamily="sans-serif-black"
+                    android:text="@string/colorMenu"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/white" />
 
-                <LinearLayout
-                    android:id="@+id/fancyMenu"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/buttonFancy"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="75dp"
                     android:layout_height="wrap_content"
-                    android:focusable="true"
-                    android:orientation="horizontal"
-                    android:visibility="gone" />
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/black"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/fancyMenu"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/white" />
 
-                <LinearLayout
-                    android:id="@+id/blurMenu"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/buttonBlur"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="75dp"
                     android:layout_height="wrap_content"
-                    android:focusable="true"
-                    android:orientation="horizontal"
-                    android:visibility="gone" />
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/black"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/blurMenu"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/white" />
 
-                <LinearLayout
-                    android:id="@+id/contourMenu"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/buttonContour"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="75dp"
                     android:layout_height="wrap_content"
-                    android:focusable="true"
-                    android:orientation="horizontal"
-                    android:visibility="gone" />
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/black"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/contourMenu"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/white" />
+
             </LinearLayout>
 
+            <HorizontalScrollView
+                android:id="@+id/buttonBar"
+                style="@android:style/ButtonBar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none">
 
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:focusable="true"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/colorMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:orientation="horizontal"
+                        android:visibility="visible" />
+
+                    <LinearLayout
+                        android:id="@+id/fancyMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:orientation="horizontal"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/blurMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:orientation="horizontal"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/contourMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:orientation="horizontal"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+
+            </HorizontalScrollView>
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/presetsBar"
+            style="@android:style/ButtonBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/bottomBar"
+            android:scrollbars="none"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/presetsLinearLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal" />
         </HorizontalScrollView>
-    </LinearLayout>
+
+        <TableLayout
+            android:id="@+id/toolsBar"
+            style="@android:style/ButtonBar"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_above="@id/bottomBar"
+            android:collapseColumns="true"
+            android:visibility="gone">
+
+            <TableRow
+                android:id="@+id/toolsLineOne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:gravity="center_horizontal" />
+
+            <TableRow
+                android:id="@+id/toolsLineTwo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal" />
+
+            <TableRow
+                android:id="@+id/toolsLineThree"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:layout_weight="1"
+                android:gravity="center_horizontal" />
+
+        </TableLayout>
+
+        <LinearLayout
+            android:id="@+id/bottomBar"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonPresets"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/presetsButton"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/buttonTools"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/toolsButton"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/buttonFilters"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/filtersButton"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

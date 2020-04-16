@@ -5,9 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import android.view.GestureDetector;
@@ -18,8 +21,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -53,20 +57,21 @@ public class FiltersActivity extends AppCompatActivity {
     private boolean shouldUseMask = false;
 
     private ImageViewZoomScroll layoutImageView;
-    private Button      layoutButtonApply;
-    private Button      layoutCancel;
+    private ImageButton layoutButtonApply;
+    private ImageButton layoutCancel;
     private Button      layoutFilterMenuButton;
-    private Button      layoutPickButton;
-    private Button      layoutMaskButton;
-    private Button      layoutHistogramButton;
+    private ImageButton layoutPickButton;
+    private ImageButton layoutMaskButton;
+    private ImageButton layoutHistogramButton;
     private ImageView   layoutHistogramView;
     private SeekBar     layoutSeekBar1;
     private SeekBar     layoutSeekBar2;
     private SeekBar     layoutColorSeekBar;
     private TextView    layoutSeekBarValue1;
     private TextView    layoutSeekBarValue2;
+    private TextView    layoutSwitchValue1;
     private Switch      layoutSwitch1;
-    private LinearLayout filterMenu;
+    private RelativeLayout filterMenu;
 
     private Point imageTouchDown;
     private Point imageTouchCurrent;
@@ -92,9 +97,8 @@ public class FiltersActivity extends AppCompatActivity {
         layoutSeekBarValue1     = findViewById(R.id.seekBarValue1);
         layoutSeekBarValue2     = findViewById(R.id.seekBarValue2);
         layoutSwitch1           = findViewById(R.id.switch1);
+        layoutSwitchValue1      = findViewById(R.id.switchValue1);
         filterMenu              = findViewById(R.id.filtersMenu);
-
-
 
         // Gets the resources from the caller activity. If something crucial is missing aborts.
         // Once resources have been gathered, they are deleted from they original location to avoid
@@ -140,11 +144,6 @@ public class FiltersActivity extends AppCompatActivity {
         }
 
         layoutFilterMenuButton.setText(selectedFilter.getName());
-
-        // Selects the default image in the resource folder and set it
-        layoutImageView.setImageBitmap(filteredImage);
-        layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
-
         layoutHistogramView.setVisibility(View.GONE);
 
         // Initialize all the different listeners, the interface and the masks
@@ -159,22 +158,35 @@ public class FiltersActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            layoutImageView.setInternalValues();
+            // Selects the default image in the resource folder and set it
+            layoutImageView.setImageBitmap(filteredImage);
+            layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
         }
+    }
 
+    /**
+     * Triggers when the orientation change.
+     * @param newConfig
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
 
     private void applyColorTheme() {
+
+        Settings.setColorTheme(MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE));
+
         filterMenu.setBackgroundColor(Settings.COLOR_SELECTED);
         layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
 
         layoutButtonApply.setBackgroundColor(Settings.COLOR_GREY);
         layoutCancel.setBackgroundColor(Settings.COLOR_GREY);
 
-        layoutButtonApply.setTextColor(Settings.COLOR_TEXT);
+        layoutSwitchValue1.setTextColor(Settings.COLOR_TEXT);
+
         layoutFilterMenuButton.setTextColor(Settings.COLOR_TEXT);
-        layoutCancel.setTextColor(Settings.COLOR_TEXT);
 
         layoutSeekBarValue1.setTextColor(Settings.COLOR_TEXT);
         layoutSeekBarValue2.setTextColor(Settings.COLOR_TEXT);
@@ -215,22 +227,18 @@ public class FiltersActivity extends AppCompatActivity {
         window.setStatusBarColor(Settings.COLOR_BACKGROUND);
         window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
 
-        if (!Settings.IS_DARK_THEME) {
+        if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         } else {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         }
 
-
+        layoutPickButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.pick));
+        layoutMaskButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.mask));
+        layoutHistogramButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.histogram));
+        layoutCancel.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.cancel));
+        layoutButtonApply.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.valid));
     }
-
-
-
-
-
-
-
-
 
 
 
@@ -279,6 +287,7 @@ public class FiltersActivity extends AppCompatActivity {
             layoutSeekBar1.setVisibility(View.GONE);
             layoutSeekBar2.setVisibility(View.GONE);
             layoutSwitch1.setVisibility(View.GONE);
+            layoutSwitchValue1.setVisibility(View.GONE);
 
             // And add anything we need.
 
@@ -305,18 +314,19 @@ public class FiltersActivity extends AppCompatActivity {
             if (selectedFilter.switch1) {
                 layoutSwitch1.setVisibility(View.VISIBLE);
                 layoutSwitch1.setChecked(selectedFilter.switch1Default);
+
                 if (layoutSwitch1.isChecked()) {
-                    layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
+                    layoutSwitchValue1.setText(selectedFilter.switch1UnitTrue);
                 } else {
-                    layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
+                    layoutSwitchValue1.setText(selectedFilter.switch1UnitFalse);
                 }
+
             }
 
             // Only shows the seekBarValues when the seekBars are visible.
             layoutSeekBarValue1.setVisibility(layoutSeekBar1.getVisibility());
             layoutSeekBarValue2.setVisibility(layoutSeekBar2.getVisibility());
-            layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar1.getProgress(), selectedFilter.seekBar1Unit));
-            layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", layoutSeekBar2.getProgress(), selectedFilter.seekBar2Unit));
+            layoutSwitchValue1.setVisibility(layoutSwitch1.getVisibility());
 
             // Only shows the pick tool if there is a seekBar
             layoutPickButton.setVisibility(layoutColorSeekBar.getVisibility());
@@ -330,6 +340,12 @@ public class FiltersActivity extends AppCompatActivity {
 
         // The seek bars listener can be triggered again.
         inputsReady = true;
+
+        // Call the listeners of layout object for them to refresh.
+        layoutSeekBarValue1.setText(layoutSeekBarValue1.getText());
+        layoutSeekBarValue2.setText(layoutSeekBarValue2.getText());
+        layoutSwitch1.setChecked(layoutSwitch1.isChecked());
+
     }
 
 
@@ -422,20 +438,6 @@ public class FiltersActivity extends AppCompatActivity {
         }
     }
 
-    /*
-    private void refreshImageInfo() {
-
-        final String infoString = String.format(
-                Locale.ENGLISH,"%s%d  |  %s%d",
-                getResources().getString(R.string.width),
-                filteredImage.getWidth(),
-                getResources().getString(R.string.height),
-                filteredImage.getHeight());
-
-        layoutImageInfo.setText(infoString);
-    }
-     */
-
     private void initializeListener() {
 
 
@@ -461,10 +463,12 @@ public class FiltersActivity extends AppCompatActivity {
             public boolean onDoubleTap(MotionEvent e) {
 
                 // it it's zoomed
-                if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
-                    layoutImageView.reset();
+                //if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
+                if (layoutImageView.getZoom() != 1f) {
+                    layoutImageView.setZoom(1f);
                 } else {
                     Point touch = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(e.getX(), e.getY()));
+                    //layoutImageView.setZoom(layoutImageView.getZoom() * Settings.DOUBLE_TAP_ZOOM);
                     layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
                     layoutImageView.setCenter(touch);
                 }
@@ -503,6 +507,7 @@ public class FiltersActivity extends AppCompatActivity {
                 if (selectedFilter.allowScrollZoom) {
                     myScaleDetector.onTouchEvent(event);
                     myGestureDetector.onTouchEvent(event);
+                    layoutImageView.refresh();
 
                 } else {
 
@@ -594,10 +599,10 @@ public class FiltersActivity extends AppCompatActivity {
         layoutSwitch1.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (layoutSwitch1.isChecked()) {
-                    layoutSwitch1.setText(selectedFilter.switch1UnitTrue);
+                if (isChecked) {
+                    layoutSwitchValue1.setText(selectedFilter.switch1UnitTrue);
                 } else {
-                    layoutSwitch1.setText(selectedFilter.switch1UnitFalse);
+                    layoutSwitchValue1.setText(selectedFilter.switch1UnitFalse);
                 }
                 if (inputsReady && selectedFilter.switch1AutoRefresh) previewFilter();
             }
