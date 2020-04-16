@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final Boolean[] hasChanged = {true, true, true, true, true, true};
 
-    private ImageViewZoomScroll layoutImageView;
+    private ImageViewZoomScrollWIP layoutImageView;
     private Toolbar     layoutToolbar;
     private Button      toolsButton;
     private Button      presetsButton;
@@ -153,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         preferences = getSharedPreferences(Settings.PREFERENCE_NAME, 0);
 
         // Sets all the layout shortcuts.
-        layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
+        layoutImageView         = new ImageViewZoomScrollWIP((ImageView) findViewById(R.id.imageView));
 
         toolsButton             = findViewById(R.id.buttonTools);
         presetsButton           = findViewById(R.id.buttonPresets);
@@ -321,6 +322,7 @@ public class MainActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
+            layoutImageView.setInternalValues();
             layoutImageView.setImageBitmap(currentImage);
             layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
         }
@@ -507,12 +509,13 @@ public class MainActivity extends AppCompatActivity {
             public boolean onDoubleTap(MotionEvent e) {
 
                 // it it's zoomed
-                //if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
-                if (layoutImageView.getZoom() != 1f) {
+                if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
+                //if (layoutImageView.getZoom() != 1f) {
                     layoutImageView.reset();
                 } else {
                     Point touch = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(e.getX(), e.getY()));
-                    layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
+                    layoutImageView.setZoom(layoutImageView.getZoom() * Settings.DOUBLE_TAP_ZOOM);
+                    //layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
                     layoutImageView.setCenter(touch);
                 }
                 return true;
@@ -549,7 +552,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isVisible(historyBar)) closeHistory();
                 myScaleDetector.onTouchEvent(event);
                 myGestureDetector.onTouchEvent(event);
-                layoutImageView.refresh();
+                //layoutImageView.refresh();
                 v.performClick();
                 return true;
             }

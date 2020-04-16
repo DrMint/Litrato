@@ -73,7 +73,7 @@ class ImageViewZoomScrollWIP {
                 if (topLeft.x > maxAcceptableX) topLeft.x = maxAcceptableX;
             }
         } else {
-            topLeft.x = 0;
+            topLeft.x = (int) -(((viewWidth - bmpWidth * zoom) / 2) / zoom);
         }
         refresh();
     }
@@ -109,17 +109,11 @@ class ImageViewZoomScrollWIP {
     }
 
     void setZoom(float zoom) {
-        float currentZoom = this.zoom;
         this.zoom = zoom;
-        if (zoom > maxZoom * minZoom) {
+        if (this.zoom > maxZoom * minZoom) {
             this.zoom = maxZoom * minZoom;
-        } else if (zoom < minZoom) {
+        } else if (this.zoom < minZoom) {
             this.zoom = minZoom;
-        } else {
-
-            //float diff = zoom - currentZoom;
-
-            //translate((int) (diff * (bmpWidth / zoom) / 2), (int) (diff * (bmpHeight / zoom) / 2));
         }
         horizontalScroll = bmpWidth * this.zoom > viewWidth;
         verticalScroll = bmpHeight * this.zoom > viewHeight;
@@ -128,13 +122,7 @@ class ImageViewZoomScrollWIP {
 
     private void refresh() {
         Matrix test = new Matrix();
-        if (horizontalScroll) {
-            test.setTranslate(-topLeft.x, -topLeft.y);
-        } else {
-            //Log.wtf("Test", zoom + " " + bmpWidth);
-            test.setTranslate(0, -topLeft.y);
-        }
-
+        test.setTranslate(-topLeft.x, -topLeft.y);
         test.postScale(zoom, zoom);
         imageView.setScaleType(ImageView.ScaleType.MATRIX);
         imageView.setImageMatrix(test);
