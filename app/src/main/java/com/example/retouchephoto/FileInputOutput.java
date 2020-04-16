@@ -16,21 +16,30 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 class FileInputOutput {
 
     private static String lastTakenImagePath;
+    private static String getLastImportedImagePath;
 
-    static boolean saveImage(Bitmap bmp, Activity activity) {
+    static boolean saveImageToGallery(Bitmap bmp, Activity activity) {
+        if (!askPermissionToReadWriteFiles(activity)) return false;
+        MediaStore.Images.Media.insertImage(activity.getContentResolver(), bmp, createUniqueFileName(activity.getApplicationContext()) , "");
+        return true;
+    }
+
+    static boolean saveImageToSaveFolder(Bitmap bmp, Activity activity) {
 
         if (!askPermissionToReadWriteFiles(activity)) return false;
 
         try {
 
-            /*
             File dir = new File(Settings.SAVE_PATH);
             if (!dir.exists()) {
                 // If the directory cannot be created, aborts.
@@ -44,10 +53,6 @@ class FileInputOutput {
             bmp.compress(Bitmap.CompressFormat.JPEG, Settings.OUTPUT_JPG_QUALITY, fOut);
             fOut.flush();
             fOut.close();
-
-             */
-
-            MediaStore.Images.Media.insertImage(activity.getContentResolver(), bmp, createUniqueFileName(activity.getApplicationContext()) , "");
 
         } catch (Exception e) {
             if (e.getMessage() != null) {
@@ -80,19 +85,51 @@ class FileInputOutput {
         return null;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    static Bitmap getBitmap(String fullPath) {
+    static Bitmap getBitmap(Resources resources, int index) {
+        return BitmapFactory.decodeResource(resources, index);
+    }
 
+    static Bitmap getBitmap(Resources resources, int index, int width, int height) {
+        Bitmap bmp = getBitmap(resources, index);
+        return Bitmap.createScaledBitmap(bmp, width, height, true);
+    }
+
+    static Bitmap getBitmap(String fullPath) {
+        if (fullPath.startsWith("/raw/")) fullPath = fullPath.replaceFirst("/raw/", "");
+        getLastImportedImagePath = fullPath;
+        return rotateImgAccordingToExif(fullPath);
+    }
+
+    static Bitmap getBitmap(Uri uri) {
+        return getBitmap(Objects.requireNonNull(uri.getPath()));
+    }
+
+    static Bitmap getLastTakenBitmap() {
+        return getBitmap(lastTakenImagePath);
+    }
+
+    static String getLastImportedImagePath() {
+        return getLastImportedImagePath;
+    }
+
+    private static boolean askPermissionToReadWriteFiles(Activity activity){
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 10);
+        int checkVal = activity.getApplicationContext().checkCallingOrSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        return (checkVal == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private static Bitmap rotateImgAccordingToExif(String fullPath) {
         File imgFile = new  File(fullPath);
         if(imgFile.exists()){
             Bitmap bmp = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
             // Try to rotate the image according to EXIF info
             try {
                 ExifInterface exif = new ExifInterface(imgFile.getPath());
                 int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
                 return FilterFunction.rotate(bmp, exifToDegrees(rotation));
 
-            }catch(IOException ex){
+            } catch(IOException ex){
                 return bmp;
             }
         }
@@ -104,26 +141,6 @@ class FileInputOutput {
         else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {  return 180; }
         else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {  return 270; }
         return 0;
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    static Bitmap getBitmap(Resources resources, int index) {
-        return BitmapFactory.decodeResource(resources, index);
-    }
-
-    static Bitmap getBitmap(Resources resources, int index, int width, int height) {
-        Bitmap bmp = getBitmap(resources, index);
-        return Bitmap.createScaledBitmap(bmp, width, height, true);
-    }
-
-    static Bitmap getLastTakenBitmap() {
-        return getBitmap(lastTakenImagePath);
-    }
-
-    private static boolean askPermissionToReadWriteFiles(Activity activity){
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 10);
-        int checkVal = activity.getApplicationContext().checkCallingOrSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        return (checkVal == PackageManager.PERMISSION_GRANTED);
     }
 
 }

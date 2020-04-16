@@ -17,9 +17,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,7 +34,6 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -77,9 +74,13 @@ public class MainActivity extends AppCompatActivity {
     static Bitmap subActivityBitmap;
     static Bitmap subMaskBmp;
 
+    static SharedPreferences preferences;
+
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
     private final int FILTER_ACTIVITY_IS_FINISHED = 3;
+    private final int CONFIG_REQUEST = 4;
+    private final int EXIF_REQUEST = 5;
 
     /**
      * This is the image as it was before applying any filter.
@@ -140,12 +141,6 @@ public class MainActivity extends AppCompatActivity {
 
     private int numberOfTools;
 
-    /**
-     * A boolean to avoid applying filter because the listener have been triggered when modifying
-     * the seeks bars minimum, progress, or maximum value.
-     */
-    private boolean inputsReady = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -155,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         layoutToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(layoutToolbar);
 
-        PreferenceManager.setDefaultValues(this, R.xml.settings, false);
+        preferences = getSharedPreferences(Settings.PREFERENCE_NAME, 0);
 
         // Sets all the layout shortcuts.
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
@@ -194,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
         submenuSelected = colorButton.getTypeface();
         submenuUnselected = fancyButton.getTypeface();
 
-
         // If this is the first launch, compiles the RenderScript's functions
         if (appGetFirstTimeRun() == 0) {
             initializeRenderScriptCaching();
@@ -208,9 +202,6 @@ public class MainActivity extends AppCompatActivity {
         // Initialize all the different listeners.
         // The filters / tools / presets must already be ready
         initializeListener();
-
-        // Set global theme to dark theme.
-        Settings.setColorTheme(Settings.DARK_THEME);
 
         // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
@@ -280,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.action_save: {
-                if (FileInputOutput.saveImage(currentImage, MainActivity.this)) {
+                if (FileInputOutput.saveImageToGallery(currentImage, MainActivity.this)) {
                     Snackbar.make(toolsBar, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
                 }
                 break;
@@ -300,13 +291,17 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
 
-            case R.id.action_information: {
+            case R.id.action_settings: {
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivityForResult(intent, CONFIG_REQUEST);
                 break;
             }
 
-            case R.id.action_settings: {
-                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                startActivity(intent);
+            case R.id.action_exif: {
+                //Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                //startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(), ExifActivity.class);
+                startActivityForResult(intent, EXIF_REQUEST);
                 break;
             }
 
@@ -331,6 +326,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void applyColorTheme() {
+
+        Settings.setColorTheme(MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE));
 
         historyBar.setBackgroundColor(Settings.COLOR_GREY);
         historyTitle.setTextColor(Settings.COLOR_TEXT);
@@ -372,7 +369,8 @@ public class MainActivity extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Settings.COLOR_BACKGROUND);
         window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
-        if (!Settings.IS_DARK_THEME) {
+
+        if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             layoutToolbar.setPopupTheme(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         } else {
@@ -383,73 +381,63 @@ public class MainActivity extends AppCompatActivity {
         for (DisplayedFilter displayedFilter:displayedFilters) {
             displayedFilter.textView.setTextColor(Settings.COLOR_TEXT);
             if (displayedFilter.filter.getFilterCategory() == FilterCategory.TOOL) {
-
-                Bitmap icon = ImageTools.bitmapClone(displayedFilter.filter.getIcon());
-                //TODO: Use invert instead but invert has to deal with transparent images.
-                if (!Settings.IS_DARK_THEME) FilterFunction.brightness(icon, getApplicationContext(), -2000);
-
-                Drawable drawable = new BitmapDrawable(getResources(), icon);
-                drawable.setBounds(0, 0, Settings.TOOL_DISPLAYED_SIZE, Settings.TOOL_DISPLAYED_SIZE);
+                Drawable drawable = ImageTools.getThemedIcon(getApplicationContext(), displayedFilter.filter.getIcon());
                 displayedFilter.textView.setCompoundDrawablePadding(25);
                 displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
-
             }
         }
 
-        Bitmap saveIcon = FileInputOutput.getBitmap(getResources(), R.drawable.save);
-        Bitmap openIcon = FileInputOutput.getBitmap(getResources(), R.drawable.open);
-        Bitmap historyIcon = FileInputOutput.getBitmap(getResources(), R.drawable.history);
-        Bitmap overflowIcon = FileInputOutput.getBitmap(getResources(), R.drawable.overflow);
-
-        if (!Settings.IS_DARK_THEME) {
-            FilterFunction.brightness(saveIcon, getApplicationContext(), -2000);
-            FilterFunction.brightness(openIcon, getApplicationContext(), -2000);
-            FilterFunction.brightness(historyIcon, getApplicationContext(), -2000);
-            FilterFunction.brightness(overflowIcon, getApplicationContext(), -2000);
-        }
-        Drawable drawable = new BitmapDrawable(getResources(), openIcon);
-        layoutToolbar.getMenu().getItem(0).setIcon(drawable);
-        drawable = new BitmapDrawable(getResources(), historyIcon);
-        layoutToolbar.getMenu().getItem(1).setIcon(drawable);
-        drawable = new BitmapDrawable(getResources(), saveIcon);
-        layoutToolbar.getMenu().getItem(2).setIcon(drawable);
-        drawable = new BitmapDrawable(getResources(), overflowIcon);
-        layoutToolbar.setOverflowIcon(drawable);
+        layoutToolbar.getMenu().getItem(0).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.open));
+        layoutToolbar.getMenu().getItem(1).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.history));
+        layoutToolbar.getMenu().getItem(2).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.save));
+        layoutToolbar.getMenu().getItem(4).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.rotateleft));
+        layoutToolbar.getMenu().getItem(5).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.rotateright));
+        layoutToolbar.setOverflowIcon(ImageTools.getThemedIcon(this, R.drawable.overflow));
 
     }
-
-
 
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // After the user as selected an image, loads it and stores it in this.original_image
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Bitmap mBitmap;
-            try {
-                mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
-                setBitmap(mBitmap);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            //Load the last taken photo.
-            setBitmap(FileInputOutput.getLastTakenBitmap());
-        }
-
-        if (requestCode == FILTER_ACTIVITY_IS_FINISHED) {
-            Bitmap result = FiltersActivity.activityBitmap;
-            if (result != null) {
-                layoutImageView.reset();
-                currentImage = ImageTools.bitmapClone(result);
+        switch (requestCode) {
+            case CONFIG_REQUEST:
+                hasChanged[0] = true;
+                hasChanged[2] = true;
+                hasChanged[3] = true;
+                hasChanged[4] = true;
+                hasChanged[5] = true;
+                closeHistory();
                 closeMenus();
-                refreshImageView();
-            }
-            if (isVisible(historyBar)) closeHistory();
+                applyColorTheme();
+                break;
+
+            case PICK_IMAGE_REQUEST:
+
+                if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                    setBitmap(FileInputOutput.getBitmap(data.getData()));
+                    layoutToolbar.getMenu().getItem(7).setEnabled(true);
+                }
+
+                break;
+
+            case REQUEST_IMAGE_CAPTURE:
+                //Load the last taken photo.
+                setBitmap(FileInputOutput.getLastTakenBitmap());
+                layoutToolbar.getMenu().getItem(7).setEnabled(true);
+                break;
+
+            case FILTER_ACTIVITY_IS_FINISHED:
+                Bitmap result = FiltersActivity.activityBitmap;
+                if (result != null) {
+                    layoutImageView.reset();
+                    currentImage = ImageTools.bitmapClone(result);
+                    closeMenus();
+                    refreshImageView();
+                }
+                if (isVisible(historyBar)) closeHistory();
+
+                break;
         }
     }
 
@@ -462,9 +450,11 @@ public class MainActivity extends AppCompatActivity {
         // If the bmp is null, aborts
         if (bmp == null) return;
 
+        int importedBmpSize = MainActivity.preferences.getInt(Settings.PREFERENCE_IMPORTED_BMP_SIZE, Settings.DEFAULT_IMPORTED_BMP_SIZE);
+
         // Resize the image before continuing, if necessary
-        if (bmp.getHeight() > Settings.IMPORTED_BMP_SIZE || bmp.getWidth() > Settings.IMPORTED_BMP_SIZE) {
-            bmp = ImageTools.resizeAsContainInARectangle(bmp, Settings.IMPORTED_BMP_SIZE);
+        if (bmp.getHeight() > importedBmpSize || bmp.getWidth() > importedBmpSize) {
+            bmp = ImageTools.resizeAsContainInARectangle(bmp, importedBmpSize);
         }
 
         // Set this image as the originalImage and reset the UI
@@ -1307,7 +1297,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void generateMiniatures(FilterCategory onlyThisCategory) {
-        Bitmap resizedMiniature = ImageTools.toSquare(currentImage, Settings.MINIATURE_BMP_SIZE);
+        Bitmap resizedMiniature = ImageTools.toSquare(
+                currentImage,
+                MainActivity.preferences.getInt(Settings.PREFERENCE_MINIATURE_BMP_SIZE, Settings.DEFAULT_MINIATURE_BMP_SIZE)
+        );
 
         for (DisplayedFilter displayedFilter:displayedFilters) {
 

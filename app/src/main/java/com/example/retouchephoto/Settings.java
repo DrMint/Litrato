@@ -12,11 +12,7 @@ import android.os.Environment;
  */
 class Settings {
 
-    /**
-     * The maximum size of a loaded image.
-     * If the image is rectangular, the longest dimension will be resized to IMPORTED_BMP_SIZE and the other will be smaller than IMPORTED_BMP_SIZE.
-     */
-    static final int IMPORTED_BMP_SIZE = 1000;
+
 
     /**
      * How much the user can zoom on the image.
@@ -37,10 +33,6 @@ class Settings {
      */
     static final float IMAGE_RATIO_PRECISION = 0.01f;
 
-    static final int CROP_OPACITY = 100;
-
-    static final int CROP_BORDER_SIZE = 5;
-
     // 100 means no compression, the lower you go, the stronger the compression
     static final int OUTPUT_JPG_QUALITY = 90;
 
@@ -50,30 +42,26 @@ class Settings {
 
     static final int ITEMS_MARGIN_IN_MENU = 20;
 
-    static final int MINIATURE_BMP_SIZE = 100;
-
     static final int MINIATURE_DISPLAYED_SIZE = 250;
     static final int TOOL_DISPLAYED_SIZE = 120;
 
-    static int COLOR_BACKGROUND;
-    static int COLOR_GREY;
-    static int COLOR_SELECTED;
-    static int COLOR_TEXT;
+    static final int HISTOGRAM_BACKGROUND_TRANSPARENCY = 100;
+    static final int HISTOGRAM_FOREGROUND_TRANSPARENCY = 200;
 
-    static final int DARK_THEME = 0;
-    static final int LIGHT_THEME = 1;
+    static final int CROP_OPACITY = 100;
+    static final int CROP_BORDER_SIZE = 5;
 
-    static boolean IS_DARK_THEME;
 
-    static void setColorTheme(int theme) {
-        if (theme == DARK_THEME) {
-            IS_DARK_THEME = true;
+
+    // COLOR
+
+    static void setColorTheme(boolean darkMode) {
+        if (darkMode) {
             COLOR_BACKGROUND = Color.rgb(0,0,0);
             COLOR_GREY = Color.rgb(40,40,40);
             COLOR_SELECTED = Color.rgb(70,70,70);
             COLOR_TEXT = Color.rgb(255,255,255);
         } else {
-            IS_DARK_THEME = false;
             COLOR_BACKGROUND = Color.rgb(255,255,255);
             COLOR_GREY = Color.rgb(215,215,215);
             COLOR_SELECTED = Color.rgb(190,190,190);
@@ -81,9 +69,30 @@ class Settings {
         }
     }
 
-    static final int HISTOGRAM_BACKGROUND_TRANSPARENCY = 100;
-    static final int HISTOGRAM_FOREGROUND_TRANSPARENCY = 200;
+    static int COLOR_BACKGROUND;
+    static int COLOR_GREY;
+    static int COLOR_SELECTED;
+    static int COLOR_TEXT;
+
 
     static final String ACTIVITY_EXTRA_CALLER = "CallerActivity";
+
+
+    // PREFERENCE VARIABLES
+
+    static final String PREFERENCE_NAME = "UserInfo";
+
+    static final boolean DEFAULT_DARK_MODE = true;
+    static final String PREFERENCE_DARK_MODE = "DARK_MODE";
+
+    /**
+     * The maximum size of a loaded image.
+     * If the image is rectangular, the longest dimension will be resized to IMPORTED_BMP_SIZE and the other will be smaller than IMPORTED_BMP_SIZE.
+     */
+    static final int DEFAULT_IMPORTED_BMP_SIZE = 1000;
+    static final String PREFERENCE_IMPORTED_BMP_SIZE = "IMPORTED_BMP_SIZE";
+
+    static final int DEFAULT_MINIATURE_BMP_SIZE = 100;
+    static final String PREFERENCE_MINIATURE_BMP_SIZE = "MINIATURE_BMP_SIZE";
 
 }

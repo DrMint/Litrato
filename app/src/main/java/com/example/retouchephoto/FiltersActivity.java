@@ -175,6 +175,9 @@ public class FiltersActivity extends AppCompatActivity {
 
 
     private void applyColorTheme() {
+
+        Settings.setColorTheme(MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE));
+
         filterMenu.setBackgroundColor(Settings.COLOR_SELECTED);
         layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
 
@@ -183,9 +186,7 @@ public class FiltersActivity extends AppCompatActivity {
 
         layoutSwitchValue1.setTextColor(Settings.COLOR_TEXT);
 
-        //layoutButtonApply.setTextColor(Settings.COLOR_TEXT);
         layoutFilterMenuButton.setTextColor(Settings.COLOR_TEXT);
-        //layoutCancel.setTextColor(Settings.COLOR_TEXT);
 
         layoutSeekBarValue1.setTextColor(Settings.COLOR_TEXT);
         layoutSeekBarValue2.setTextColor(Settings.COLOR_TEXT);
@@ -226,35 +227,18 @@ public class FiltersActivity extends AppCompatActivity {
         window.setStatusBarColor(Settings.COLOR_BACKGROUND);
         window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
 
-        if (!Settings.IS_DARK_THEME) {
+        if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         } else {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         }
 
-        lightThemeButton(layoutPickButton,R.drawable.pick);
-        lightThemeButton(layoutMaskButton,R.drawable.mask);
-        lightThemeButton(layoutHistogramButton,R.drawable.histogram);
+        layoutPickButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.pick));
+        layoutMaskButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.mask));
+        layoutHistogramButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.histogram));
+        layoutCancel.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.cancel));
+        layoutButtonApply.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.valid));
     }
-
-    void lightThemeButton(ImageButton button, int image){
-        Bitmap pickIcon= FileInputOutput.getBitmap(getResources(), image);
-        Bitmap icon = ImageTools.bitmapClone(pickIcon);
-        //TODO: Use invert instead but invert has to deal with transparent images.
-        if (!Settings.IS_DARK_THEME) FilterFunction.brightness(icon, getApplicationContext(), -2000);
-
-        Drawable drawable = new BitmapDrawable(getResources(), icon);
-        drawable.setBounds(0, 0, Settings.TOOL_DISPLAYED_SIZE, Settings.TOOL_DISPLAYED_SIZE);
-        button.setImageDrawable(drawable);
-    }
-
-
-
-
-
-
-
-
 
 
 
@@ -454,20 +438,6 @@ public class FiltersActivity extends AppCompatActivity {
         }
     }
 
-    /*
-    private void refreshImageInfo() {
-
-        final String infoString = String.format(
-                Locale.ENGLISH,"%s%d  |  %s%d",
-                getResources().getString(R.string.width),
-                filteredImage.getWidth(),
-                getResources().getString(R.string.height),
-                filteredImage.getHeight());
-
-        layoutImageInfo.setText(infoString);
-    }
-     */
-
     private void initializeListener() {
 
 
@@ -629,7 +599,7 @@ public class FiltersActivity extends AppCompatActivity {
         layoutSwitch1.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (layoutSwitch1.isChecked()) {
+                if (isChecked) {
                     layoutSwitchValue1.setText(selectedFilter.switch1UnitTrue);
                 } else {
                     layoutSwitchValue1.setText(selectedFilter.switch1UnitFalse);

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:id="@+id/returnButton"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:adjustViewBounds="true"
+        android:background="#00FFFFFF"
+        android:contentDescription="@string/pickButton"
+        android:scaleType="fitCenter"
+        android:src="@drawable/pick"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/cameraModel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:text="Dark mode"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/darkModeSwitch" />
+
+    <Switch
+        android:id="@+id/darkModeSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/exifTitle"
+        tools:checked="true" />
+
+    <TextView
+        android:id="@+id/importedBmpTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:text="Resolution of loaded pictures"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cameraModel" />
+
+    <TextView
+        android:id="@+id/importedBmpDesc"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="If the image is rectangular, the longest dimension will be resized to this size. Image ratio is conserved."
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/importedBmpTitle"
+        app:layout_constraintTop_toBottomOf="@+id/importedBmpTitle" />
+
+    <Spinner
+        android:id="@+id/importedBmpSpinner"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/importedBmpTitle" />
+
+    <TextView
+        android:id="@+id/miniatureTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:text="Resolution of preview miniature"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/importedBmpDesc" />
+
+    <TextView
+        android:id="@+id/miniatureDesc"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Preview miniatures are the images showcasing presets and filters."
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/miniatureTitle"
+        app:layout_constraintTop_toBottomOf="@+id/miniatureTitle" />
+
+    <Spinner
+        android:id="@+id/miniatureSpinner"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/miniatureTitle" />
+
+    <TextView
+        android:id="@+id/exifTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-black"
+        android:text="Settings"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/returnButton" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
