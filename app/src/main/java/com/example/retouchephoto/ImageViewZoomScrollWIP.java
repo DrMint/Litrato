@@ -109,14 +109,24 @@ class ImageViewZoomScrollWIP {
     }
 
     void setZoom(float zoom) {
-        this.zoom = zoom;
-        if (this.zoom > maxZoom * minZoom) {
+        if (zoom > maxZoom * minZoom) {
             this.zoom = maxZoom * minZoom;
-        } else if (this.zoom < minZoom) {
+        } else if (zoom < minZoom) {
             this.zoom = minZoom;
+        } else {
+            // We calculate the position of the center point
+            Point p = new Point(viewWidth, viewHeight);
+            Point p2 = p.copy();
+            imageViewTouchPointToBmpCoordinates(p);
+            this.zoom = zoom;
+            // We calculate the new position of the center point
+            imageViewTouchPointToBmpCoordinates(p2);
+            // We divide this difference by two to keep the center at the center.
+            translate((p.x - p2.x) / 2, (p.y - p2.y) / 2);
         }
         horizontalScroll = bmpWidth * this.zoom > viewWidth;
         verticalScroll = bmpHeight * this.zoom > viewHeight;
+
         refresh();
     }
 
