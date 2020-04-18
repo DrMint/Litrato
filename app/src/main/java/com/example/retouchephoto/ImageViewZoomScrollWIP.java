@@ -73,7 +73,7 @@ class ImageViewZoomScrollWIP {
                 if (topLeft.x > maxAcceptableX) topLeft.x = maxAcceptableX;
             }
         } else {
-            topLeft.x = 0;
+            topLeft.x = (int) -(((viewWidth - bmpWidth * zoom) / 2) / zoom);
         }
         refresh();
     }
@@ -109,32 +109,30 @@ class ImageViewZoomScrollWIP {
     }
 
     void setZoom(float zoom) {
-        float currentZoom = this.zoom;
-        this.zoom = zoom;
         if (zoom > maxZoom * minZoom) {
             this.zoom = maxZoom * minZoom;
         } else if (zoom < minZoom) {
             this.zoom = minZoom;
         } else {
-
-            //float diff = zoom - currentZoom;
-
-            //translate((int) (diff * (bmpWidth / zoom) / 2), (int) (diff * (bmpHeight / zoom) / 2));
+            // We calculate the position of the center point
+            Point p = new Point(viewWidth, viewHeight);
+            Point p2 = p.copy();
+            imageViewTouchPointToBmpCoordinates(p);
+            this.zoom = zoom;
+            // We calculate the new position of the center point
+            imageViewTouchPointToBmpCoordinates(p2);
+            // We divide this difference by two to keep the center at the center.
+            translate((p.x - p2.x) / 2, (p.y - p2.y) / 2);
         }
         horizontalScroll = bmpWidth * this.zoom > viewWidth;
         verticalScroll = bmpHeight * this.zoom > viewHeight;
+
         refresh();
     }
 
     private void refresh() {
         Matrix test = new Matrix();
-        if (horizontalScroll) {
-            test.setTranslate(-topLeft.x, -topLeft.y);
-        } else {
-            //Log.wtf("Test", zoom + " " + bmpWidth);
-            test.setTranslate(0, -topLeft.y);
-        }
-
+        test.setTranslate(-topLeft.x, -topLeft.y);
         test.postScale(zoom, zoom);
         imageView.setScaleType(ImageView.ScaleType.MATRIX);
         imageView.setImageMatrix(test);

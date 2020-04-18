@@ -59,7 +59,7 @@ public class FiltersActivity extends AppCompatActivity {
     private boolean pickBool = false;
     private boolean shouldUseMask = false;
 
-    private ImageViewZoomScroll layoutImageView;
+    private ImageViewZoomScrollWIP layoutImageView;
     private ImageButton layoutButtonApply;
     private ImageButton layoutCancel;
     private Button      layoutFilterMenuButton;
@@ -86,7 +86,7 @@ public class FiltersActivity extends AppCompatActivity {
         setContentView(R.layout.activity_filters);
 
         // Sets all the layout shortcuts.
-        layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
+        layoutImageView         = new ImageViewZoomScrollWIP((ImageView) findViewById(R.id.imageView));
         layoutButtonApply       = findViewById(R.id.applyButton);
         layoutCancel            = findViewById(R.id.cancelButton);
         layoutFilterMenuButton  = findViewById(R.id.filterNameButton);
@@ -161,7 +161,7 @@ public class FiltersActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            // Selects the default image in the resource folder and set it
+            layoutImageView.setInternalValues();
             layoutImageView.setImageBitmap(filteredImage);
             layoutImageView.setMaxZoom(Settings.MAX_ZOOM_LEVEL);
         }
@@ -255,10 +255,10 @@ public class FiltersActivity extends AppCompatActivity {
         maskBmp = bmp;
 
         Bitmap invertedMaskBmp = ImageTools.bitmapClone(maskBmp);
-        FilterFunction.invert(invertedMaskBmp, getApplicationContext());
+        FilterFunction.invert(invertedMaskBmp);
 
         originalImageMasked = ImageTools.bitmapClone(originalImage);
-        FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, getApplicationContext(), BlendType.MULTIPLY);
+        FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, BlendType.MULTIPLY);
     }
 
     @Override
@@ -412,8 +412,8 @@ public class FiltersActivity extends AppCompatActivity {
 
         // Keep the filtered part only where the maskBmp is white.
         if (shouldUseMask) {
-            FilterFunction.applyTexture(filteredImage, maskBmp,getApplicationContext(),BlendType.MULTIPLY);
-            FilterFunction.applyTexture(filteredImage, originalImageMasked, getApplicationContext(), BlendType.ADD);
+            FilterFunction.applyTexture(filteredImage, maskBmp,BlendType.MULTIPLY);
+            FilterFunction.applyTexture(filteredImage, originalImageMasked, BlendType.ADD);
         }
 
         // Refresh the image viewer and the histogram.
@@ -479,13 +479,13 @@ public class FiltersActivity extends AppCompatActivity {
             public boolean onDoubleTap(MotionEvent e) {
 
                 // it it's zoomed
-                //if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
-                if (layoutImageView.getZoom() != 1f) {
-                    layoutImageView.setZoom(1f);
+                if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
+                //if (layoutImageView.getZoom() != 1f) {
+                    layoutImageView.reset();
                 } else {
                     Point touch = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(e.getX(), e.getY()));
-                    //layoutImageView.setZoom(layoutImageView.getZoom() * Settings.DOUBLE_TAP_ZOOM);
-                    layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
+                    layoutImageView.setZoom(layoutImageView.getZoom() * Settings.DOUBLE_TAP_ZOOM);
+                    //layoutImageView.setZoom(Settings.DOUBLE_TAP_ZOOM);
                     layoutImageView.setCenter(touch);
                 }
                 return true;
@@ -523,7 +523,7 @@ public class FiltersActivity extends AppCompatActivity {
                 if (selectedFilter.allowScrollZoom) {
                     myScaleDetector.onTouchEvent(event);
                     myGestureDetector.onTouchEvent(event);
-                    layoutImageView.refresh();
+                    //layoutImageView.refresh();
 
                 } else {
 
@@ -669,7 +669,7 @@ public class FiltersActivity extends AppCompatActivity {
                         } else {
                             ImageTools.drawCircle(maskBmp, touchUp, (int) seekBar, Color.BLACK);
                         }
-                        FilterFunction.applyTexture(bmp, maskBmp, context, BlendType.OVERLAY, seekBar2 / 100f);
+                        FilterFunction.applyTexture(bmp, maskBmp, BlendType.OVERLAY, seekBar2 / 100f);
                         return null;
                     }
                 });
@@ -698,8 +698,7 @@ public class FiltersActivity extends AppCompatActivity {
 
                     case MotionEvent.ACTION_DOWN:
                     case MotionEvent.ACTION_MOVE: {
-                        Point chosenPixel = layoutImageView.imageViewTouchPointToBmpCoordinates(new Point(event.getX(), event.getY()));
-                        int newHue = ImageTools.getHueFromColor(layoutImageView.getPixelAt(chosenPixel));
+                        int newHue = ImageTools.getHueFromColor(layoutImageView.getPixelAt(new Point(event.getX(), event.getY())));
                         if (newHue >= 0) layoutColorSeekBar.setProgress(newHue);
                         break;
                     }

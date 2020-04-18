@@ -218,7 +218,7 @@ class ImageTools {
 
         //TODO: Use invert instead but invert has to deal with transparent images.
         if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
-            FilterFunction.brightness(icon, context, -2000);
+            FilterFunction.brightness(icon, -2000);
         }
 
         Drawable drawable = new BitmapDrawable(context.getResources(), icon);

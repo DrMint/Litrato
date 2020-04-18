@@ -48,7 +48,7 @@ class FilterFunctionIntrinsic {
         script.forEach(output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, rs, input, output);
+        cleanRenderScript(script, input, output);
     }
 
     /**
