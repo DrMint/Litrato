@@ -614,16 +614,29 @@ public class FiltersActivity extends AppCompatActivity {
                 if (originalImage != null) {
                     applyFilter();
 
-                    activityAppliedFilter = new AppliedFilter(
-                            selectedFilter,
-                            maskBmp,
-                            layoutColorSeekBar.getProgress(),
-                            layoutSeekBar1.getProgress(),
-                            layoutSeekBar2.getProgress(),
-                            layoutSwitch1.isChecked(),
-                            imageTouchDown,
-                            imageTouchCurrent
-                    );
+                    if (shouldUseMask) {
+                        activityAppliedFilter = new AppliedFilter(
+                                selectedFilter,
+                                maskBmp,
+                                layoutColorSeekBar.getProgress(),
+                                layoutSeekBar1.getProgress(),
+                                layoutSeekBar2.getProgress(),
+                                layoutSwitch1.isChecked(),
+                                imageTouchDown,
+                                imageTouchCurrent
+                        );
+                    } else {
+                        activityAppliedFilter = new AppliedFilter(
+                                selectedFilter,
+                                null,
+                                layoutColorSeekBar.getProgress(),
+                                layoutSeekBar1.getProgress(),
+                                layoutSeekBar2.getProgress(),
+                                layoutSwitch1.isChecked(),
+                                imageTouchDown,
+                                imageTouchCurrent
+                        );
+                    }
 
                     activityBitmap = filteredImage;
                     finish();

@@ -2,7 +2,6 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 
 class AppliedFilter {
     private final Filter filter;
@@ -36,7 +35,7 @@ class AppliedFilter {
         // This only works because we never use a maskBmp and return the filtered image in filter.apply
         if (maskBmp == null) {
 
-            return filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+            return filter.apply(bmp, null, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
 
         } else {
 
