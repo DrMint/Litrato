@@ -46,8 +46,6 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.snackbar.Snackbar;
 
-//import static com.example.retouchephoto.FiltersActivity.lastAppliedFilter;
-
 /*TODO:
    Bugs:
         [0001] - When the histogram is resize, the image can get lstretch because the imageView gets bigger or smaller.
@@ -82,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_IMAGE_CAPTURE = 2;
     private final int FILTER_ACTIVITY_IS_FINISHED = 3;
     private final int CONFIG_REQUEST = 4;
-    private final int EXIF_REQUEST = 5;
 
     /**
      * This is the image as it was before applying any filter.
@@ -103,8 +100,6 @@ public class MainActivity extends AppCompatActivity {
 
     private final List<DisplayedFilter> displayedFilters = new ArrayList<>();
 
-    //private final List<String> history = new ArrayList<>();
-    //private AppliedFilter lastUsedFilter;
     private Historic historic = new Historic();
 
     private Filter filterRotation;
@@ -308,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
                 //Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
                 //startActivity(intent);
                 Intent intent = new Intent(getApplicationContext(), ExifActivity.class);
-                startActivityForResult(intent, EXIF_REQUEST);
+                startActivity(intent);
                 break;
             }
 

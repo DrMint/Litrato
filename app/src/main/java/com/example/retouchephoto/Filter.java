@@ -3,6 +3,7 @@ package com.example.retouchephoto;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.util.Log;
 
 /**
  * A instance of this class has many properties such as what kind of inputs (colorSeekBar and seekBars) should be available to the user.

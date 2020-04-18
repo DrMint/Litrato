@@ -31,12 +31,26 @@ class AppliedFilter {
 
     String getName() {return filter.getName();}
 
-    Bitmap preview(final Bitmap bmp, Context context) {
-        return filter.preview(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
-    }
+    Bitmap apply(Bitmap bmp, Context context) {
 
-    Bitmap apply(final Bitmap bmp, Context context) {
-        return filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+        if (maskBmp == null) {
+            return filter.apply(bmp, null, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+        } else {
+            Bitmap invertedMaskBmp = ImageTools.bitmapClone(maskBmp);
+            FilterFunction.invert(invertedMaskBmp);
+
+            Bitmap originalImageMasked = ImageTools.bitmapClone(bmp);
+            FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, BlendType.MULTIPLY);
+
+
+            Bitmap result = filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+            if (result != null) bmp = result;
+
+            FilterFunction.applyTexture(bmp, maskBmp,BlendType.MULTIPLY);
+            FilterFunction.applyTexture(bmp, originalImageMasked, BlendType.ADD);
+
+            return bmp;
+        }
     }
 
 
