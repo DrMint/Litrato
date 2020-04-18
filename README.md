@@ -333,14 +333,13 @@ The following features will **surely** be added before 04/15/2020:
  - [X] A "Cartoon" filter that limits the number of colors and highlight the contour of the image.
  - [X] The ability to rotate the image by 90°, -90° or 180°.
  - [X] New presets that redirect the user to already existing filters. The preset will change the default values of this filter.
- - [ ] The ability the remove the last applied filter (currently we can only remove all applied filters).
+ - [X] The ability the remove the last applied filter (currently we can only remove all applied filters).
  - [X] Bug removal: take a picture from the camera at higher resolution than 187px by 250px.
 
 The following features will **likely** be added before 04/15/2020:
 - [X] Rotate the image at any degrees, which means that the image should also get cropped.
-- [ ] The ability to crop the image (with a switch to keep the original image ratio or not)
-- [ ] If we create the ability to crop the image, then fuse those to option in one UI (as Adobe Photoshop is doing it).
-- [ ] Save all state of the image. That way, we can have a "Filter History" and go back to any prior state.
+- [X] The ability to crop the image.
+- [X] Save all state of the image. That way, we can have a "Filter History" and go back to any prior state.
 - [ ] An idea to keep the UI interactive while saving the image at its original resolution would be to work on a preview sized image, save all the filters applied, and then apply them again to the full size image when saving. It is okay for the user to wait a few seconds when saving, but not while using the UI.
 
 
