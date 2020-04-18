@@ -6,62 +6,64 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-public class Historic {
-    ArrayList<AppliedFilter> historic;
+class Historic {
 
-    public Historic() {
-        this.historic = new ArrayList<AppliedFilter>();
+    private ArrayList<AppliedFilter> historic;
+
+    Historic() {
+        this.historic = new ArrayList<>();
     }
 
-    public ArrayList<AppliedFilter> getHistoric() {
+    /*ArrayList<AppliedFilter> getHistoric() {
         return historic;
     }
 
-    public void init(){
-        this.historic.removeAll(this.historic);
+     */
+
+    AppliedFilter get(int index) {return historic.get(index);}
+    int size() {return historic.size();}
+
+    void clear(){
+        this.historic.clear();
     }
 
-    public void addFilter(AppliedFilter appFilter){
+    void addFilter(AppliedFilter appFilter){
         this.historic.add(appFilter);
     }
-    public void addFilter(Filter filter, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp){
-        AppliedFilter appFilter = new AppliedFilter(filter,maskBmp, context,colorSeekHue,seekBar,seekBar2, switch1,touchDown,touchUp);
+
+    /*
+    void addFilter(Filter filter, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp){
+        AppliedFilter appFilter = new AppliedFilter(filter, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
         this.historic.add(appFilter);
     }
-/*unused*/
-    public Bitmap goBack(Bitmap originalImage){
+
+    Bitmap goBack(Bitmap originalImage){
         int index = this.historic.size()-1;
         Bitmap copy ;
         copy=ImageTools.bitmapClone(originalImage);
-        if(index>=0) {
+        if(index >= 0) {
             this.historic.remove(index);
             for (AppliedFilter allFilter : this.historic) {
-                allFilter.filter.apply(copy, allFilter.maskBmp, allFilter.context, allFilter.colorSeekHue, allFilter.seekBar, allFilter.seekBar2, allFilter.switch1, allFilter.touchDown, allFilter.touchUp);
+                allFilter.apply(copy);
             }
         }
-        if(index==-1){
+        if(index == -1){
             return copy;
         }
         return copy;
     }
 
-    public Bitmap goUntilFilter(Bitmap originalImage,int index) {
+     */
+
+    Bitmap goUntilFilter(Bitmap originalImage, int index, Context context) {
             Bitmap copy = ImageTools.bitmapClone(originalImage);
-            if(index==0){
-                return copy;
-            }
-            if(index!=0) {
-                for (int i = 0; i < index; i++) {
-                    AppliedFilter allFilter = this.historic.get(i);
-                    allFilter.filter.apply(copy, allFilter.maskBmp, allFilter.context, allFilter.colorSeekHue, allFilter.seekBar, allFilter.seekBar2, allFilter.switch1, allFilter.touchDown, allFilter.touchUp);
-                }
+            for (int i = 0; i <= index; i++) {
+                historic.get(i).apply(copy, context);
             }
             return copy;
     }
 
-    public void removeUntil(int index){
-        for (int i =1; i <=this.historic.size()-index; i++) {
-            this.historic.remove(this.historic.size() - i);
-        }
+    void removeUntil(int index){
+        historic.subList(index + 1, historic.size()).clear();
     }
 }

@@ -123,7 +123,7 @@ class Filter {
      */
     Bitmap apply(final Bitmap bmp, final Bitmap maskBmp, final Context context, final int colorSeekHue, final float seekBar, final float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
         if (myApplyInterface != null) return myApplyInterface.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
-        return myPreviewInterface.preview(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+        return preview(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
     }
 
     Bitmap apply(final Bitmap bmp, Bitmap maskBmp, final Context context) {

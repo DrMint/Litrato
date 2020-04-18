@@ -2,22 +2,21 @@ package com.example.retouchephoto;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 
-public class AppliedFilter {
-    Filter filter;
-    Bitmap maskBmp;
-    Context context;
-    int colorSeekHue;
-    float seekBar;
-    float seekBar2;
-    boolean switch1;
-    Point touchDown;
-    Point touchUp;
+class AppliedFilter {
+    private final Filter filter;
+    private final Bitmap maskBmp;
+    private final int colorSeekHue;
+    private final float seekBar;
+    private final float seekBar2;
+    private final boolean switch1;
+    private final Point touchDown;
+    private final Point touchUp;
 
-    public AppliedFilter(Filter filter, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+    AppliedFilter(Filter filter, Bitmap maskBmp, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
         this.filter = filter;
         this.maskBmp = maskBmp;
-        this.context = context;
         this.colorSeekHue = colorSeekHue;
         this.seekBar = seekBar;
         this.seekBar2 = seekBar2;
@@ -25,15 +24,20 @@ public class AppliedFilter {
         this.touchDown = touchDown;
         this.touchUp = touchUp;
     }
-    public AppliedFilter(Filter filter,Context context){
-        this.filter=filter;
-        this.maskBmp =Bitmap.createBitmap(1,1, Bitmap.Config.ALPHA_8);
-        this.context = context;
-        this.colorSeekHue = 0;
-        this.seekBar = 0;
-        this.seekBar2 = 0;
-        this.switch1 = false;
-        this.touchDown = new Point(0,0);
-        this.touchUp = new Point(0,0);
+
+    AppliedFilter(Filter filter){
+        this(filter, null, 0, filter.seekBar1Set, filter.seekBar2Set, filter.switch1Default,  new Point(0,0), new Point(0,0));
     }
+
+    String getName() {return filter.getName();}
+
+    Bitmap preview(final Bitmap bmp, Context context) {
+        return filter.preview(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+    }
+
+    Bitmap apply(final Bitmap bmp, Context context) {
+        return filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+    }
+
+
 }
