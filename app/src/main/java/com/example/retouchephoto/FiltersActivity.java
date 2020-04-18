@@ -31,12 +31,15 @@ import android.widget.TextView;
 import java.util.Locale;
 import java.util.Objects;
 
+import static com.example.retouchephoto.MainActivity.historic;
+import static com.example.retouchephoto.MainActivity.historyBool;
+
 public class FiltersActivity extends AppCompatActivity {
 
     static Filter subActivityFilter;
     static Bitmap subActivityBitmap;
     static Bitmap subMaskBmp;
-
+    static AppliedFilter lastAppliedFilter;
     static Bitmap activityBitmap;
 
     private Bitmap originalImage;
@@ -379,6 +382,15 @@ public class FiltersActivity extends AppCompatActivity {
                     imageTouchDown,
                     imageTouchCurrent
             );
+            lastAppliedFilter=new AppliedFilter(selectedFilter,
+                    maskBmp,
+                    getApplicationContext(),
+                    layoutColorSeekBar.getProgress(),
+                    layoutSeekBar1.getProgress(),
+                    layoutSeekBar2.getProgress(),
+                    layoutSwitch1.isChecked(),
+                    imageTouchDown,
+                    imageTouchCurrent);
         } else {
             result = selectedFilter.preview(
                     filteredImage,
@@ -414,6 +426,10 @@ public class FiltersActivity extends AppCompatActivity {
      */
     private void applyFilter() {
         previewOrApply(true);
+        if(historyBool && !(lastAppliedFilter==null)){
+            historic.addFilter(lastAppliedFilter);
+            lastAppliedFilter=null;
+        }
     }
 
     private void previewFilter() {

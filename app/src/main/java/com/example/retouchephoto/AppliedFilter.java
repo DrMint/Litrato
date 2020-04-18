@@ -25,4 +25,15 @@ public class AppliedFilter {
         this.touchDown = touchDown;
         this.touchUp = touchUp;
     }
+    public AppliedFilter(Filter filter,Context context){
+        this.filter=filter;
+        this.maskBmp =Bitmap.createBitmap(1,1, Bitmap.Config.ALPHA_8);
+        this.context = context;
+        this.colorSeekHue = 0;
+        this.seekBar = 0;
+        this.seekBar2 = 0;
+        this.switch1 = false;
+        this.touchDown = new Point(0,0);
+        this.touchUp = new Point(0,0);
+    }
 }

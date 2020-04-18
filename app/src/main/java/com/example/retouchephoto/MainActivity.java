@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,6 +45,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.snackbar.Snackbar;
+
+import static com.example.retouchephoto.FiltersActivity.lastAppliedFilter;
 
 /*TODO:
    Bugs:
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     static Filter subActivityFilter;
     static Bitmap subActivityBitmap;
     static Bitmap subMaskBmp;
-
+    static Historic historic;
     static SharedPreferences preferences;
 
     private final int PICK_IMAGE_REQUEST = 1;
@@ -131,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView    historyTitle;
     private SeekBar     historySeekBar;
     private Button      historyConfirmButton;
+    static boolean historyBool=true;
 
     private TableRow    toolsLineOne;
     private TableRow    toolsLineTwo;
@@ -151,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(layoutToolbar);
 
         preferences = getSharedPreferences(Settings.PREFERENCE_NAME, 0);
-
+        historic=new Historic();
         // Sets all the layout shortcuts.
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
 
@@ -225,11 +229,12 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.action_history: {
-
                 if (isVisible(historyBar)) {
                     closeHistory();
                 } else {
+                    closeMenus();
                     historyBar.setVisibility(View.VISIBLE);
+                    historyBool=false;
                 }
                 break;
             }
@@ -280,6 +285,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_rotate_left: {
                 currentImage = filterRotation.apply(currentImage, null, getApplicationContext(), 0, 270, 0, false, new Point(), new Point());
                 lastUsedFilter = filterRotation;
+                AppliedFilter rotate=new AppliedFilter(filterRotation,null, getApplicationContext(), 0, 270, 0, false, new Point(), new Point());
+                historic.addFilter(rotate);
+                lastUsedFilter=null;
                 refreshImageView();
                 break;
             }
@@ -287,6 +295,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_rotate_right: {
                 currentImage = filterRotation.apply(currentImage, null, getApplicationContext(), 0, 90, 0, false, new Point(), new Point());
                 lastUsedFilter = filterRotation;
+                AppliedFilter rotate=new AppliedFilter(filterRotation,null, getApplicationContext(), 0, 90, 0, false, new Point(), new Point());
+                historic.addFilter(rotate);
+                lastUsedFilter=null;
                 refreshImageView();
                 break;
             }
@@ -435,8 +446,7 @@ public class MainActivity extends AppCompatActivity {
                     closeMenus();
                     refreshImageView();
                 }
-                if (isVisible(historyBar)) closeHistory();
-
+                closeHistory();
                 break;
         }
     }
@@ -461,9 +471,9 @@ public class MainActivity extends AppCompatActivity {
         originalImage = bmp;
         currentImage = ImageTools.bitmapClone(originalImage);
 
-        lastUsedFilter = new Filter("Original");
+        lastUsedFilter = null;
         history.clear();
-
+        historic.init();
         refreshImageView();
     }
 
@@ -471,14 +481,23 @@ public class MainActivity extends AppCompatActivity {
      * Displays currentImage on the imageView, also refreshes Histogram and ImageInfo
      */
     private void refreshImageView() {
-        layoutImageView.setImageBitmap(currentImage);
-        hasChanged[0] = true;
-        hasChanged[2] = true;
-        hasChanged[3] = true;
-        hasChanged[4] = true;
-        hasChanged[5] = true;
-        generateMiniatureForOpenedMenu();
-        addToHistory(lastUsedFilter);
+        if(historyBool) {
+            layoutImageView.setImageBitmap(currentImage);
+        }
+            hasChanged[0] = true;
+            hasChanged[2] = true;
+            hasChanged[3] = true;
+            hasChanged[4] = true;
+            hasChanged[5] = true;
+            generateMiniatureForOpenedMenu();
+        if(historyBool && !(lastUsedFilter==null)){
+            addToHistory(lastUsedFilter);
+        }
+        if(historyBool) {
+            historySeekBar.setProgress(historic.getHistoric().size());
+            historySeekBar.setMax(historic.getHistoric().size());
+        }
+
     }
 
     private void initializeListener() {
@@ -640,15 +659,25 @@ public class MainActivity extends AppCompatActivity {
         historySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                historyTitle.setText(history.get(progress));
                 historyConfirmButton.setEnabled(progress != seekBar.getMax());
+                if(progress==0){
+                    historyTitle.setText("Original");
+                }
+                else{
+                    historyTitle.setText(historic.getHistoric().get(progress-1).filter.getName());
+                }
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if (seekBar.getProgress() != seekBar.getMax()) {
-                    //TODO: Shows what the state looked like by changing imageView's image.
-                }
+                    if (seekBar.getProgress() != seekBar.getMax()) {
+                        Bitmap tmp = historic.goUntilFilter(originalImage, seekBar.getProgress());
+                        layoutImageView.setImageBitmap(tmp);
+                    }
+                    else{
+                        layoutImageView.setImageBitmap(currentImage);
+                    }
+                refreshImageView();
             }
         });
 
@@ -656,6 +685,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //TODO: Go back to historySeekBar.progress in the history
+                if(historySeekBar.getProgress()==0){
+                    currentImage=originalImage;
+                    historic.init();
+                }
+                if(historySeekBar.getProgress()!=historic.getHistoric().size()){
+                    currentImage = Bitmap.createBitmap(historic.goUntilFilter(originalImage, historySeekBar.getProgress()));
+                    historic.removeUntil(historySeekBar.getProgress()-1);
+                }
+                closeHistory();
+                refreshImageView();
             }
         });
 
@@ -668,7 +707,7 @@ public class MainActivity extends AppCompatActivity {
         contourBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
         fancyBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
         blurBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
-        historyBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
+        historyBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {lastUsedFilter=null;}});
     }
 
     private void generatePresets(){
@@ -687,7 +726,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         filters.add(newPresets);
-
         newPresets = new Filter("Invert");
         newPresets.setFilterCategory(FilterCategory.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1249,22 +1287,32 @@ public class MainActivity extends AppCompatActivity {
      */
     private void apply(Filter filter) {
         lastUsedFilter = filter;
-
         Bitmap result = filter.apply(currentImage, getApplicationContext());
-
         // If the filter return a bitmap, currentImage becomes this bitmap
         if (result != null) {
             currentImage = result;
         }
-
         refreshImageView();
+        lastUsedFilter=null;
+        lastAppliedFilter=null;
     }
 
     private void addToHistory(Filter filter) {
         //TODO: To add way more than just the name.
-        history.add(filter.getName());
-        historySeekBar.setMax(history.size() - 1);
-        historySeekBar.setProgress(history.size() - 1);
+        if(filter.getFilterCategory()==FilterCategory.PRESET) {
+            history.add(filter.getName());
+            lastAppliedFilter = new AppliedFilter(filter, getApplicationContext());
+            historic.addFilter(lastAppliedFilter);
+            lastAppliedFilter = null;
+        }
+        if(filter.getFilterCategory()==FilterCategory.TOOL) {
+            if (!filter.seekBar1 && !filter.seekBar2 && !filter.switch1 && !filter.allowMasking && !filter.colorSeekBar) {
+                history.add(filter.getName());
+                lastAppliedFilter = new AppliedFilter(filter, getApplicationContext());
+                historic.addFilter(lastAppliedFilter);
+                lastAppliedFilter = null;
+            }
+        }
     }
 
 
@@ -1411,11 +1459,13 @@ public class MainActivity extends AppCompatActivity {
         presetsBar.setVisibility(View.GONE);
         toolsBar.setVisibility(View.GONE);
         filtersBar.setVisibility(View.GONE);
+        closeHistory();
     }
 
     private void closeHistory() {
         historyBar.setVisibility(View.GONE);
-        historySeekBar.setProgress(historySeekBar.getMax());
+        historyBool=true;
+        refreshImageView();
     }
 
     private void closeSubMenus(){
