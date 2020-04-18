@@ -58,7 +58,8 @@ class Historic {
     Bitmap goUntilFilter(Bitmap originalImage, int index, Context context) {
             Bitmap copy = ImageTools.bitmapClone(originalImage);
             for (int i = 0; i <= index; i++) {
-                historic.get(i).apply(copy, context);
+                Bitmap result = historic.get(i).apply(copy, context);
+                if (result != null) copy = result;
             }
             return copy;
     }

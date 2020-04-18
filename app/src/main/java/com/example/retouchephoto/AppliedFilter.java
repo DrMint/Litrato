@@ -33,25 +33,24 @@ class AppliedFilter {
 
     Bitmap apply(Bitmap bmp, Context context) {
 
+        // This only works because we never use a maskBmp and return the filtered image in filter.apply
         if (maskBmp == null) {
-            return filter.apply(bmp, null, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+
+            return filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+
         } else {
+
             Bitmap invertedMaskBmp = ImageTools.bitmapClone(maskBmp);
             FilterFunction.invert(invertedMaskBmp);
 
             Bitmap originalImageMasked = ImageTools.bitmapClone(bmp);
             FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, BlendType.MULTIPLY);
 
-
-            Bitmap result = filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
-            if (result != null) bmp = result;
+            filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
 
             FilterFunction.applyTexture(bmp, maskBmp,BlendType.MULTIPLY);
             FilterFunction.applyTexture(bmp, originalImageMasked, BlendType.ADD);
-
-            return bmp;
+            return null;
         }
     }
-
-
 }
