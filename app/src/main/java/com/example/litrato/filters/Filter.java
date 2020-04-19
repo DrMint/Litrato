@@ -45,6 +45,7 @@ public class Filter {
     public int seekBar1Min;
     public int seekBar1Set;
     public int seekBar1Max;
+    public String seekBar1Title;
     public String seekBar1Unit;
 
     /**
@@ -55,6 +56,7 @@ public class Filter {
     public int seekBar2Min;
     public int seekBar2Set;
     public int seekBar2Max;
+    public String seekBar2Title;
     public String seekBar2Unit;
 
     /**
@@ -89,19 +91,21 @@ public class Filter {
 
     //Getters and Setters
 
-    private void setSeekBar1(int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Unit) {
+    private void setSeekBar1(int seekBar1Min, int seekBar1Set, int seekBar1Max, String seekBar1Title, String seekBar1Unit) {
         this.seekBar1 = true;
         this.seekBar1Min = seekBar1Min;
         this.seekBar1Set = seekBar1Set;
         this.seekBar1Max = seekBar1Max;
+        this.seekBar1Title = seekBar1Title;
         this.seekBar1Unit = seekBar1Unit;
     }
 
-    private void setSeekBar2(int seekBar2Min, int seekBar2Set, int seekBar2Max, String seekBar2Unit) {
+    private void setSeekBar2(int seekBar2Min, int seekBar2Set, int seekBar2Max, String seekBar2Title, String seekBar2Unit) {
         this.seekBar2 = true;
         this.seekBar2Min = seekBar2Min;
         this.seekBar2Set = seekBar2Set;
         this.seekBar2Max = seekBar2Max;
+        this.seekBar2Title = seekBar2Title;
         this.seekBar2Unit = seekBar2Unit;
     }
 
@@ -370,7 +374,7 @@ public class Filter {
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.rotate));
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
-        newTools.setSeekBar1(-180, 0, 180, "deg");
+        newTools.setSeekBar1(-180, 0, 180, "Angle", "deg");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -424,8 +428,8 @@ public class Filter {
 
         newTools = new Filter("Luminosity", Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.luminosity));
-        newTools.setSeekBar1(-100, 0, 100, "%");
-        newTools.setSeekBar2(-100, 0, 100, "%");
+        newTools.setSeekBar1(-100, 0, 100, "Brightness","%");
+        newTools.setSeekBar2(-100, 0, 100, "Gamma", "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -438,8 +442,8 @@ public class Filter {
 
         newTools = new Filter("Contrast", Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.contrast));
-        newTools.setSeekBar1(-50, 0, 50, "%");
-        newTools.setSeekBar2(-100, 0, 100, "%");
+        newTools.setSeekBar1(-50, 0, 50, "Contrast","%");
+        newTools.setSeekBar2(-100, 0, 100, "Burn","%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -452,7 +456,7 @@ public class Filter {
 
         newTools = new Filter("Sharpness", Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.sharpness));
-        newTools.setSeekBar1(-100, 0, 100, "%");
+        newTools.setSeekBar1(-100, 0, 100, "Intensity","%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -480,7 +484,7 @@ public class Filter {
 
         newTools = new Filter("Saturation", Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.saturation));
-        newTools.setSeekBar1(0, 100, 200, "%");
+        newTools.setSeekBar1(0, 100, 200, "Intensity", "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -492,7 +496,7 @@ public class Filter {
 
         newTools = new Filter("Add noise", Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.add_noise));
-        newTools.setSeekBar1(0, 0, 255, "");
+        newTools.setSeekBar1(0, 0, 255, "Amount visible","");
         newTools.setSwitch1(false,"B&W Noise", "Color Noise");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -505,7 +509,7 @@ public class Filter {
 
         newTools = new Filter("Temperature", Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.temperature));
-        newTools.setSeekBar1(-100, 0, 100, "%");
+        newTools.setSeekBar1(-100, 0, 100, "Cold <---> Warm","%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -517,7 +521,7 @@ public class Filter {
 
         newTools = new Filter("Tint", Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.tint));
-        newTools.setSeekBar1(-100, 0, 100, "%");
+        newTools.setSeekBar1(-100, 0, 100, "Green <---> Magenta","%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -536,7 +540,7 @@ public class Filter {
 
         newFilter = new Filter("Colorize", Category.COLOR);
         newFilter.setColorSeekBar();
-        newFilter.setSeekBar1(0,100,100,"");
+        newFilter.setSeekBar1(0,100,100,"Saturation","");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -559,7 +563,7 @@ public class Filter {
 
         newFilter = new Filter("Selective coloring", Category.COLOR);
         newFilter.setColorSeekBar();
-        newFilter.setSeekBar1(1, 25, 360, "deg");
+        newFilter.setSeekBar1(1, 25, 360, "Sensibility","deg");
         newFilter.setSwitch1(false, "Keep", "Remove");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -575,7 +579,7 @@ public class Filter {
         filters.add(newFilter);
 
         newFilter = new Filter("Hue shift", Category.COLOR);
-        newFilter.setSeekBar1(-180, 0, 180, "deg");
+        newFilter.setSeekBar1(-180, 0, 180, "Shift amount", "deg");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -592,7 +596,7 @@ public class Filter {
         // Filters > Fancy
 
         newFilter = new Filter("Threshold", Category.FANCY);
-        newFilter.setSeekBar1(0, 128, 256, "");
+        newFilter.setSeekBar1(0, 128, 256, "Threshold value","");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -603,7 +607,7 @@ public class Filter {
         filters.add(newFilter);
 
         newFilter = new Filter("Posterize", Category.FANCY);
-        newFilter.setSeekBar1(2, 10, 32, "steps");
+        newFilter.setSeekBar1(2, 10, 32, "Number of values","steps");
         newFilter.setSwitch1(true,"Color", "B&W");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -620,7 +624,7 @@ public class Filter {
         // Filters > Blur
 
         newFilter = new Filter("Average blur", Category.BLUR);
-        newFilter.setSeekBar1(1, 2, 19, "px");
+        newFilter.setSeekBar1(1, 2, 19, "Radius","px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -631,7 +635,7 @@ public class Filter {
         filters.add(newFilter);
 
         newFilter = new Filter("Gaussian blur", Category.BLUR);
-        newFilter.setSeekBar1(1, 2, 25, "px");
+        newFilter.setSeekBar1(1, 2, 25, "Radius", "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -642,7 +646,7 @@ public class Filter {
         filters.add(newFilter);
 
         newFilter = new Filter("Directional blur", Category.BLUR);
-        newFilter.setSeekBar1(2, 2, 30, "");
+        newFilter.setSeekBar1(2, 2, 30, "Radius", "");
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -658,7 +662,7 @@ public class Filter {
 
         // Filters > Contour
         newFilter = new Filter("Laplacian", Category.CONTOUR);
-        newFilter.setSeekBar1(1, 2, 14, "px");
+        newFilter.setSeekBar1(1, 2, 14, "Sensibility","px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -669,7 +673,7 @@ public class Filter {
         filters.add(newFilter);
 
         newFilter = new Filter("Sobel", Category.CONTOUR);
-        newFilter.setSeekBar1(1, 2, 14, "px");
+        newFilter.setSeekBar1(1, 2, 14, "Sensibility","px");
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -681,8 +685,8 @@ public class Filter {
         filters.add(newFilter);
 
         newFilter = new Filter("Sketch", Category.CONTOUR);
-        newFilter.setSeekBar1(1, 4, 14, "");
-        newFilter.setSeekBar2(0, 20, 100, "");
+        newFilter.setSeekBar1(1, 4, 14, "Contour finesse","");
+        newFilter.setSeekBar2(0, 20, 100, "Colors washing","");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -703,8 +707,8 @@ public class Filter {
         filters.add(newFilter);
 
         newFilter = new Filter("Cartoon", Category.CONTOUR);
-        newFilter.setSeekBar1(1, 0, 100, "px");
-        newFilter.setSeekBar2(2, 4, 14, "px");
+        newFilter.setSeekBar1(1, 0, 100, "Black value","px");
+        newFilter.setSeekBar2(2, 4, 14, "Posterization","");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -722,8 +726,8 @@ public class Filter {
         newFilter.allowMasking = false;
         newFilter.allowHistogram = false;
         newFilter.allowScrollZoom = false;
-        newFilter.setSeekBar1(5,30,300, "px");
-        newFilter.setSeekBar2(0,50,100, "%");
+        newFilter.setSeekBar1(5,30,300, "Brush radius","px");
+        newFilter.setSeekBar2(0,50,100, "View opacity","%");
         newFilter.setSwitch1(true, "Black", "White");
         newFilter.seekBar1AutoRefresh = false;
         newFilter.switch1AutoRefresh = false;

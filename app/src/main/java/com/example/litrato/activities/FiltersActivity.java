@@ -431,7 +431,6 @@ public class FiltersActivity extends AppCompatActivity {
     private void refreshImageView() {
         layoutImageView.setImageBitmap(filteredImage);
         refreshHistogram();
-        //refreshImageInfo();
     }
 
     /**
@@ -570,7 +569,13 @@ public class FiltersActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (inputsReady && selectedFilter.seekBar1AutoRefresh) previewFilter();
-                layoutSeekBarValue1.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar1Unit));
+                layoutSeekBarValue1.setText(String.format(
+                        Locale.ENGLISH,
+                        "%s (%d%s)",
+                        selectedFilter.seekBar1Title,
+                        seekBar.getProgress(),
+                        selectedFilter.seekBar1Unit
+                ));
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -583,7 +588,13 @@ public class FiltersActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (inputsReady && selectedFilter.seekBar2AutoRefresh) previewFilter();
-                layoutSeekBarValue2.setText(String.format(Locale.ENGLISH,"%d%s", seekBar.getProgress(), selectedFilter.seekBar2Unit));
+                layoutSeekBarValue2.setText(String.format(
+                        Locale.ENGLISH,
+                        "%s (%d%s)",
+                        selectedFilter.seekBar2Title,
+                        seekBar.getProgress(),
+                        selectedFilter.seekBar2Unit
+                ));
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
