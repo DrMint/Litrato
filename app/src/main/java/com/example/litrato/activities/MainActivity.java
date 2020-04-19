@@ -14,6 +14,7 @@ import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -22,20 +23,14 @@ import android.view.View;
 import android.content.Intent;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import java.util.Objects;
 
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.example.litrato.activities.ui.BottomMenu;
-import com.example.litrato.activities.ui.DisplayedFilter;
 import com.example.litrato.activities.tools.History;
 import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;
@@ -85,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * The filter to use in subActivities.
      */
-    static Filter subActivityFilter;
+    public static Filter subActivityFilter;
 
     /**
      * The image to use in subActivities.
@@ -97,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
      */
     static Bitmap subActivityMaskBmp;
 
-    public static Context ActivityContext;
+    private static Context appContext;
 
     // Numerous set values for REQUESTS. They have to differ from one another that's all.
     private final int PICK_IMAGE_REQUEST = 1;
@@ -126,79 +121,69 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageViewZoomScroll layoutImageView;
     private Toolbar     layoutToolbar;
-    private Button      toolsButton;
-    private Button      presetsButton;
-    private Button      filtersButton;
-    private Button      colorButton;
-    private Button      fancyButton;
-    private Button      blurButton;
-    private Button      contourButton;
-    private TableLayout toolsBar;
-    private HorizontalScrollView presetsBar;
-    private HorizontalScrollView buttonBar;
-    private LinearLayout filtersBar;
-    private LinearLayout presetsLinearLayout;
-    private LinearLayout colorBar;
-    private LinearLayout fancyBar;
-    private LinearLayout blurBar;
-    private LinearLayout contourBar;
 
-    private RelativeLayout historyBar;
+    private ViewGroup   historyBar;
     private TextView    historyTitle;
     private SeekBar     historySeekBar;
     private Button      historyConfirmButton;
 
-    private TableRow    toolsLineOne;
-    private TableRow    toolsLineTwo;
-    private TableRow    toolsLineThree;
+    static private View.OnClickListener menuItemListener;
 
-    private int numberOfTools;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        appContext = getApplicationContext();
+
         setContentView(R.layout.activity_main);
 
         layoutToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(layoutToolbar);
 
-        ActivityContext = getApplicationContext();
-
         // Sets all the layout shortcuts.
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
 
-        toolsButton             = findViewById(R.id.buttonTools);
-        presetsButton           = findViewById(R.id.buttonPresets);
-        filtersButton           = findViewById(R.id.buttonFilters);
-
-        colorButton             = findViewById(R.id.buttonColor);
-        fancyButton             = findViewById(R.id.buttonFancy);
-        blurButton              = findViewById(R.id.buttonBlur);
-        contourButton           = findViewById(R.id.buttonContour);
-
-        toolsBar                = findViewById(R.id.toolsBar);
-        presetsBar              = findViewById(R.id.presetsBar);
-        filtersBar              = findViewById(R.id.filtersBar);
-
-        buttonBar               = findViewById(R.id.buttonBar);
-
-        presetsLinearLayout     = findViewById(R.id.presetsLinearLayout);
+        ViewGroup presetsLinearLayout = findViewById(R.id.presetsLinearLayout);
 
         historyBar              = findViewById(R.id.historyBar);
         historyTitle            = findViewById(R.id.historyTitle);
         historySeekBar          = findViewById(R.id.historySeekBar);
         historyConfirmButton    = findViewById(R.id.historyConfirmButton);
 
-        colorBar                = findViewById(R.id.colorMenu);
-        fancyBar                = findViewById(R.id.fancyMenu);
-        blurBar                 = findViewById(R.id.blurMenu);
-        contourBar              = findViewById(R.id.contourMenu);
+        ViewGroup colorBar = findViewById(R.id.colorMenu);
+        ViewGroup fancyBar = findViewById(R.id.fancyMenu);
+        ViewGroup blurBar = findViewById(R.id.blurMenu);
+        ViewGroup contourBar = findViewById(R.id.contourMenu);
 
-        toolsLineOne            = findViewById(R.id.toolsLineOne);
-        toolsLineTwo            = findViewById(R.id.toolsLineTwo);
-        toolsLineThree          = findViewById(R.id.toolsLineThree);
 
+        menuItemListener = new View.OnClickListener()  {
+
+            @Override
+            public void onClick(View v) {
+
+                if (subActivityFilter.needFilterActivity) {
+
+                    subActivityBitmap = currentImage;
+                    Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
+                    intent.putExtra(Settings.ACTIVITY_EXTRA_CALLER, this.getClass().getName());
+                    startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
+
+                } else {
+
+                    AppliedFilter lastUsedFilter = new AppliedFilter(subActivityFilter);
+                    Bitmap result = lastUsedFilter.apply(currentImage, getApplicationContext());
+                    // If the filter return a bitmap, currentImage becomes this bitmap
+                    if (result != null) {
+                        currentImage = result;
+                    }
+
+                    addToHistory(lastUsedFilter);
+                    refreshImageView();
+                }
+            }
+        };
 
 
         FileInputOutput.askPermissionToReadWriteFiles(this);
@@ -207,22 +192,47 @@ public class MainActivity extends AppCompatActivity {
         Filter.generateFilters(getApplicationContext());
         FilterFunction.initializeRenderScript(getApplicationContext());
 
+
+        // Menu creation
+        {
+            Button toolsButton = findViewById(R.id.buttonTools);
+            Button presetsButton = findViewById(R.id.buttonPresets);
+            Button filtersButton = findViewById(R.id.buttonFilters);
+
+            Button colorButton = findViewById(R.id.buttonColor);
+            Button fancyButton = findViewById(R.id.buttonFancy);
+            Button blurButton = findViewById(R.id.buttonBlur);
+            Button contourButton = findViewById(R.id.buttonContour);
+
+            ViewGroup toolsBar = findViewById(R.id.toolsBar);
+            ViewGroup presetsBar = findViewById(R.id.presetsBar);
+            ViewGroup filtersBar = findViewById(R.id.filtersBar);
+
+            BottomMenu.submenuSelected = colorButton.getTypeface();
+            BottomMenu.submenuUnselected = fancyButton.getTypeface();
+
+            new BottomMenu(presetsButton, presetsBar, presetsLinearLayout, Category.PRESET);
+            BottomMenu menuTools = new BottomMenu(toolsButton, toolsBar, Category.TOOL);
+            BottomMenu menuFilters = new BottomMenu(filtersButton, filtersBar, null);
+
+            {
+                ViewGroup toolsLineOne = findViewById(R.id.toolsLineOne);
+                ViewGroup toolsLineTwo = findViewById(R.id.toolsLineTwo);
+                ViewGroup toolsLineThree = findViewById(R.id.toolsLineThree);
+                menuTools.setToolsRows(toolsLineOne, toolsLineTwo, toolsLineThree);
+            }
+
+            new BottomMenu(colorButton, colorBar, Category.COLOR, menuFilters);
+            new BottomMenu(fancyButton, fancyBar, Category.FANCY, menuFilters);
+            new BottomMenu(blurButton, blurBar, Category.BLUR, menuFilters);
+            new BottomMenu(contourButton, contourBar, Category.CONTOUR, menuFilters);
+        }
+
+
         // Initialize all the different listeners.
         // The filters / tools / presets must already be ready
         initializeListener();
-
-        new BottomMenu(presetsButton, presetsBar, Category.PRESET);
-        new BottomMenu(toolsButton, toolsBar, Category.TOOL);
-        BottomMenu myMenu = new BottomMenu(filtersButton, filtersBar, null);
-
-        new BottomMenu(colorButton, colorBar, Category.COLOR, myMenu);
-        new BottomMenu(fancyButton, fancyBar, Category.FANCY, myMenu);
-        new BottomMenu(blurButton, blurBar, Category.BLUR, myMenu);
-        new BottomMenu(contourButton, contourBar, Category.CONTOUR, myMenu);
-        BottomMenu.closeMenus();
-
-        BottomMenu.submenuSelected = colorButton.getTypeface();
-        BottomMenu.submenuUnselected = fancyButton.getTypeface();
+        BottomMenu.initializeMenus();
 
         // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
@@ -299,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
                     saveImage = fullSize;
                 }
                 if (FileInputOutput.saveImageToGallery(saveImage, MainActivity.this)) {
-                    Snackbar.make(toolsBar, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(layoutToolbar, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
                 }
                 break;
             }
@@ -429,11 +439,7 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                     setBitmap(FileInputOutput.getBitmap(data.getData(), getApplicationContext()));
                     layoutToolbar.getMenu().getItem(7).setEnabled(true);
-                } else {
-                    int x = 0/0;
                 }
-
-
                 break;
 
             case REQUEST_IMAGE_CAPTURE:
@@ -565,8 +571,6 @@ public class MainActivity extends AppCompatActivity {
         };
         layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
 
-        initializeMenus();
-
         historySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -583,7 +587,6 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     layoutImageView.setImageBitmap(currentImage);
                 }
-                //refreshImageView();
             }
         });
 
@@ -598,70 +601,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    /**
-     * Applies a filter to beforeLastFilterImage and refreshes ImageView.
-     * @param filter the filter to apply
-     */
-    private void apply(Filter filter) {
-
-        AppliedFilter lastUsedFilter = new AppliedFilter(filter);
-        Bitmap result = lastUsedFilter.apply(currentImage, getApplicationContext());
-        // If the filter return a bitmap, currentImage becomes this bitmap
-        if (result != null) {
-            currentImage = result;
-        }
-
-        addToHistory(lastUsedFilter);
-        refreshImageView();
+        // We leave those because if no onClickListener is set, there are permeable to touch events.
+        // That means that clicking on the their background will trigger an event to the object behind.
+        historyBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
     }
 
     private void addToHistory(AppliedFilter appliedFilter) {
         history.addFilter(appliedFilter);
         historySeekBar.setMax(history.size() - 1);
         historySeekBar.setProgress(historySeekBar.getMax());
-    }
-
-
-    private void initializeMenus(){
-
-        TextView textView;
-
-        for (final Filter currentFilter:Filter.filters) {
-            textView = BottomMenu.generateATextView(currentFilter, getApplicationContext());
-
-            // Add the filter to its right category
-            switch (currentFilter.getFilterCategory()){
-                case COLOR: this.colorBar.addView(textView); break;
-                case FANCY: this.fancyBar.addView(textView); break;
-                case BLUR: this.blurBar.addView(textView); break;
-                case CONTOUR: this.contourBar.addView(textView); break;
-                case PRESET: this.presetsLinearLayout.addView(textView); break;
-                case TOOL: addToolsButton(textView); break;
-            }
-
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (currentFilter.needFilterActivity) {
-                        openFiltersActivity(currentFilter, currentImage);
-                    } else {
-                        apply(currentFilter);
-                    }
-                }
-            });
-            BottomMenu.displayedFilters.add(new DisplayedFilter(textView, currentFilter));
-        }
-    }
-
-    private void addToolsButton(TextView textView){
-        switch (numberOfTools / 4){
-            case 0: this.toolsLineOne.addView(textView); break;
-            case 1: this.toolsLineTwo.addView(textView); break;
-            case 2: this.toolsLineThree.addView(textView); break;
-        }
-        numberOfTools++;
     }
 
     private void closeHistory() {
@@ -672,11 +620,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void openFiltersActivity(Filter filter, Bitmap bmp){
-        subActivityFilter = filter;
-        subActivityBitmap = bmp;
-        Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
-        intent.putExtra(Settings.ACTIVITY_EXTRA_CALLER, this.getClass().getName());
-        startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
-    }
+    public static Context getAppContext() {return appContext;}
+    public static View.OnClickListener getMenuItemListener() {return menuItemListener;}
 }

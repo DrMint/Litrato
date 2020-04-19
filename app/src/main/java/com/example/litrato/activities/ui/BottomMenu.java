@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TableRow;
@@ -32,23 +33,32 @@ public class BottomMenu {
      * A list of all filters, associated with their corresponding TextView (their visual
      * representation on the UI).
      */
-    public static final List<DisplayedFilter> displayedFilters = new ArrayList<>();
+    private static final List<DisplayedFilter> displayedFilters = new ArrayList<>();
+    private static final List<BottomMenu> bottomMenus = new ArrayList<>();
 
-    public static final List<BottomMenu> bottomMenus = new ArrayList<>();
     public static Typeface submenuSelected;
     public static Typeface submenuUnselected;
     public static Bitmap currentImage;
 
     private boolean needRefreshMiniature;
     private final Category category;
-    private final View bar;
+    private final ViewGroup bar;
+    private final ViewGroup container;
     private final Button button;
     private final BottomMenu parent;
 
-    public BottomMenu(final Button button, final View bar, final Category category, final BottomMenu parent) {
+    private ViewGroup   toolsLineOne;
+    private ViewGroup   toolsLineTwo;
+    private ViewGroup   toolsLineThree;
+
+    private int numberOfTools;
+
+    @SuppressWarnings("WeakerAccess")
+    public BottomMenu(final Button button, final ViewGroup bar, final ViewGroup container, final Category category, final BottomMenu parent) {
         this.needRefreshMiniature = true;
         this.category = category;
         this.bar = bar;
+        this.container = container;
         this.button = button;
         this.parent = parent;
 
@@ -61,7 +71,7 @@ public class BottomMenu {
                     open();
                 } else {
                     close();
-                };
+                }
             }
         });
 
@@ -73,15 +83,29 @@ public class BottomMenu {
 
     }
 
-    public BottomMenu(final Button button, final View bar, final Category category) {
-        this(button, bar, category, null);
+    public BottomMenu(final Button button, final ViewGroup bar, final Category category, final BottomMenu parent) {
+        this(button, bar, bar, category, parent);
+    }
+
+    public BottomMenu(final Button button, final ViewGroup bar, final ViewGroup container, final Category category) {
+        this(button, bar, container, category, null);
+    }
+
+    public BottomMenu(final Button button, final ViewGroup bar, final Category category) {
+        this(button, bar, bar, category, null);
+    }
+
+    public void setToolsRows(ViewGroup toolsLineOne, ViewGroup toolsLineTwo, ViewGroup toolsLineThree) {
+        this.toolsLineOne = toolsLineOne;
+        this.toolsLineTwo = toolsLineTwo;
+        this.toolsLineThree = toolsLineThree;
     }
 
     /**
      * Refreshes/Generates the miniatures of the currently opened.
      * If no menu is opened, no image is generated.
      */
-    void generateMiniatureForOpenedMenu() {
+    private void generateMiniatureForOpenedMenu() {
         if (ViewTools.isVisible(bar) && needRefreshMiniature) {
             generateMiniatures(category);
             needRefreshMiniature = false;
@@ -92,7 +116,7 @@ public class BottomMenu {
 
         Bitmap resizedMiniature = ImageTools.toSquare(
                 currentImage,
-                PreferenceManager.getInt(MainActivity.ActivityContext, Preference.MINIATURE_BMP_SIZE)
+                PreferenceManager.getInt(MainActivity.getAppContext(), Preference.MINIATURE_BMP_SIZE)
         );
 
         for (DisplayedFilter displayedFilter:displayedFilters) {
@@ -105,11 +129,11 @@ public class BottomMenu {
                     Bitmap filteredMiniature =  ImageTools.bitmapClone(resizedMiniature);
 
                     // Apply the filter to the miniature
-                    Bitmap result = displayedFilter.filter.apply(filteredMiniature, MainActivity.ActivityContext);
+                    Bitmap result = displayedFilter.filter.apply(filteredMiniature, MainActivity.getAppContext());
                     if (result != null) filteredMiniature = result;
 
                     // Add the image on top of the text
-                    drawable = new BitmapDrawable(MainActivity.ActivityContext.getResources(), filteredMiniature);
+                    drawable = new BitmapDrawable(MainActivity.getAppContext().getResources(), filteredMiniature);
                     drawable.setBounds(0, 0, Settings.MINIATURE_DISPLAYED_SIZE, Settings.MINIATURE_DISPLAYED_SIZE);
 
                     displayedFilter.textView.setCompoundDrawablePadding(25);
@@ -121,7 +145,7 @@ public class BottomMenu {
 
     }
 
-    static public TextView generateATextView(Filter filter, Context context) {
+    static private TextView generateATextView(Filter filter, Context context) {
         TextView textView;
         textView = new TextView(context);
         textView.setClickable(true);
@@ -183,6 +207,40 @@ public class BottomMenu {
         generateMiniatureForOpenedMenu();
     }
 
+    static public void initializeMenus(){
+
+        TextView textView;
+
+        for (BottomMenu bottomMenu:bottomMenus) {
+            for (final Filter currentFilter:Filter.filters) {
+                if (bottomMenu.category == currentFilter.getFilterCategory()) {
+
+                    textView = BottomMenu.generateATextView(currentFilter, MainActivity.getAppContext());
+                    textView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            MainActivity.subActivityFilter = currentFilter;
+                            MainActivity.getMenuItemListener().onClick(v);
+                        }
+                    });
+
+                    if (currentFilter.getFilterCategory() == Category.TOOL) {
+                        switch (bottomMenu.numberOfTools / 4) {
+                            case 0: bottomMenu.toolsLineOne.addView(textView); break;
+                            case 1: bottomMenu.toolsLineTwo.addView(textView); break;
+                            case 2: bottomMenu.toolsLineThree.addView(textView); break;
+                        }
+                        bottomMenu.numberOfTools++;
+                    } else {
+                        bottomMenu.container.addView(textView);
+                    }
+
+                    displayedFilters.add(new DisplayedFilter(textView, currentFilter));
+                }
+            }
+        }
+    }
+
     static public void closeMenus(){
         for (BottomMenu bottomMenu:bottomMenus) {
             if (bottomMenu.parent == null) {
@@ -211,11 +269,10 @@ public class BottomMenu {
         for (DisplayedFilter displayedFilter:displayedFilters) {
             displayedFilter.textView.setTextColor(Settings.COLOR_TEXT);
             if (displayedFilter.filter.getFilterCategory() == Category.TOOL) {
-                Drawable drawable = ImageTools.getThemedIcon(MainActivity.ActivityContext, displayedFilter.filter.getIcon());
+                Drawable drawable = ImageTools.getThemedIcon(MainActivity.getAppContext(), displayedFilter.filter.getIcon());
                 displayedFilter.textView.setCompoundDrawablePadding(25);
                 displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
             }
         }
     }
-
 }
