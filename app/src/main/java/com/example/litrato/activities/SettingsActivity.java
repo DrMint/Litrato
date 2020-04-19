@@ -36,6 +36,10 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView miniatureDesc;
     private Spinner miniatureSpinner;
 
+    private TextView saveOriginalResolutionTitle;
+    private TextView saveOriginalResolutionDesc;
+    private Switch saveOriginalResolutionSwitch;
+
     private ImageButton returnButton;
 
     private String[] importedBmpArray = new String[] {
@@ -64,6 +68,10 @@ public class SettingsActivity extends AppCompatActivity {
         miniatureTitle = findViewById(R.id.miniatureTitle);
         miniatureDesc = findViewById(R.id.miniatureDesc);
         miniatureSpinner = findViewById(R.id.miniatureSpinner);
+
+        saveOriginalResolutionTitle = findViewById(R.id.saveOriginalResolutionTitle);
+        saveOriginalResolutionDesc = findViewById(R.id.saveOriginalResolutionDesc);
+        saveOriginalResolutionSwitch = findViewById(R.id.saveOriginalResolutionSwitch);
 
 
 
@@ -97,6 +105,8 @@ public class SettingsActivity extends AppCompatActivity {
             index++;
         }
 
+        saveOriginalResolutionSwitch.setChecked(PreferenceManager.getBoolean(getApplicationContext(), Preference.SAVE_ORIGINAL_RESOLUTION));
+
 
     }
 
@@ -122,6 +132,10 @@ public class SettingsActivity extends AppCompatActivity {
         miniatureTitle.setTextColor(Settings.COLOR_TEXT);
         miniatureDesc.setTextColor(Settings.COLOR_TEXT);
 
+        saveOriginalResolutionTitle.setTextColor(Settings.COLOR_TEXT);
+        saveOriginalResolutionDesc.setTextColor(Settings.COLOR_TEXT);
+        saveOriginalResolutionSwitch.setTextColor(Settings.COLOR_TEXT);
+
         ColorStateList thumbStates = new ColorStateList(
                 new int[][]{
                         new int[]{-android.R.attr.state_enabled},
@@ -135,6 +149,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
         );
         darkModeSwitch.setThumbTintList(thumbStates);
+        saveOriginalResolutionSwitch.setThumbTintList(thumbStates);
 
         importedBmpSpinner.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -172,6 +187,7 @@ public class SettingsActivity extends AppCompatActivity {
                 PreferenceManager.setBoolean(getApplicationContext(), Preference.DARK_MODE, darkModeSwitch.isChecked());
                 PreferenceManager.setInt(getApplicationContext(), Preference.IMPORTED_BMP_SIZE, Integer.parseInt(importedBmpSpinner.getSelectedItem().toString()));
                 PreferenceManager.setInt(getApplicationContext(), Preference.MINIATURE_BMP_SIZE, Integer.parseInt(miniatureSpinner.getSelectedItem().toString()));
+                PreferenceManager.setBoolean(getApplicationContext(), Preference.SAVE_ORIGINAL_RESOLUTION, saveOriginalResolutionSwitch.isChecked());
                 finish();
             }
         });

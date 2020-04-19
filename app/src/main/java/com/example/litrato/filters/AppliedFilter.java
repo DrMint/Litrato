@@ -2,9 +2,11 @@ package com.example.litrato.filters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
+import com.example.litrato.tools.PointPercentage;
 
 public class AppliedFilter {
     private final Filter filter;
@@ -13,10 +15,10 @@ public class AppliedFilter {
     private final float seekBar;
     private final float seekBar2;
     private final boolean switch1;
-    private final Point touchDown;
-    private final Point touchUp;
+    private final PointPercentage touchDown;
+    private final PointPercentage touchUp;
 
-    public AppliedFilter(Filter filter, Bitmap maskBmp, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+    public AppliedFilter(Filter filter, Bitmap maskBmp, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, PointPercentage touchDown, PointPercentage touchUp) {
         this.filter = filter;
         this.maskBmp = maskBmp;
         this.colorSeekHue = colorSeekHue;
@@ -28,17 +30,24 @@ public class AppliedFilter {
     }
 
     public AppliedFilter(Filter filter){
-        this(filter, null, 0, filter.seekBar1Set, filter.seekBar2Set, filter.switch1Default,  new Point(0,0), new Point(0,0));
+        this(filter, null, 0, filter.seekBar1Set, filter.seekBar2Set, filter.switch1Default,  new PointPercentage(0,0), new PointPercentage(0,0));
     }
 
     public String getName() {return filter.getName();}
 
     public Bitmap apply(Bitmap bmp, Context context) {
 
+        Point a = null;
+        Point b = null;
+        if (touchDown != null) {
+            a = new Point(touchDown, bmp);
+            b = new Point(touchUp, bmp);
+        }
+
         // This only works because we never use a maskBmp and return the filtered image in filter.apply
         if (maskBmp == null) {
 
-            return filter.apply(bmp, null, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+            return filter.apply(bmp, null, context, colorSeekHue, seekBar, seekBar2, switch1, a, b);
 
         } else {
 
@@ -53,7 +62,7 @@ public class AppliedFilter {
             Bitmap originalImageMasked = ImageTools.bitmapClone(bmp);
             FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, BlendType.MULTIPLY);
 
-            filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, touchDown, touchUp);
+            filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, a, b);
 
             FilterFunction.applyTexture(bmp, maskBmp,BlendType.MULTIPLY);
             FilterFunction.applyTexture(bmp, originalImageMasked, BlendType.ADD);

@@ -11,47 +11,41 @@ import android.graphics.Bitmap;
  * @version 1.0
  * @since   2020-31-01
  */
-public class Point {
+public class PointPercentage {
 
     /**
-     * Coordinates on the x axis.
+     * Coordinates on the x axis in %.
      */
-    public int x = 0;
+    public float x = 0;
 
     /**
-     * Coordinates on the y axis.
+     * Coordinates on the y axis in %.
      */
-    public int y = 0;
+    public float y = 0;
 
     /**
-     * Constructor using two coordinates.
-     * @param x the coordinates on the x axis.
-     * @param y the coordinates on the y axis.
+     * Constructor using floating coordinates.
+     * @param x the coordinates on the x axis in %.
+     * @param y the coordinates on the y axis in %.
      */
-    public Point(int x, int y) {
+    public PointPercentage(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
     /**
-     * Constructor using floating coordinates. They are converted to int.
-     * @param x the coordinates on the x axis.
-     * @param y the coordinates on the y axis.
+     * Constructor using floating coordinates.
+     *
      */
-    public Point(float x, float y) {
-        this.x = (int) x;
-        this.y = (int) y;
-    }
-
-    public Point(PointPercentage pp, Bitmap bmp) {
-        this.x = (int) (pp.x * bmp.getWidth());
-        this.y = (int) (pp.y * bmp.getHeight());
+    public PointPercentage(Point p, Bitmap bmp) {
+        this.x = (float) p.x / bmp.getWidth();
+        this.y = (float) p.y / bmp.getHeight();
     }
 
     /**
      * Default constructor. If no coordinates are given, the point is (0, 0)
      */
-    public Point() {}
+    public PointPercentage() {}
 
     /**
      * Translates this point coordinates according to the param x and y.
@@ -99,7 +93,7 @@ public class Point {
      * @return true if both points are equal, false otherwise.
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean isEquals(Point other) {
+    public boolean isEquals(PointPercentage other) {
         return isEquals(other.x, other.y);
     }
 
@@ -109,11 +103,8 @@ public class Point {
      * @param y the coordinates on the y axis.
      * @return true if both points are equal, false otherwise.
      */
-    public boolean isEquals(int x, int y) {
+    public boolean isEquals(float x, float y) {
         return this.x == x && this.y == y;
     }
 
-    public int distance(Point y){
-        return (int)Math.sqrt((this.x+y.x)*(this.x+y.x)+(this.y+y.y)*(this.y+y.y));
-    }
 }

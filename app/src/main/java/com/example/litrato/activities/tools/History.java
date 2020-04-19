@@ -8,11 +8,11 @@ import com.example.litrato.tools.ImageTools;
 
 import java.util.ArrayList;
 
-public class Historic {
+public class History {
 
     private ArrayList<AppliedFilter> historic;
 
-    public Historic() {
+    public History() {
         this.historic = new ArrayList<>();
     }
     public AppliedFilter get(int index) {return historic.get(index);}

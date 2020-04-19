@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -46,7 +47,7 @@ import android.widget.TextView;
 
 import com.example.litrato.BuildConfig;
 import com.example.litrato.activities.ui.DisplayedFilter;
-import com.example.litrato.activities.tools.Historic;
+import com.example.litrato.activities.tools.History;
 import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;
 import com.example.litrato.R;
@@ -63,6 +64,7 @@ import com.example.litrato.filters.FilterPreviewInterface;
 import com.example.litrato.tools.FileInputOutput;
 import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
+import com.example.litrato.tools.PointPercentage;
 import com.google.android.material.snackbar.Snackbar;
 
 /*TODO:
@@ -116,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final List<DisplayedFilter> displayedFilters = new ArrayList<>();
 
-    private Historic historic = new Historic();
+    private History history = new History();
 
     private Filter filterRotation;
 
@@ -285,14 +287,20 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.action_save: {
-                if (FileInputOutput.saveImageToGallery(currentImage, MainActivity.this)) {
+                Bitmap saveImage = currentImage;
+                if (PreferenceManager.getBoolean(getApplicationContext(), Preference.SAVE_ORIGINAL_RESOLUTION) && FileInputOutput.getLastImportedImagePath() != null) {
+                    Bitmap fullSize = FileInputOutput.getBitmap(FileInputOutput.getLastImportedImagePath());
+                    fullSize = history.goUntilFilter(fullSize, history.size() - 1, getApplicationContext());
+                    saveImage = fullSize;
+                }
+                if (FileInputOutput.saveImageToGallery(saveImage, MainActivity.this)) {
                     Snackbar.make(toolsBar, getString(R.string.savingMessage), Snackbar.LENGTH_SHORT).show();
                 }
                 break;
             }
 
             case R.id.action_rotate_left: {
-                AppliedFilter lastUsedFilter =  new AppliedFilter(filterRotation,null, 0, 270, 0, false, new Point(), new Point());
+                AppliedFilter lastUsedFilter =  new AppliedFilter(filterRotation,null, 0, 270, 0, false, new PointPercentage(), new PointPercentage());
                 currentImage = lastUsedFilter.apply(currentImage, getApplicationContext());
                 addToHistory(lastUsedFilter);
                 refreshImageView();
@@ -300,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             case R.id.action_rotate_right: {
-                AppliedFilter lastUsedFilter =  new AppliedFilter(filterRotation,null, 0, 90, 0, false, new Point(), new Point());
+                AppliedFilter lastUsedFilter =  new AppliedFilter(filterRotation,null, 0, 90, 0, false, new PointPercentage(), new PointPercentage());
                 currentImage = lastUsedFilter.apply(currentImage, getApplicationContext());
                 addToHistory(lastUsedFilter);
                 refreshImageView();
@@ -478,7 +486,7 @@ public class MainActivity extends AppCompatActivity {
         originalImage = bmp;
         currentImage = ImageTools.bitmapClone(originalImage);
 
-        historic.clear();
+        history.clear();
         addToHistory(new AppliedFilter(new Filter("Original")));
         refreshImageView();
     }
@@ -660,13 +668,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 historyConfirmButton.setEnabled(progress != seekBar.getMax());
-                historyTitle.setText(historic.get(progress).getName());
+                historyTitle.setText(history.get(progress).getName());
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (seekBar.getProgress() != seekBar.getMax()) {
-                    Bitmap tmp = historic.goUntilFilter(originalImage, historySeekBar.getProgress(), getApplicationContext());
+                    Bitmap tmp = history.goUntilFilter(originalImage, historySeekBar.getProgress(), getApplicationContext());
                     layoutImageView.setImageBitmap(tmp);
                 }
                 else{
@@ -679,9 +687,9 @@ public class MainActivity extends AppCompatActivity {
         historyConfirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentImage = historic.goUntilFilter(originalImage, historySeekBar.getProgress(), getApplicationContext());
-                historic.removeUntil(historySeekBar.getProgress());
-                historySeekBar.setMax(historic.size() - 1);
+                currentImage = history.goUntilFilter(originalImage, historySeekBar.getProgress(), getApplicationContext());
+                history.removeUntil(historySeekBar.getProgress());
+                historySeekBar.setMax(history.size() - 1);
                 closeHistory();
                 refreshImageView();
             }
@@ -1288,8 +1296,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addToHistory(AppliedFilter appliedFilter) {
-        historic.addFilter(appliedFilter);
-        historySeekBar.setMax(historic.size() - 1);
+        history.addFilter(appliedFilter);
+        historySeekBar.setMax(history.size() - 1);
         historySeekBar.setProgress(historySeekBar.getMax());
     }
 

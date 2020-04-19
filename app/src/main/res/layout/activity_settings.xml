@@ -41,6 +41,15 @@
         app:layout_constraintTop_toBottomOf="@+id/exifTitle"
         tools:checked="true" />
 
+    <Switch
+        android:id="@+id/saveOriginalResolutionSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/saveOriginalResolutionTitle"
+        tools:checked="true" />
+
     <TextView
         android:id="@+id/importedBmpTitle"
         android:layout_width="wrap_content"
@@ -81,6 +90,16 @@
         app:layout_constraintTop_toBottomOf="@+id/importedBmpDesc" />
 
     <TextView
+        android:id="@+id/saveOriginalResolutionTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Save with the original resolution"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/miniatureDesc"
+        app:layout_constraintTop_toBottomOf="@+id/miniatureDesc" />
+
+    <TextView
         android:id="@+id/miniatureDesc"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
@@ -88,6 +107,15 @@
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/miniatureTitle"
         app:layout_constraintTop_toBottomOf="@+id/miniatureTitle" />
+
+    <TextView
+        android:id="@+id/saveOriginalResolutionDesc"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Instead of saving the image in its loaded resolution, saves it in its original resolution. Warning: it can increase the saving process duration."
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/saveOriginalResolutionTitle"
+        app:layout_constraintTop_toBottomOf="@+id/saveOriginalResolutionTitle" />
 
     <Spinner
         android:id="@+id/miniatureSpinner"

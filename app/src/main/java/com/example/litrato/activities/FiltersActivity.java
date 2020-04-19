@@ -39,6 +39,7 @@ import com.example.litrato.filters.FilterFunction;
 import com.example.litrato.filters.FilterPreviewInterface;
 import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
+import com.example.litrato.tools.PointPercentage;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -629,6 +630,13 @@ public class FiltersActivity extends AppCompatActivity {
                 if (originalImage != null) {
                     applyFilter();
 
+                    PointPercentage touchDown = null;
+                    PointPercentage touchCurrent = null;
+                    if (imageTouchDown != null) {
+                        touchDown = new PointPercentage(imageTouchDown, originalImage);
+                        touchCurrent = new PointPercentage(imageTouchCurrent, originalImage);
+                    }
+
                     if (shouldUseMask) {
                         activityAppliedFilter = new AppliedFilter(
                                 selectedFilter,
@@ -637,8 +645,8 @@ public class FiltersActivity extends AppCompatActivity {
                                 layoutSeekBar1.getProgress(),
                                 layoutSeekBar2.getProgress(),
                                 layoutSwitch1.isChecked(),
-                                imageTouchDown,
-                                imageTouchCurrent
+                                touchDown,
+                                touchCurrent
                         );
                     } else {
                         activityAppliedFilter = new AppliedFilter(
@@ -648,8 +656,8 @@ public class FiltersActivity extends AppCompatActivity {
                                 layoutSeekBar1.getProgress(),
                                 layoutSeekBar2.getProgress(),
                                 layoutSwitch1.isChecked(),
-                                imageTouchDown,
-                                imageTouchCurrent
+                                touchDown,
+                                touchCurrent
                         );
                     }
 
