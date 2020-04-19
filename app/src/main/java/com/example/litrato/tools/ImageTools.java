@@ -193,6 +193,7 @@ public class ImageTools {
     public static void forceRectangleRatio(Bitmap bmp, Point a, Point b) {
 
         // Negative values are not acceptable.
+        if (a == null || b == null) return;
         if (a.x < 0 || a.y < 0 ||b.x < 0 ||b.y < 0) return;
 
         int rectangleWidth = Math.abs(a.x - b.x);
@@ -204,9 +205,17 @@ public class ImageTools {
         boolean rectangleWiderThenBmp = rectangleRatio > bmpRatio;
 
         if (rectangleWiderThenBmp) {
-            b.x =  a.x + (int) ((b.x - a.x) * bmpRatio);
+            if (b.x > a.x) {
+                b.x =  a.x + (int) Math.abs((b.y - a.y) * bmpRatio);
+            } else {
+                b.x =  a.x + (int) - Math.abs((b.y - a.y) * bmpRatio);
+            }
         } else {
-            b.y =  a.y + (int) ((b.x - a.x) / bmpRatio);
+            if (b.y > a.y) {
+                b.y =  a.y + (int) Math.abs((b.x - a.x) / bmpRatio);
+            } else {
+                b.y =  a.y + (int) - Math.abs((b.x - a.x) / bmpRatio);
+            }
         }
 
     }

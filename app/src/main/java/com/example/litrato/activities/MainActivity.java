@@ -45,7 +45,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.example.litrato.BuildConfig;
-import com.example.litrato.activities.tools.DisplayedFilter;
+import com.example.litrato.activities.ui.DisplayedFilter;
 import com.example.litrato.activities.tools.Historic;
 import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;

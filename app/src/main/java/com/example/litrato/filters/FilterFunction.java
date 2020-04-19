@@ -506,14 +506,16 @@ public class FilterFunction {
      */
     public static Bitmap crop (final Bitmap bmp, final Point a, final Point b){
 
-        if (!a.isEquals(b)) {
-            int width = Math.abs(a.x - b.x);
-            int height = Math.abs(a.y - b.y);
+        if (a != null && b != null) {
+            if (!a.isEquals(b)) {
+                int width = Math.abs(a.x - b.x);
+                int height = Math.abs(a.y - b.y);
 
-            int startX = Math.min(a.x, b.x);
-            int startY = Math.min(a.y, b.y);
+                int startX = Math.min(a.x, b.x);
+                int startY = Math.min(a.y, b.y);
 
-            return Bitmap.createBitmap(bmp, startX, startY, width, height);
+                return Bitmap.createBitmap(bmp, startX, startY, width, height);
+            }
         }
         return bmp;
     }

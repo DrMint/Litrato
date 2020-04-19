@@ -10,13 +10,14 @@ public class PreferenceManager {
     private static final boolean DEFAULT_DARK_MODE = true;
     private static final int DEFAULT_IMPORTED_BMP_SIZE = 1000;
     private static final int DEFAULT_MINIATURE_BMP_SIZE = 100;
+    private static final boolean DEFAULT_SAVE_ORIGINAL_RESOLUTION = true;
 
     public static boolean getBoolean(Context context, Preference pref) {
         SharedPreferences sp = context.getSharedPreferences(PREFERENCE_NAME, 0);
 
-        //noinspection SwitchStatementWithTooFewBranches
         switch (pref) {
             case DARK_MODE: return sp.getBoolean(pref.toString(), DEFAULT_DARK_MODE);
+            case SAVE_ORIGINAL_RESOLUTION: return sp.getBoolean(pref.toString(), DEFAULT_SAVE_ORIGINAL_RESOLUTION);
             default: return false;
         }
     }

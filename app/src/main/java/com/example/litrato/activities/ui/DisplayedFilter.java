@@ -1,4 +1,4 @@
-package com.example.litrato.activities.tools;
+package com.example.litrato.activities.ui;
 
 import android.widget.TextView;
 
