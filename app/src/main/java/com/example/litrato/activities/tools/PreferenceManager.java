@@ -11,7 +11,7 @@ public class PreferenceManager {
     private static final int DEFAULT_IMPORTED_BMP_SIZE = 1000;
     private static final int DEFAULT_MINIATURE_BMP_SIZE = 100;
     private static final boolean DEFAULT_SAVE_ORIGINAL_RESOLUTION = true;
-    private static final boolean DEFAULT_OPEN_HISTOGRAM_BY_DEFAULT = true;
+    private static final boolean DEFAULT_OPEN_HISTOGRAM_BY_DEFAULT = false;
 
     public static boolean getBoolean(Context context, Preference pref) {
         SharedPreferences sp = context.getSharedPreferences(PREFERENCE_NAME, 0);

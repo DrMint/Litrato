@@ -1,17 +1,12 @@
 package com.example.litrato.activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -21,7 +16,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -32,8 +26,6 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import android.widget.RelativeLayout;
@@ -42,7 +34,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.example.litrato.BuildConfig;
+import com.example.litrato.activities.ui.BottomMenu;
 import com.example.litrato.activities.ui.DisplayedFilter;
 import com.example.litrato.activities.tools.History;
 import com.example.litrato.activities.tools.Preference;
@@ -105,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
      */
     static Bitmap subActivityMaskBmp;
 
+    public static Context ActivityContext;
+
     // Numerous set values for REQUESTS. They have to differ from one another that's all.
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
@@ -125,19 +119,10 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap currentImage;
 
     /**
-     * A list of all filters, associated with their corresponding TextView (their visual
-     * representation on the UI).
-     */
-    private final List<DisplayedFilter> displayedFilters = new ArrayList<>();
-
-    /**
      * The object history is used to save all prior image state and revert to any of them when
      * the user so desire.
      */
     private History history = new History();
-
-
-    private final Boolean[] hasChanged = {true, true, true, true, true, true};
 
     private ImageViewZoomScroll layoutImageView;
     private Toolbar     layoutToolbar;
@@ -167,9 +152,6 @@ public class MainActivity extends AppCompatActivity {
     private TableRow    toolsLineTwo;
     private TableRow    toolsLineThree;
 
-    private Typeface submenuUnselected;
-    private Typeface submenuSelected;
-
     private int numberOfTools;
 
     @Override
@@ -180,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
 
         layoutToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(layoutToolbar);
+
+        ActivityContext = getApplicationContext();
 
         // Sets all the layout shortcuts.
         layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
@@ -215,13 +199,7 @@ public class MainActivity extends AppCompatActivity {
         toolsLineTwo            = findViewById(R.id.toolsLineTwo);
         toolsLineThree          = findViewById(R.id.toolsLineThree);
 
-        submenuSelected = colorButton.getTypeface();
-        submenuUnselected = fancyButton.getTypeface();
 
-        // If this is the first launch, compiles the RenderScript's functions
-        if (appGetFirstTimeRun() != 0) {
-            initializeRenderScriptCaching();
-        }
 
         FileInputOutput.askPermissionToReadWriteFiles(this);
 
@@ -232,6 +210,19 @@ public class MainActivity extends AppCompatActivity {
         // Initialize all the different listeners.
         // The filters / tools / presets must already be ready
         initializeListener();
+
+        new BottomMenu(presetsButton, presetsBar, Category.PRESET);
+        new BottomMenu(toolsButton, toolsBar, Category.TOOL);
+        BottomMenu myMenu = new BottomMenu(filtersButton, filtersBar, null);
+
+        new BottomMenu(colorButton, colorBar, Category.COLOR, myMenu);
+        new BottomMenu(fancyButton, fancyBar, Category.FANCY, myMenu);
+        new BottomMenu(blurButton, blurBar, Category.BLUR, myMenu);
+        new BottomMenu(contourButton, contourBar, Category.CONTOUR, myMenu);
+        BottomMenu.closeMenus();
+
+        BottomMenu.submenuSelected = colorButton.getTypeface();
+        BottomMenu.submenuUnselected = fancyButton.getTypeface();
 
         // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
@@ -258,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
                 if (ViewTools.isVisible(historyBar)) {
                     closeHistory();
                 } else {
-                    closeMenus();
+                    BottomMenu.closeMenus();
                     historyBar.setVisibility(View.VISIBLE);
                 }
                 break;
@@ -392,36 +383,6 @@ public class MainActivity extends AppCompatActivity {
         historyTitle.setTextColor(Settings.COLOR_TEXT);
 
         Objects.requireNonNull(getSupportActionBar()).setTitle("");
-        colorBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        fancyBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        blurBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        contourBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        toolsBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        presetsBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        filtersBar.setBackgroundColor(Settings.COLOR_SELECTED);
-        buttonBar.setBackgroundColor(Settings.COLOR_SELECTED);
-
-        presetsButton.setBackgroundColor(Settings.COLOR_GREY);
-        toolsButton.setBackgroundColor(Settings.COLOR_GREY);
-        filtersButton.setBackgroundColor(Settings.COLOR_GREY);
-
-        presetsButton.setTextColor(Settings.COLOR_TEXT);
-        toolsButton.setTextColor(Settings.COLOR_TEXT);
-        filtersButton.setTextColor(Settings.COLOR_TEXT);
-
-        presetsButton.setTypeface(submenuUnselected);
-        toolsButton.setTypeface(submenuUnselected);
-        filtersButton.setTypeface(submenuUnselected);
-
-        colorButton.setTextColor(Settings.COLOR_TEXT);
-        fancyButton.setTextColor(Settings.COLOR_TEXT);
-        blurButton.setTextColor(Settings.COLOR_TEXT);
-        contourButton.setTextColor(Settings.COLOR_TEXT);
-
-        colorButton.setBackgroundColor(Settings.COLOR_SELECTED);
-        fancyButton.setBackgroundColor(Settings.COLOR_SELECTED);
-        blurButton.setBackgroundColor(Settings.COLOR_SELECTED);
-        contourButton.setBackgroundColor(Settings.COLOR_SELECTED);
 
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -438,21 +399,14 @@ public class MainActivity extends AppCompatActivity {
             layoutToolbar.setPopupTheme(View.SYSTEM_UI_FLAG_VISIBLE);
         }
 
-        for (DisplayedFilter displayedFilter:displayedFilters) {
-            displayedFilter.textView.setTextColor(Settings.COLOR_TEXT);
-            if (displayedFilter.filter.getFilterCategory() == Category.TOOL) {
-                Drawable drawable = ImageTools.getThemedIcon(getApplicationContext(), displayedFilter.filter.getIcon());
-                displayedFilter.textView.setCompoundDrawablePadding(25);
-                displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
-            }
-        }
-
         layoutToolbar.getMenu().getItem(0).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.open));
         layoutToolbar.getMenu().getItem(1).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.history));
         layoutToolbar.getMenu().getItem(2).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.save));
         layoutToolbar.getMenu().getItem(4).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.rotateleft));
         layoutToolbar.getMenu().getItem(5).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.rotateright));
         layoutToolbar.setOverflowIcon(ImageTools.getThemedIcon(this, R.drawable.overflow));
+
+        BottomMenu.applyColorTheme();
 
     }
 
@@ -463,22 +417,22 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
 
             case CONFIG_REQUEST:
-                hasChanged[0] = true;
-                hasChanged[2] = true;
-                hasChanged[3] = true;
-                hasChanged[4] = true;
-                hasChanged[5] = true;
+
+                BottomMenu.invalidateMiniatures();
                 closeHistory();
-                closeMenus();
+                BottomMenu.closeMenus();
                 applyColorTheme();
                 break;
 
             case PICK_IMAGE_REQUEST:
 
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-                    setBitmap(FileInputOutput.getBitmap(data.getData()));
+                    setBitmap(FileInputOutput.getBitmap(data.getData(), getApplicationContext()));
                     layoutToolbar.getMenu().getItem(7).setEnabled(true);
+                } else {
+                    int x = 0/0;
                 }
+
 
                 break;
 
@@ -495,7 +449,7 @@ public class MainActivity extends AppCompatActivity {
                     currentImage = ImageTools.bitmapClone(result);
                     addToHistory(FiltersActivity.activityAppliedFilter);
                     refreshImageView();
-                    closeMenus();
+                    BottomMenu.closeMenus();
                 }
                 closeHistory();
                 break;
@@ -533,14 +487,9 @@ public class MainActivity extends AppCompatActivity {
     private void refreshImageView() {
 
         layoutImageView.setImageBitmap(currentImage);
-
-        hasChanged[0] = true;
-        hasChanged[2] = true;
-        hasChanged[3] = true;
-        hasChanged[4] = true;
-        hasChanged[5] = true;
-
-        generateMiniatureForOpenedMenu();
+        BottomMenu.currentImage = currentImage;
+        BottomMenu.invalidateMiniatures();
+        //generateMiniatureForOpenedMenu();
     }
 
     private void initializeListener() {
@@ -606,98 +555,16 @@ public class MainActivity extends AppCompatActivity {
         // The default behavior of imageView.
         final View.OnTouchListener defaultImageViewTouchListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
-                closeMenus();
+                BottomMenu.closeMenus();
                 if (ViewTools.isVisible(historyBar)) closeHistory();
                 myScaleDetector.onTouchEvent(event);
                 myGestureDetector.onTouchEvent(event);
-                //layoutImageView.refresh();
                 v.performClick();
                 return true;
             }
         };
         layoutImageView.setOnTouchListener(defaultImageViewTouchListener);
 
-        presetsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean visible = ViewTools.isVisible(presetsBar);
-                closeMenus();
-                if (!visible) {
-                    v.setBackgroundColor(Settings.COLOR_SELECTED);
-                    presetsButton.setTypeface(submenuSelected);
-                    presetsBar.setVisibility(View.VISIBLE);
-                    generateMiniatureForOpenedMenu();
-                }
-            }
-        });
-
-        toolsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean visible = ViewTools.isVisible(toolsBar);
-                closeMenus();
-                if (!visible) {
-                    v.setBackgroundColor(Settings.COLOR_SELECTED);
-                    toolsButton.setTypeface(submenuSelected);
-                    toolsBar.setVisibility(View.VISIBLE);
-                    generateMiniatureForOpenedMenu();
-                }
-            }
-        });
-
-        filtersButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean visible = ViewTools.isVisible(filtersBar);
-                closeMenus();
-                if (!visible) {
-                    v.setBackgroundColor(Settings.COLOR_SELECTED);
-                    filtersButton.setTypeface(submenuSelected);
-                    filtersBar.setVisibility(View.VISIBLE);
-                    generateMiniatureForOpenedMenu();
-                }
-            }
-        });
-
-        colorButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                closeSubMenus();
-                colorButton.setTypeface(submenuSelected);
-                colorBar.setVisibility(View.VISIBLE);
-                generateMiniatureForOpenedMenu();
-            }
-        });
-
-        fancyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                closeSubMenus();
-                fancyButton.setTypeface(submenuSelected);
-                fancyBar.setVisibility(View.VISIBLE);
-                generateMiniatureForOpenedMenu();
-            }
-        });
-
-        blurButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                closeSubMenus();
-                blurButton.setTypeface(submenuSelected);
-                blurBar.setVisibility(View.VISIBLE);
-                generateMiniatureForOpenedMenu();
-            }
-        });
-
-        contourButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                closeSubMenus();
-                contourButton.setTypeface(submenuSelected);
-                contourBar.setVisibility(View.VISIBLE);
-                generateMiniatureForOpenedMenu();
-            }
-        });
         initializeMenus();
 
         historySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -731,20 +598,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        // We leave those because if no onClickListener is set, there are permeable to touch events.
-        // That means that clicking on the their background will trigger an event to the object behind.
-        presetsBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
-        filtersBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
-        toolsBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
-        contourBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
-        fancyBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
-        blurBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
-        historyBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
     }
-
-
-
 
     /**
      * Applies a filter to beforeLastFilterImage and refreshes ImageView.
@@ -770,103 +624,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * Refreshes/Generates the miniatures of the currently opened.
-     * If no menu is opened, no image is generated.
-     */
-    private void generateMiniatureForOpenedMenu() {
-        if (ViewTools.isVisible(presetsBar) && hasChanged[0]) {
-            generateMiniatures(Category.PRESET);
-            hasChanged[0] = false;
-        } else if (ViewTools.isVisible(toolsBar) && hasChanged[1]) {
-            generateMiniatures(Category.TOOL);
-            hasChanged[1] = false;
-        } else if (ViewTools.isVisible(filtersBar)) {
-            if (ViewTools.isVisible(colorBar) && hasChanged[2]) {
-                generateMiniatures(Category.COLOR);
-                hasChanged[2] = false;
-            } else if (ViewTools.isVisible(fancyBar) && hasChanged[3]) {
-                generateMiniatures(Category.FANCY);
-                hasChanged[3] = false;
-            } else if (ViewTools.isVisible(blurBar) && hasChanged[4]) {
-                generateMiniatures(Category.BLUR);
-                hasChanged[4] = false;
-            } else if (ViewTools.isVisible(contourBar) && hasChanged[5]) {
-                generateMiniatures(Category.CONTOUR);
-                hasChanged[5] = false;
-            }
-        }
-    }
-
-    private void generateMiniatures(Category onlyThisCategory) {
-        Bitmap resizedMiniature = ImageTools.toSquare(
-                currentImage,
-                PreferenceManager.getInt(getApplicationContext(), Preference.MINIATURE_BMP_SIZE)
-        );
-
-        for (DisplayedFilter displayedFilter:displayedFilters) {
-
-            // Only generate the miniature if the displayedFilter of this category
-            if (displayedFilter.filter.getFilterCategory() == onlyThisCategory) {
-
-                Drawable drawable;
-                if(onlyThisCategory != Category.TOOL) {
-                    Bitmap filteredMiniature =  ImageTools.bitmapClone(resizedMiniature);
-
-                    // Apply the filter to the miniature
-                    Bitmap result = displayedFilter.filter.apply(filteredMiniature, getApplicationContext());
-                    if (result != null) filteredMiniature = result;
-
-                    // Add the image on top of the text
-                    drawable = new BitmapDrawable(getResources(), filteredMiniature);
-                    drawable.setBounds(0, 0, Settings.MINIATURE_DISPLAYED_SIZE, Settings.MINIATURE_DISPLAYED_SIZE);
-
-                    displayedFilter.textView.setCompoundDrawablePadding(25);
-                    displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
-                }
-            }
-        }
-    }
-
-    private TextView generateATextView(Filter filter) {
-        TextView textView;
-        textView = new TextView(this);
-        textView.setClickable(true);
-        textView.setText(filter.getName());
-        textView.setAllCaps(true);
-        textView.setMaxLines(2);
-        textView.setHorizontallyScrolling(false);
-        textView.setTextColor(Settings.COLOR_TEXT);
-        textView.setTextSize(12);
-        textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setBackgroundColor(Color.TRANSPARENT);
-
-        if (filter.getFilterCategory() == Category.TOOL) {
-
-            textView.setMaxWidth(Settings.TOOL_DISPLAYED_SIZE);
-            textView.setHeight((int) (Settings.TOOL_DISPLAYED_SIZE * 1.8));
-            TableRow.LayoutParams params = new TableRow.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT,4);
-            params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
-            textView.setLayoutParams(params);
-
-        } else {
-
-            textView.setMaxWidth(Settings.MINIATURE_DISPLAYED_SIZE);
-            textView.setHeight((int) (Settings.MINIATURE_DISPLAYED_SIZE * 1.4));
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
-            params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
-            textView.setLayoutParams(params);
-
-        }
-        return textView;
-    }
-
     private void initializeMenus(){
 
         TextView textView;
 
         for (final Filter currentFilter:Filter.filters) {
-            textView = generateATextView(currentFilter);
+            textView = BottomMenu.generateATextView(currentFilter, getApplicationContext());
 
             // Add the filter to its right category
             switch (currentFilter.getFilterCategory()){
@@ -888,7 +651,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-            displayedFilters.add(new DisplayedFilter(textView, currentFilter));
+            BottomMenu.displayedFilters.add(new DisplayedFilter(textView, currentFilter));
         }
     }
 
@@ -901,21 +664,6 @@ public class MainActivity extends AppCompatActivity {
         numberOfTools++;
     }
 
-    private void closeMenus(){
-        presetsButton.setTypeface(submenuUnselected);
-        toolsButton.setTypeface(submenuUnselected);
-        filtersButton.setTypeface(submenuUnselected);
-
-        presetsButton.setBackgroundColor(Settings.COLOR_GREY);
-        toolsButton.setBackgroundColor(Settings.COLOR_GREY);
-        filtersButton.setBackgroundColor(Settings.COLOR_GREY);
-
-        presetsBar.setVisibility(View.GONE);
-        toolsBar.setVisibility(View.GONE);
-        filtersBar.setVisibility(View.GONE);
-        closeHistory();
-    }
-
     private void closeHistory() {
         historyBar.setVisibility(View.GONE);
         if (historySeekBar.getProgress() != historySeekBar.getMax()) {
@@ -924,52 +672,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void closeSubMenus(){
-        colorButton.setTypeface(submenuUnselected);
-        fancyButton.setTypeface(submenuUnselected);
-        blurButton.setTypeface(submenuUnselected);
-        contourButton.setTypeface(submenuUnselected);
-
-        colorBar.setVisibility(View.GONE);
-        fancyBar.setVisibility(View.GONE);
-        blurBar.setVisibility(View.GONE);
-        contourBar.setVisibility(View.GONE);
-    }
-
     private void openFiltersActivity(Filter filter, Bitmap bmp){
         subActivityFilter = filter;
         subActivityBitmap = bmp;
         Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
         intent.putExtra(Settings.ACTIVITY_EXTRA_CALLER, this.getClass().getName());
         startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
-    }
-
-    private void initializeRenderScriptCaching() {
-        Bitmap dummyBmp = ImageTools.bitmapCreate(10,10);
-        for (Filter filter:Filter.filters) {
-            if (filter.getFilterCategory() != Category.PRESET) {
-                filter.preview(dummyBmp, getApplicationContext());
-            }
-        }
-    }
-
-    private int appGetFirstTimeRun() {
-        //Check if App Start First Time
-        SharedPreferences appPreferences = getSharedPreferences("MyAPP", 0);
-        int appCurrentBuildVersion = BuildConfig.VERSION_CODE;
-        int appLastBuildVersion = appPreferences.getInt("app_first_time", 0);
-
-        if (appLastBuildVersion == appCurrentBuildVersion ) {
-            return 1; //It has being used already.
-
-        } else {
-            appPreferences.edit().putInt("app_first_time",
-                    appCurrentBuildVersion).apply();
-            if (appLastBuildVersion == 0) {
-                return 0; //Never used
-            } else {
-                return 2; //It has been used but not this version
-            }
-        }
     }
 }
