@@ -340,6 +340,6 @@ The following features will **likely** be added before 04/15/2020:
 - [X] Rotate the image at any degrees, which means that the image should also get cropped.
 - [X] The ability to crop the image.
 - [X] Save all state of the image. That way, we can have a "Filter History" and go back to any prior state.
-- [ ] An idea to keep the UI interactive while saving the image at its original resolution would be to work on a preview sized image, save all the filters applied, and then apply them again to the full size image when saving. It is okay for the user to wait a few seconds when saving, but not while using the UI.
+- [X] An idea to keep the UI interactive while saving the image at its original resolution would be to work on a preview sized image, save all the filters applied, and then apply them again to the full size image when saving. It is okay for the user to wait a few seconds when saving, but not while using the UI.
 
 
