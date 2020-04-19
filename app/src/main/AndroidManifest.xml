@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.retouchephoto">
+    package="com.example.litrato">
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -48,7 +48,7 @@
         </provider>
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.litrato.activities.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
@@ -61,21 +61,21 @@
         </activity>
 
         <activity
-            android:name=".FiltersActivity"
+            android:name="com.example.litrato.activities.FiltersActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
 
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.example.litrato.activities.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
 
         <activity
-            android:name=".ExifActivity"
+            android:name="com.example.litrato.activities.ExifActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"

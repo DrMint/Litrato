@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -25,17 +25,32 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.example.litrato.activities.tools.Preference;
+import com.example.litrato.activities.tools.PreferenceManager;
+import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.activities.ui.ImageViewZoomScroll;
+import com.example.litrato.R;
+import com.example.litrato.activities.ui.ViewTools;
+import com.example.litrato.filters.AppliedFilter;
+import com.example.litrato.filters.BlendType;
+import com.example.litrato.filters.Filter;
+import com.example.litrato.filters.FilterApplyInterface;
+import com.example.litrato.filters.FilterFunction;
+import com.example.litrato.filters.FilterPreviewInterface;
+import com.example.litrato.tools.ImageTools;
+import com.example.litrato.tools.Point;
+
 import java.util.Locale;
 import java.util.Objects;
 
 public class FiltersActivity extends AppCompatActivity {
 
+    static AppliedFilter activityAppliedFilter;
+    static Bitmap activityBitmap;
+
     static Filter subActivityFilter;
     static Bitmap subActivityBitmap;
     static Bitmap subMaskBmp;
-
-    static AppliedFilter activityAppliedFilter;
-    static Bitmap activityBitmap;
 
     private Bitmap originalImage;
     private Bitmap filteredImage;
@@ -54,7 +69,7 @@ public class FiltersActivity extends AppCompatActivity {
     private boolean pickBool = false;
     private boolean shouldUseMask = false;
 
-    private ImageViewZoomScrollWIP layoutImageView;
+    private ImageViewZoomScroll layoutImageView;
     private ImageButton layoutButtonApply;
     private ImageButton layoutCancel;
     private Button      layoutFilterMenuButton;
@@ -81,7 +96,7 @@ public class FiltersActivity extends AppCompatActivity {
         setContentView(R.layout.activity_filters);
 
         // Sets all the layout shortcuts.
-        layoutImageView         = new ImageViewZoomScrollWIP((ImageView) findViewById(R.id.imageView));
+        layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
         layoutButtonApply       = findViewById(R.id.applyButton);
         layoutCancel            = findViewById(R.id.cancelButton);
         layoutFilterMenuButton  = findViewById(R.id.filterNameButton);
@@ -165,7 +180,7 @@ public class FiltersActivity extends AppCompatActivity {
 
     private void applyColorTheme() {
 
-        Settings.setColorTheme(MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE));
+        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
 
         filterMenu.setBackgroundColor(Settings.COLOR_SELECTED);
         layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
@@ -216,7 +231,7 @@ public class FiltersActivity extends AppCompatActivity {
         window.setStatusBarColor(Settings.COLOR_BACKGROUND);
         window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
 
-        if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
+        if (!PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE)) {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         } else {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
@@ -422,7 +437,7 @@ public class FiltersActivity extends AppCompatActivity {
      * Display the histogram of filteredImage on layoutHistogram
      */
     private void refreshHistogram() {
-        if(MainActivity.isVisible(layoutHistogramView)) {
+        if(ViewTools.isVisible(layoutHistogramView)) {
             layoutHistogramView.setImageBitmap(ImageTools.generateHistogram(filteredImage));
         }
     }
@@ -452,7 +467,7 @@ public class FiltersActivity extends AppCompatActivity {
             public boolean onDoubleTap(MotionEvent e) {
 
                 // it it's zoomed
-                if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
+                if (layoutImageView.hasVerticalScroll() || layoutImageView.hasHorizontalScroll()) {
                 //if (layoutImageView.getZoom() != 1f) {
                     layoutImageView.reset();
                 } else {
@@ -535,7 +550,7 @@ public class FiltersActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (selectedFilter.allowFilterMenu) {
-                    if (!MainActivity.isVisible(filterMenu)) {
+                    if (!ViewTools.isVisible(filterMenu)) {
                         layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
                         filterMenu.setVisibility(View.VISIBLE);
                     } else {
@@ -741,7 +756,7 @@ public class FiltersActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                if (!MainActivity.isVisible(layoutHistogramView)) {
+                if (!ViewTools.isVisible(layoutHistogramView)) {
                     layoutHistogramView.setVisibility(View.VISIBLE);
                     refreshHistogram();
                 } else {

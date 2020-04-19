@@ -1,7 +1,6 @@
-package com.example.retouchephoto;
+package com.example.litrato.tools;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,16 +8,21 @@ import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
+import com.example.litrato.activities.tools.Preference;
+import com.example.litrato.activities.tools.PreferenceManager;
+import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.filters.FilterFunction;
+
 import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.blue;
 import static android.graphics.Color.green;
 import static android.graphics.Color.red;
 
-class ImageTools {
+public class ImageTools {
 
 
     @SuppressWarnings("SameParameterValue")
-    static Bitmap resizeAsContainInARectangle(Bitmap bmp, int maxSize) {
+    public static Bitmap scaleToBeContainedInSquare(Bitmap bmp, int maxSize) {
         if (bmp.getHeight() >  bmp.getWidth()) {
             return Bitmap.createScaledBitmap(bmp, bmp.getWidth() * maxSize / bmp.getHeight() , maxSize, true);
         } else {
@@ -26,8 +30,12 @@ class ImageTools {
         }
     }
 
+    public static Bitmap scale(Bitmap bmp, int width, int height) {
+        return Bitmap.createScaledBitmap(bmp, width, height, true);
+    }
+
     @SuppressWarnings({"SuspiciousNameCombination", "SameParameterValue"})
-    static Bitmap toSquare(Bitmap bmp, int newSize) {
+    public static Bitmap toSquare(Bitmap bmp, int newSize) {
 
         int currentWidth = bmp.getWidth();
         int currentHeight =  bmp.getHeight();
@@ -57,7 +65,7 @@ class ImageTools {
     /**
      *  Generates the histogram and displays it in "histogram"
      */
-    static Bitmap generateHistogram(Bitmap bmp) {
+    public static Bitmap generateHistogram(Bitmap bmp) {
 
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
@@ -135,12 +143,12 @@ class ImageTools {
     }
 
 
-    static void drawRectangle(final Bitmap bmp, Point a, Point b, int color) {
+    public static void drawRectangle(final Bitmap bmp, Point a, Point b, int color) {
         drawRectangle(bmp, a, b, color, -1);
     }
 
 
-    static void drawRectangle(final Bitmap bmp, Point a, Point b, int color, int thickness) {
+    public static void drawRectangle(final Bitmap bmp, Point a, Point b, int color, int thickness) {
         if (a != null && b!= null) {
             if (!a.isEquals(b)) {
                 Canvas myCanvas = new Canvas(bmp);
@@ -159,18 +167,18 @@ class ImageTools {
     }
 
     @SuppressWarnings("unused")
-    static void fillWithColor(final Bitmap bmp, int color) {
+    public static void fillWithColor(final Bitmap bmp, int color) {
         drawRectangle(bmp, new Point(0,0), new Point(bmp.getWidth(), bmp.getHeight()), color);
     }
 
-    static Bitmap bitmapClone(Bitmap source) {
+    public static Bitmap bitmapClone(Bitmap source) {
         if (source == null) return null;
         return source.copy(source.getConfig(), true);
     }
 
-    static Bitmap bitmapCreate(int width, int height) {return Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);}
+    public static Bitmap bitmapCreate(int width, int height) {return Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);}
 
-    static void drawCircle(final Bitmap bmp, Point center, int radius, int color) {
+    public static void drawCircle(final Bitmap bmp, Point center, int radius, int color) {
         if (center != null && radius > 0) {
             final Paint paint = new Paint();
             paint.setStyle(Paint.Style.FILL);
@@ -182,7 +190,7 @@ class ImageTools {
     }
 
     //TODO: Not working well yet
-    static void forceRectangleRatio(Bitmap bmp, Point a, Point b) {
+    public static void forceRectangleRatio(Bitmap bmp, Point a, Point b) {
 
         // Negative values are not acceptable.
         if (a.x < 0 || a.y < 0 ||b.x < 0 ||b.y < 0) return;
@@ -203,21 +211,21 @@ class ImageTools {
 
     }
 
-    static int getHueFromColor(int color){
+    public static int getHueFromColor(int color){
         float[] hsv = new float[3];
         Color.RGBToHSV(red(color), green(color), blue(color), hsv);
         return (int) hsv[0];
     }
 
-    static Drawable getThemedIcon(Context context, int index){
+    public static Drawable getThemedIcon(Context context, int index){
         Bitmap bmp = FileInputOutput.getBitmap(context.getResources(), index);
         return getThemedIcon(context, bmp);
     }
 
-    static Drawable getThemedIcon(Context context, Bitmap icon){
+    public static Drawable getThemedIcon(Context context, Bitmap icon){
 
         //TODO: Use invert instead but invert has to deal with transparent images.
-        if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
+        if (!PreferenceManager.getBoolean(context, Preference.DARK_MODE)) {
             FilterFunction.brightness(icon, -2000);
         }
 

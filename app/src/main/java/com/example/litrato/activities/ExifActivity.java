@@ -1,18 +1,14 @@
-package com.example.retouchephoto;
+package com.example.litrato.activities;
 
 import androidx.fragment.app.FragmentActivity;
 
-import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.exifinterface.media.ExifInterface;
@@ -20,10 +16,15 @@ import androidx.exifinterface.media.ExifInterface;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
+import com.example.litrato.R;
+import com.example.litrato.activities.tools.Preference;
+import com.example.litrato.activities.tools.PreferenceManager;
+import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.tools.FileInputOutput;
+import com.example.litrato.tools.ImageTools;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,31 +37,30 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class ExifActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
-    ImageButton returnButton;
+    private ImageButton returnButton;
 
-    TextView exifTitle;
+    private TextView exifTitle;
 
-    TextView cameraModel;
-    TextView cameraConstructor;
-    TextView timeDate;
-    TextView iso;
-    TextView fNumber;
-    TextView exposureTime;
-    TextView exposureBias;
-    TextView focalLenght;
-    TextView exposureMode;
-    TextView exposureProgram;
-    TextView flash;
-    TextView colorMode;
-    TextView fileName;
-    TextView imageMpx;
-    TextView imageResolution;
-    TextView imageSize;
+    private TextView cameraModel;
+    private TextView cameraConstructor;
+    private TextView timeDate;
+    private TextView iso;
+    private TextView fNumber;
+    private TextView exposureTime;
+    private TextView exposureBias;
+    private TextView focalLenght;
+    private TextView exposureMode;
+    private TextView exposureProgram;
+    private TextView flash;
+    private TextView colorMode;
+    private TextView fileName;
+    private TextView imageMpx;
+    private TextView imageResolution;
+    private TextView imageSize;
 
-    TextView lattitude;
-    TextView longitude;
-    TextView altitude;
+    private TextView lattitude;
+    private TextView longitude;
+    private TextView altitude;
 
 
     @Override
@@ -111,7 +111,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
                 refreshValues(exif, imgFile);
 
             } catch(IOException ex){
-
+                Log.e("ExifActivity - Get Exif", Objects.requireNonNull(ex.getMessage()));
             }
         }
 
@@ -121,7 +121,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void applyColorTheme() {
 
-        Settings.setColorTheme(MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE));
+        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
 
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -250,7 +250,6 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-
         if (exif.hasAttribute(ExifInterface.TAG_COLOR_SPACE)) {
             if (Integer.parseInt(exif.getAttribute(ExifInterface.TAG_COLOR_SPACE)) == ExifInterface.COLOR_SPACE_S_RGB) {
                 colorMode.setText("RBG");
@@ -304,7 +303,6 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
 
         File imgFile = new  File(FileInputOutput.getLastImportedImagePath());
         try {
@@ -317,16 +315,16 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
                 latLong = exif.getLatLong();
 
                 // If dark theme, applies dark theme for the map
-                if (MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
-                    boolean success = googleMap.setMapStyle(
+                if (PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE)) {
+                    googleMap.setMapStyle(
                             MapStyleOptions.loadRawResourceStyle(
                                     this, R.raw.style_gmap_night));
                 }
 
                 // Add a marker in Sydney and move the camera
                 LatLng photoGPS = new LatLng(latLong[0], latLong[1]);
-                mMap.addMarker(new MarkerOptions().position(photoGPS).title("Photo location"));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(photoGPS, 8.0f));
+                googleMap.addMarker(new MarkerOptions().position(photoGPS).title("Photo location"));
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(photoGPS, 8.0f));
 
             } else {
                 findViewById(R.id.map).setVisibility(View.GONE);
@@ -339,8 +337,6 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
-
-
 
     private void initializeListener() {
         returnButton.setOnClickListener(new View.OnClickListener() {

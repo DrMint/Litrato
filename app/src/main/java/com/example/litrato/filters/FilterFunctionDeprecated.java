@@ -1,6 +1,9 @@
-package com.example.retouchephoto;
+package com.example.litrato.filters;
 
 import android.graphics.Bitmap;
+
+import com.example.litrato.filters.tools.ColorTools;
+import com.example.litrato.filters.tools.ConvolutionTools;
 
 /**
  * This class is the legacy versions of currently used filters. Functions that uses non-RS convolution are in this class.
@@ -9,8 +12,8 @@ import android.graphics.Bitmap;
  * That way, it is easy to switch between them by simply changing the class when calling the function.
  * This is also true for FilterFunctionIntrinsic.
  */
- @SuppressWarnings("deprecation")
- @Deprecated class FilterFunctionDeprecated {
+@SuppressWarnings("deprecation")
+@Deprecated class FilterFunctionDeprecated {
 
     /**
      *  A filter that convert the image to grayscale, but keeps a shade of color intact.
@@ -19,7 +22,7 @@ import android.graphics.Bitmap;
      *  @param colorMargin how large the range of color will be (must be between 0 and 360)
      *  @param keepColor indicates if the color must be kept or removed
      */
-   @Deprecated static void keepOrRemoveAColor(final Bitmap bmp, int deg, int colorMargin, final boolean keepColor) {
+    @Deprecated static void keepOrRemoveAColor(final Bitmap bmp, int deg, int colorMargin, final boolean keepColor) {
         int[] pixels = new int[bmp.getWidth() * bmp.getHeight()];
         bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
 

@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato.tools;
 
 import android.Manifest;
 import android.app.Activity;
@@ -15,6 +15,9 @@ import android.util.Log;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
+import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.filters.FilterFunction;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,18 +26,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
-class FileInputOutput {
+public class FileInputOutput {
 
     private static String lastTakenImagePath;
     private static String getLastImportedImagePath;
 
-    static boolean saveImageToGallery(Bitmap bmp, Activity activity) {
+    public static boolean saveImageToGallery(Bitmap bmp, Activity activity) {
         if (!askPermissionToReadWriteFiles(activity)) return false;
         MediaStore.Images.Media.insertImage(activity.getContentResolver(), bmp, createUniqueFileName(activity.getApplicationContext()) , "");
         return true;
     }
 
-    static boolean saveImageToSaveFolder(Bitmap bmp, Activity activity) {
+    @SuppressWarnings("unused")
+    public static boolean saveImageToSaveFolder(Bitmap bmp, Activity activity) {
 
         if (!askPermissionToReadWriteFiles(activity)) return false;
 
@@ -65,11 +69,7 @@ class FileInputOutput {
         return true;
     }
 
-    private static String createUniqueFileName(Context context) {
-        return new SimpleDateFormat("yyyyMMdd_HHmmss", context.getResources().getConfiguration().getLocales().get(0)).format(new Date());
-    }
-
-    static Uri createUri(Activity activity) {
+    public static Uri createUri(Activity activity) {
 
         if (askPermissionToReadWriteFiles(activity)) {
             File dir = new File(Settings.SAVE_PATH_ORIGINAL);
@@ -85,30 +85,31 @@ class FileInputOutput {
         return null;
     }
 
-    static Bitmap getBitmap(Resources resources, int index) {
+    public static Bitmap getBitmap(Resources resources, int index) {
         return BitmapFactory.decodeResource(resources, index);
     }
 
-    static Bitmap getBitmap(Resources resources, int index, int width, int height) {
+    public static Bitmap getBitmap(Resources resources, int index, int width, int height) {
         Bitmap bmp = getBitmap(resources, index);
         return Bitmap.createScaledBitmap(bmp, width, height, true);
     }
 
-    static Bitmap getBitmap(String fullPath) {
+    @SuppressWarnings("WeakerAccess")
+    public static Bitmap getBitmap(String fullPath) {
         if (fullPath.startsWith("/raw/")) fullPath = fullPath.replaceFirst("/raw/", "");
         getLastImportedImagePath = fullPath;
         return rotateImgAccordingToExif(fullPath);
     }
 
-    static Bitmap getBitmap(Uri uri) {
+    public static Bitmap getBitmap(Uri uri) {
         return getBitmap(Objects.requireNonNull(uri.getPath()));
     }
 
-    static Bitmap getLastTakenBitmap() {
+    public static Bitmap getLastTakenBitmap() {
         return getBitmap(lastTakenImagePath);
     }
 
-    static String getLastImportedImagePath() {
+    public static String getLastImportedImagePath() {
         return getLastImportedImagePath;
     }
 
@@ -141,6 +142,10 @@ class FileInputOutput {
         else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {  return 180; }
         else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {  return 270; }
         return 0;
+    }
+
+    private static String createUniqueFileName(Context context) {
+        return new SimpleDateFormat("yyyyMMdd_HHmmss", context.getResources().getConfiguration().getLocales().get(0)).format(new Date());
     }
 
 }

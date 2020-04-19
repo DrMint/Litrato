@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato.filters.tools;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -19,7 +19,7 @@ import com.android.retouchephoto.ScriptC_convolution;
  * @version 1.0
  * @since   2019-01-08
  */
-class RenderScriptTools {
+public class RenderScriptTools {
 
     /**
      * Does all the job of setting up the convolution, renderscript stuff and then clean the mess.
@@ -27,7 +27,7 @@ class RenderScriptTools {
      * @param context the app context
      * @param kernel the kernel to use for convolution
      */
-    static void applyConvolution3x3RIntrinsic(final Bitmap bmp, final Context context, final float[] kernel) {
+    public static void applyConvolution3x3RIntrinsic(final Bitmap bmp, final Context context, final float[] kernel) {
 
         RenderScript rs = RenderScript.create(context);
         ScriptIntrinsicConvolve3x3 script = ScriptIntrinsicConvolve3x3.create(rs, Element.U8_4(rs));
@@ -45,7 +45,7 @@ class RenderScriptTools {
 
 
     @SuppressWarnings("unused")
-    static void BlendIntrinsic(final Bitmap bmp1, final Bitmap bmp2, final Context context) {
+    public static void BlendIntrinsic(final Bitmap bmp1, final Bitmap bmp2, final Context context) {
 
         RenderScript rs = RenderScript.create(context);
         ScriptIntrinsicBlend script = ScriptIntrinsicBlend.create(rs, Element.U8_4(rs));
@@ -68,7 +68,7 @@ class RenderScriptTools {
      * @param kernelHeight the height of the kernel
      * @param kernel the kernel to use for convolution
      */
-    static void applyConvolution(final Bitmap bmp, final RenderScript rs, final int kernelWidth, final int kernelHeight, final float[] kernel) {
+    public static void applyConvolution(final Bitmap bmp, final RenderScript rs, final int kernelWidth, final int kernelHeight, final float[] kernel) {
 
         ScriptC_convolution script = new ScriptC_convolution(rs);
 
@@ -118,7 +118,7 @@ class RenderScriptTools {
      * @param kernelWidth the width of the kernel
      * @param kernelHeight the height of the kernel
      */
-    static void applyConvolution(final Bitmap bmp, final RenderScript rs, final int kernelWidth, final int kernelHeight) {
+    public static void applyConvolution(final Bitmap bmp, final RenderScript rs, final int kernelWidth, final int kernelHeight) {
         final float[] kernel = {};
         applyConvolution(bmp, rs, kernelWidth, kernelHeight, kernel);
     }
@@ -131,8 +131,8 @@ class RenderScriptTools {
      * @param rs the RenderScript object to destroy.
      * @param allocations an array of all the allocations to destroy.
      */
-
-    static void cleanRenderScript(final Script script, final RenderScript rs, final Allocation[] allocations) {
+    @SuppressWarnings("WeakerAccess")
+    public static void cleanRenderScript(final Script script, final RenderScript rs, final Allocation[] allocations) {
         rs.destroy();
         cleanRenderScript(script, allocations);
     }
@@ -142,7 +142,7 @@ class RenderScriptTools {
      * @param script the Script object to destroy.
      * @param allocations an array of all the allocations to destroy.
      */
-    static void cleanRenderScript(final Script script, final Allocation[] allocations) {
+    public static void cleanRenderScript(final Script script, final Allocation[] allocations) {
         script.destroy();
         for (Allocation allocation : allocations) allocation.destroy();
     }
@@ -153,7 +153,7 @@ class RenderScriptTools {
      * @param input the Allocations to destroy.
      * @param output the Allocations to destroy.
      */
-    static void cleanRenderScript(final Script script, Allocation input, Allocation output) {
+    public static void cleanRenderScript(final Script script, Allocation input, Allocation output) {
         Allocation[] allocations = {input, output};
         cleanRenderScript(script, allocations);
     }
@@ -165,7 +165,7 @@ class RenderScriptTools {
      * @param input the Allocations to destroy.
      * @param output the Allocations to destroy.
      */
-    static void cleanRenderScript(final Script script, final RenderScript rs, Allocation input, Allocation output) {
+    public static void cleanRenderScript(final Script script, final RenderScript rs, Allocation input, Allocation output) {
         Allocation[] allocations = {input, output};
         cleanRenderScript(script, rs, allocations);
     }

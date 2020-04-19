@@ -1,6 +1,5 @@
-package com.example.retouchephoto;
+package com.example.litrato.activities;
 
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
@@ -16,28 +15,34 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.litrato.R;
+import com.example.litrato.activities.tools.Preference;
+import com.example.litrato.activities.tools.PreferenceManager;
+import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.tools.ImageTools;
+
 public class SettingsActivity extends AppCompatActivity {
 
-    TextView settingsTitle;
+    private TextView settingsTitle;
 
-    TextView darkModeTitle;
-    Switch darkModeSwitch;
+    private TextView darkModeTitle;
+    private Switch darkModeSwitch;
 
-    TextView importedBmpTitle;
-    TextView importedBmpDesc;
-    Spinner importedBmpSpinner;
+    private TextView importedBmpTitle;
+    private TextView importedBmpDesc;
+    private Spinner importedBmpSpinner;
 
-    TextView miniatureTitle;
-    TextView miniatureDesc;
-    Spinner miniatureSpinner;
+    private TextView miniatureTitle;
+    private TextView miniatureDesc;
+    private Spinner miniatureSpinner;
 
-    ImageButton returnButton;
+    private ImageButton returnButton;
 
-    String[] importedBmpArray = new String[] {
+    private String[] importedBmpArray = new String[] {
             "200", "350", "500", "750", "1000", "1200", "1500", "2000"
     };
 
-    String[] miniatureArray = new String[] {
+    private String[] miniatureArray = new String[] {
             "30", "50", "75", "100", "120", "150", "200", "250"
     };
 
@@ -65,7 +70,7 @@ public class SettingsActivity extends AppCompatActivity {
         applyColorTheme();
         initializeListener();
 
-        darkModeSwitch.setChecked(MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE));
+        darkModeSwitch.setChecked(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
 
         /*SPINNER*/
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
@@ -78,14 +83,14 @@ public class SettingsActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         miniatureSpinner.setAdapter(adapter);
 
-        int tmp = MainActivity.preferences.getInt(Settings.PREFERENCE_IMPORTED_BMP_SIZE, Settings.DEFAULT_IMPORTED_BMP_SIZE);
+        int tmp = PreferenceManager.getInt(getApplicationContext(), Preference.IMPORTED_BMP_SIZE);
         int index = 0;
         for (String str:importedBmpArray) {
             if (str.equals(Integer.toString(tmp))) importedBmpSpinner.setSelection(index);
             index++;
         }
 
-        tmp = MainActivity.preferences.getInt(Settings.PREFERENCE_MINIATURE_BMP_SIZE, Settings.DEFAULT_MINIATURE_BMP_SIZE);
+        tmp = PreferenceManager.getInt(getApplicationContext(), Preference.MINIATURE_BMP_SIZE);
         index = 0;
         for (String str:miniatureArray) {
             if (str.equals(Integer.toString(tmp))) miniatureSpinner.setSelection(index);
@@ -98,7 +103,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void applyColorTheme() {
 
-        Settings.setColorTheme(MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE));
+        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
 
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -155,9 +160,7 @@ public class SettingsActivity extends AppCompatActivity {
         darkModeSwitch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferences.Editor editor = MainActivity.preferences.edit();
-                editor.putBoolean(Settings.PREFERENCE_DARK_MODE, darkModeSwitch.isChecked());
-                editor.apply();
+                PreferenceManager.setBoolean(getApplicationContext(), Preference.DARK_MODE, darkModeSwitch.isChecked());
                 applyColorTheme();
             }
         });
@@ -166,23 +169,16 @@ public class SettingsActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                SharedPreferences.Editor editor = MainActivity.preferences.edit();
-                editor.putBoolean(Settings.PREFERENCE_DARK_MODE, darkModeSwitch.isChecked());
-                editor.putInt(Settings.PREFERENCE_IMPORTED_BMP_SIZE, Integer.parseInt(importedBmpSpinner.getSelectedItem().toString()));
-                editor.putInt(Settings.PREFERENCE_MINIATURE_BMP_SIZE, Integer.parseInt(miniatureSpinner.getSelectedItem().toString()));
-                editor.apply();
+                PreferenceManager.setBoolean(getApplicationContext(), Preference.DARK_MODE, darkModeSwitch.isChecked());
+                PreferenceManager.setInt(getApplicationContext(), Preference.IMPORTED_BMP_SIZE, Integer.parseInt(importedBmpSpinner.getSelectedItem().toString()));
+                PreferenceManager.setInt(getApplicationContext(), Preference.MINIATURE_BMP_SIZE, Integer.parseInt(miniatureSpinner.getSelectedItem().toString()));
                 finish();
             }
         });
-
-
-
     }
 
     @Override
     public void onBackPressed() {
         returnButton.performClick();
     }
-
-
 }

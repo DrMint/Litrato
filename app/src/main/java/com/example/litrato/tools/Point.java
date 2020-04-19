@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato.tools;
 
 /**
  * A point is an object with two integers.
@@ -9,24 +9,24 @@ package com.example.retouchephoto;
  * @version 1.0
  * @since   2020-31-01
  */
-class Point {
+public class Point {
 
     /**
      * Coordinates on the x axis.
      */
-    int x = 0;
+    public int x = 0;
 
     /**
      * Coordinates on the y axis.
      */
-    int y = 0;
+    public int y = 0;
 
     /**
      * Constructor using two coordinates.
      * @param x the coordinates on the x axis.
      * @param y the coordinates on the y axis.
      */
-    Point(int x, int y) {
+    public Point(int x, int y) {
         this.x = x;
         this.y = y;
     }
@@ -36,7 +36,7 @@ class Point {
      * @param x the coordinates on the x axis.
      * @param y the coordinates on the y axis.
      */
-    Point(float x, float y) {
+    public Point(float x, float y) {
         this.x = (int) x;
         this.y = (int) y;
     }
@@ -44,7 +44,7 @@ class Point {
     /**
      * Default constructor. If no coordinates are given, the point is (0, 0)
      */
-    Point() {}
+    public Point() {}
 
     /**
      * Translates this point coordinates according to the param x and y.
@@ -52,7 +52,7 @@ class Point {
      * @param y translation on the y axis
      */
     @SuppressWarnings("unused")
-    void translate(int x, int y) {
+    public void translate(int x, int y) {
         this.x += x;
         this.y += y;
     }
@@ -62,7 +62,8 @@ class Point {
      * @param x coordinates on the X axis
      * @param y coordinates on the y axis
      */
-    void set(int x, int y) {
+    @SuppressWarnings("WeakerAccess")
+    public void set(int x, int y) {
         this.x = x;
         this.y = y;
     }
@@ -72,7 +73,7 @@ class Point {
      * @param p to point to be copied
      */
     @SuppressWarnings("unused")
-    void set(Point p) {
+    public void set(Point p) {
         set(p.x, p.y);
     }
 
@@ -81,7 +82,7 @@ class Point {
      * @return a copy of the point.
      */
     @SuppressWarnings("unused")
-    Point copy() {
+    public Point copy() {
         return new Point(x, y);
     }
 
@@ -91,7 +92,7 @@ class Point {
      * @return true if both points are equal, false otherwise.
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    boolean isEquals(Point other) {
+    public boolean isEquals(Point other) {
         return isEquals(other.x, other.y);
     }
 
@@ -101,11 +102,11 @@ class Point {
      * @param y the coordinates on the y axis.
      * @return true if both points are equal, false otherwise.
      */
-    boolean isEquals(int x, int y) {
+    public boolean isEquals(int x, int y) {
         return this.x == x && this.y == y;
     }
 
-    int distance(Point y){
+    public int distance(Point y){
         return (int)Math.sqrt((this.x+y.x)*(this.x+y.x)+(this.y+y.y)*(this.y+y.y));
     }
 }

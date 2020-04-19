@@ -31,4 +31,5 @@
     <string name="maskButton">Mask</string>
     <string name="historyConfirmButton">Confirm</string>
     <string name="title_activity_maps">Map</string>
+    <string name="exif_viewer">Exif Viewer</string>
 </resources>

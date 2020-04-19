@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato.filters.tools;
 
 import android.graphics.Color;
 
@@ -10,8 +10,8 @@ import android.graphics.Color;
  * @version 1.0
  * @since   2019-01-08
  */
-@SuppressWarnings("deprecation")
-@Deprecated class ColorTools {
+@SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
+@Deprecated public class ColorTools {
 
     /**
      * Converts an HSV color into a RGB color.
@@ -19,7 +19,7 @@ import android.graphics.Color;
      * @param color the HSV color to be converted
      * @return the color in RGB.
      */
-    @Deprecated static int hsv2rgb (final float[] color) {
+    @Deprecated public static int hsv2rgb (final float[] color) {
         return hsv2rgb((int) color[0], color[1], color[2]);
     }
 
@@ -30,7 +30,7 @@ import android.graphics.Color;
      * @param V the luminosity (between 0 and 1)
      * @return the color in RGB
      */
-    @Deprecated static int hsv2rgb (int H, float S, float V) {
+    @Deprecated public static int hsv2rgb (int H, float S, float V) {
 
         if (S < 0) {S = 0;}
         if (S > 1) {S = 1;}
@@ -70,7 +70,7 @@ import android.graphics.Color;
      * @param color the RGB color to be converted
      * @param hsv the float[] in which to store the result
      */
-    @Deprecated static void rgb2hsv (final int color, final float[] hsv) {
+    @Deprecated public static void rgb2hsv (final int color, final float[] hsv) {
         float R = ((color >> 16) & 0x000000FF) / 255f;
         float G = ((color >>8 ) & 0x000000FF) / 255f;
         float B = ((color) & 0x000000FF) / 255f;
@@ -117,7 +117,7 @@ import android.graphics.Color;
      * @param color the RGB color to be converted
      * @return the hue between 0 and 359
      */
-    @Deprecated static int rgb2h (final int color) {
+    @Deprecated public static int rgb2h (final int color) {
         float R = ((color >> 16) & 0x000000FF) / 255f;
         float G = ((color >>8 ) & 0x000000FF) / 255f;
         float B = ((color) & 0x000000FF) / 255f;
@@ -149,7 +149,7 @@ import android.graphics.Color;
      * @param color the RGB color to be converted
      * @return the saturation between 0 and 1
      */
-    @Deprecated static float rgb2s (final int color) {
+    @Deprecated public static float rgb2s (final int color) {
         int R = (color >> 16) & 0x000000FF;
         int G = (color >>8 ) & 0x000000FF;
         int B = (color) & 0x000000FF;
@@ -167,7 +167,7 @@ import android.graphics.Color;
      * @param color the RGB color to be converted
      * @return the luminosity between 0 and 1
      */
-    @Deprecated static float rgb2v (final int color) {
+    @Deprecated public static float rgb2v (final int color) {
         int R = (color >> 16) & 0x000000FF;
         int G = (color >>8 ) & 0x000000FF;
         int B = (color) & 0x000000FF;

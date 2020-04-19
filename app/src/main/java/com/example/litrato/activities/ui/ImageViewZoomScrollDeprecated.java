@@ -1,10 +1,13 @@
-package com.example.retouchephoto;
+package com.example.litrato.activities.ui;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.tools.ImageTools;
+import com.example.litrato.tools.Point;
 
 import static android.graphics.Bitmap.createBitmap;
 
@@ -17,7 +20,8 @@ import static android.graphics.Bitmap.createBitmap;
  * @version 1.0
  * @since   2020-31-01
  */
-class ImageViewZoomScroll {
+@SuppressWarnings("WeakerAccess")
+@Deprecated class ImageViewZoomScrollDeprecated {
 
     /**
      * How much to image is zoomed in (i.e if zoomFactor = 2.0f, only 1/2 of the original is shown).
@@ -60,12 +64,12 @@ class ImageViewZoomScroll {
     }
 
     @SuppressWarnings("WeakerAccess")
-    ImageViewZoomScroll(ImageView imageView, Bitmap bmp) {
+    ImageViewZoomScrollDeprecated(ImageView imageView, Bitmap bmp) {
         this.imageView = imageView;
         this.bmp = bmp;
     }
 
-    ImageViewZoomScroll(ImageView imageView) {
+    ImageViewZoomScrollDeprecated(ImageView imageView) {
         // Generate a empty image
         this(imageView, ImageTools.bitmapCreate(100,100));
     }

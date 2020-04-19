@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato.filters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -26,9 +26,9 @@ import com.android.retouchephoto.ScriptC_posterizing;
 import com.android.retouchephoto.ScriptC_rgbWeights;
 import com.android.retouchephoto.ScriptC_saturation;
 import com.android.retouchephoto.ScriptC_threshold;
-
-import static com.example.retouchephoto.RenderScriptTools.applyConvolution;
-import static com.example.retouchephoto.RenderScriptTools.cleanRenderScript;
+import com.example.litrato.filters.tools.RenderScriptTools;
+import com.example.litrato.tools.ImageTools;
+import com.example.litrato.tools.Point;
 
 /**
  * This class implements all the filter function.
@@ -39,11 +39,11 @@ import static com.example.retouchephoto.RenderScriptTools.cleanRenderScript;
  * @version 1.0
  * @since   2020-02-08
  */
-class FilterFunction {
+public class FilterFunction {
 
-    static private RenderScript rs;
+    private static RenderScript rs;
 
-    static void initializeRenderScript(final Context context) {
+    public static void initializeRenderScript(final Context context) {
         rs = RenderScript.create(context);
     }
 
@@ -60,7 +60,7 @@ class FilterFunction {
         script.forEach_grayscale(input, output) ;
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
 
@@ -69,7 +69,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param shift the value to shift the hue with.
      */
-    static void hueShift(final Bitmap bmp, final float shift) {
+    public static void hueShift(final Bitmap bmp, final float shift) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -80,7 +80,7 @@ class FilterFunction {
         script.forEach_hueshift(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
     /**
@@ -89,7 +89,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param saturation the amount of saturation (must be between 0 and +inf)
      */
-    static void saturation(final Bitmap bmp, final float saturation) {
+    public static void saturation(final Bitmap bmp, final float saturation) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -101,7 +101,7 @@ class FilterFunction {
         script.forEach_saturation(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
 
@@ -110,7 +110,7 @@ class FilterFunction {
      *  This filter use RenderScript.
      *  @param bmp the image
      */
-    static void invert(final Bitmap bmp) {
+    public static void invert(final Bitmap bmp) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -118,7 +118,7 @@ class FilterFunction {
         script.forEach_invert(input, output) ;
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
     /**
@@ -127,7 +127,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param exposure the exposure to use (should be between -inf and 255)
      */
-    static void brightness(final Bitmap bmp, final float exposure) {
+    public static void brightness(final Bitmap bmp, final float exposure) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -137,7 +137,7 @@ class FilterFunction {
         script.forEach_brightness(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
     /**
@@ -147,7 +147,7 @@ class FilterFunction {
      *  @param steps numbers of luminance values.
      *  @param toGray if true, also turns the image gray.
      */
-    static void posterize(final Bitmap bmp, final int steps, boolean toGray) {
+    public static void posterize(final Bitmap bmp, final int steps, boolean toGray) {
         if (toGray) grayscale(bmp);
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
@@ -159,7 +159,7 @@ class FilterFunction {
         script.forEach_posterize(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
 
     }
 
@@ -169,7 +169,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param level numbers of luminance values.
      */
-    static void threshold(final Bitmap bmp, final float level) {
+    public static void threshold(final Bitmap bmp, final float level) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -179,7 +179,7 @@ class FilterFunction {
         script.forEach_threshold(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
     /**
@@ -188,7 +188,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param level how powerful is the effect.
      */
-    static void temperature(final Bitmap bmp, final float level) {
+    public static void temperature(final Bitmap bmp, final float level) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -204,7 +204,7 @@ class FilterFunction {
         script.forEach_applyWeights(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
     /**
@@ -214,7 +214,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param level how much tint to apply.
      */
-    static void tint(final Bitmap bmp, final float level) {
+    public static void tint(final Bitmap bmp, final float level) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -224,7 +224,7 @@ class FilterFunction {
         script.forEach_applyWeights(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
     /**
@@ -236,7 +236,7 @@ class FilterFunction {
      *  @param level numbers of luminance values.
      *  @param colorNoise turns the noise colored.
      */
-    static void noise(final Bitmap bmp, final int level, final boolean colorNoise) {
+    public static void noise(final Bitmap bmp, final int level, final boolean colorNoise) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -252,7 +252,7 @@ class FilterFunction {
 
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
     /**
@@ -263,7 +263,7 @@ class FilterFunction {
      * @param changeSaturation if we change the saturation or not
      */
 
-    static void colorize(final Bitmap bmp, final int hue, final float saturation, boolean changeSaturation) {
+    public static void colorize(final Bitmap bmp, final int hue, final float saturation, boolean changeSaturation) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
         ScriptC_colorize colorizeScript = new ScriptC_colorize(rs);
@@ -273,7 +273,7 @@ class FilterFunction {
         }
         colorizeScript.forEach_colorize(input, output);
         output.copyTo(bmp);
-        cleanRenderScript(colorizeScript, input, output);
+        RenderScriptTools.cleanRenderScript(colorizeScript, input, output);
     }
 
     /**
@@ -281,7 +281,7 @@ class FilterFunction {
      * @param bmp the image
      * @param deg the color we want to keep (hue between 0 and 360)
      */
-    static void keepAColor(final Bitmap bmp, final int deg, final int colorMargin) {
+    public static void keepAColor(final Bitmap bmp, final int deg, final int colorMargin) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
         ScriptC_keepAColor script = new ScriptC_keepAColor(rs);
@@ -291,7 +291,7 @@ class FilterFunction {
         script.invoke_calculateLUT();
         script.forEach_keepAColor(input, output);
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
 
     }
 
@@ -300,7 +300,7 @@ class FilterFunction {
      * @param bmp the image
      * @param deg the color we want to remove (hue between 0 and 360)
      */
-    static void removeAColor(final Bitmap bmp, final int deg, final int colorMargin) {
+    public static void removeAColor(final Bitmap bmp, final int deg, final int colorMargin) {
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
         ScriptC_keepAColor script = new ScriptC_keepAColor(rs);
@@ -310,7 +310,7 @@ class FilterFunction {
         script.invoke_calculateLUT();
         script.forEach_keepAColor(input, output);
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
 
     }
 
@@ -320,7 +320,7 @@ class FilterFunction {
      *  the intensities on the histogram.
      *  @param bmp the image
      */
-    static void histogramEqualization(final Bitmap bmp){
+    public static void histogramEqualization(final Bitmap bmp){
         Bitmap res = ImageTools.bitmapClone(bmp);
         Allocation input = Allocation.createFromBitmap(rs, res);
         Allocation output = Allocation.createTyped(rs, input.getType());
@@ -330,7 +330,7 @@ class FilterFunction {
         script.invoke_createRemapArray();
         script.forEach_remaptoRGB(output, input);
         input.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
     /**
@@ -340,7 +340,7 @@ class FilterFunction {
      * @param targetMaxLuminosity the luminosity of the brightest pixel after linear stretching (must be between 0f and 1f)
      */
     @SuppressWarnings("SameParameterValue")
-    static void toExtDyn(final Bitmap bmp, final int targetMinLuminosity, final int targetMaxLuminosity){
+    public static void toExtDyn(final Bitmap bmp, final int targetMinLuminosity, final int targetMaxLuminosity){
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createFromBitmap(rs, bmp);
         ScriptC_constrastExtension script = new ScriptC_constrastExtension(rs);
@@ -359,7 +359,7 @@ class FilterFunction {
         script.forEach_apply_histogram(input, output);
         output.copyTo(bmp);
         Allocation[] allocations = {input, output};
-        cleanRenderScript(script, allocations);
+        RenderScriptTools.cleanRenderScript(script, allocations);
     }
 
 
@@ -369,7 +369,7 @@ class FilterFunction {
      *  @param size size of the kernel
      *  @param vertical applies the kernel vertically, horizontally otherwise.
      */
-    static void directionalBlur(final Bitmap bmp, final int size, final boolean vertical) {
+    public static void directionalBlur(final Bitmap bmp, final int size, final boolean vertical) {
 
         if (size < 1) return;
 
@@ -405,7 +405,7 @@ class FilterFunction {
         output.copyTo(bmp);
 
         Allocation[] allocations = {input, output, fGauss};
-        cleanRenderScript(script, allocations);
+        RenderScriptTools.cleanRenderScript(script, allocations);
     }
 
     /**
@@ -417,7 +417,7 @@ class FilterFunction {
      *  @param bmp the pixels of the image
      *  @param size size of the kernel
      */
-    static void gaussianBlur(final Bitmap bmp, final int size) {
+    public static void gaussianBlur(final Bitmap bmp, final int size) {
         directionalBlur(bmp, size, false);
         directionalBlur(bmp, size, true);
     }
@@ -428,7 +428,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void laplacian(final Bitmap bmp, final float amount) {
+    public static void laplacian(final Bitmap bmp, final float amount) {
         if (amount > 0) gaussianBlur(bmp, (int) amount);
         float v = amount + 1;
         float[] kernel = {
@@ -436,7 +436,7 @@ class FilterFunction {
                 v,      -8 * v,     v,
                 v,      v,          v
         };
-        applyConvolution(bmp, rs, 3, 3, kernel);
+        RenderScriptTools.applyConvolution(bmp, rs, 3, 3, kernel);
     }
 
     /**
@@ -445,13 +445,13 @@ class FilterFunction {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void sharpen(final Bitmap bmp, final float amount) {
+    public static void sharpen(final Bitmap bmp, final float amount) {
         float[] kernel = {
                 0f,         -amount,            0f,
                 -amount,    1f + 4f * amount,   -amount,
                 0f,         -amount,            0f
         };
-        applyConvolution(bmp, rs, 3, 3, kernel);
+        RenderScriptTools.applyConvolution(bmp, rs, 3, 3, kernel);
     }
 
     /**
@@ -460,7 +460,7 @@ class FilterFunction {
      *  @param bmp the image
      *  @param amount size of the blur (must be between 0 and 25)
      */
-    static void sobel(final Bitmap bmp, final float amount, final boolean vertical) {
+    public static void sobel(final Bitmap bmp, final float amount, final boolean vertical) {
         if (amount > 0) gaussianBlur(bmp, (int) amount);
         float v = amount + 1;
 
@@ -477,7 +477,7 @@ class FilterFunction {
         };
 
         float[] kernel = (vertical) ? kernelHorizontal : kernelVertical;
-        applyConvolution(bmp, rs, 3, 3, kernel);
+        RenderScriptTools.applyConvolution(bmp, rs, 3, 3, kernel);
     }
 
     /**
@@ -485,11 +485,11 @@ class FilterFunction {
      *  @param bmp the image
      *  @param size size of the kernel
      */
-    static void averageBlur(final Bitmap bmp, final int size) {
-        applyConvolution(bmp, rs, size * 2 + 1, size * 2 + 1);
+    public static void averageBlur(final Bitmap bmp, final int size) {
+        RenderScriptTools.applyConvolution(bmp, rs, size * 2 + 1, size * 2 + 1);
     }
 
-    static Bitmap rotate(final Bitmap bmp, final float degrees){
+    public static Bitmap rotate(final Bitmap bmp, final float degrees){
         if (degrees != 0) {
             Matrix matrix = new Matrix();
             matrix.postRotate(degrees);
@@ -504,7 +504,7 @@ class FilterFunction {
      * @param a a corner defining the rectangle
      * @param b the opposite corner of the rectangle
      */
-    static Bitmap crop (final Bitmap bmp, final Point a, final Point b){
+    public static Bitmap crop (final Bitmap bmp, final Point a, final Point b){
 
         if (!a.isEquals(b)) {
             int width = Math.abs(a.x - b.x);
@@ -519,7 +519,7 @@ class FilterFunction {
     }
 
 
-    static void cartoon(final Bitmap bmp, final int contour, final int posterize) {
+    public static void cartoon(final Bitmap bmp, final int contour, final int posterize) {
 
         Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
 
@@ -543,12 +543,12 @@ class FilterFunction {
         script.forEach_multiply(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
 
     }
 
 
-    static void sketch(final Bitmap bmp, final int contour, final float saturation) {
+    public static void sketch(final Bitmap bmp, final int contour, final float saturation) {
 
         Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
 
@@ -561,7 +561,7 @@ class FilterFunction {
     }
 
 
-    static void applyTexture(final Bitmap bmp, final Bitmap texture, final BlendType typeOfBlend, final float parameter) {
+    public static void applyTexture(final Bitmap bmp, final Bitmap texture, final BlendType typeOfBlend, final float parameter) {
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation pixels = Allocation.createFromBitmap(rs, texture);
@@ -591,10 +591,10 @@ class FilterFunction {
         }
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
-    static void gamma(final Bitmap bmp, final float gamma) {
+    public static void gamma(final Bitmap bmp, final float gamma) {
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
@@ -605,19 +605,19 @@ class FilterFunction {
         script.forEach_gamma(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
 
     }
 
-    static void applyTexture(final Bitmap bmp, final Bitmap texture, final BlendType typeOfBlend) {
+    public static void applyTexture(final Bitmap bmp, final Bitmap texture, final BlendType typeOfBlend) {
         applyTexture(bmp, texture, typeOfBlend,0);
     }
 
-    static void applyTexture(final Bitmap bmp, final Bitmap texture) {
+    public static void applyTexture(final Bitmap bmp, final Bitmap texture) {
         applyTexture(bmp, texture, BlendType.MULTIPLY);
     }
 
-    static void mirror(final Bitmap bmp) {
+    public static void mirror(final Bitmap bmp) {
 
         Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
 
@@ -632,10 +632,10 @@ class FilterFunction {
         script.forEach_mirror(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
-    static void burnValues(final Bitmap bmp, final float level) {
+    public static void burnValues(final Bitmap bmp, final float level) {
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
@@ -651,10 +651,10 @@ class FilterFunction {
         script.forEach_burn(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
-    static void constrastBurn(final Bitmap bmp, float level) {
+    public static void constrastBurn(final Bitmap bmp, float level) {
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
@@ -672,7 +672,7 @@ class FilterFunction {
         script.forEach_burn(input, output);
 
         output.copyTo(bmp);
-        cleanRenderScript(script, input, output);
+        RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
 

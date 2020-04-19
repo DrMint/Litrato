@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato.activities;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,14 +43,32 @@ import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import com.example.litrato.BuildConfig;
+import com.example.litrato.activities.tools.DisplayedFilter;
+import com.example.litrato.activities.tools.Historic;
+import com.example.litrato.activities.tools.Preference;
+import com.example.litrato.activities.tools.PreferenceManager;
+import com.example.litrato.R;
+import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.activities.ui.ImageViewZoomScroll;
+import com.example.litrato.activities.ui.ViewTools;
+import com.example.litrato.filters.AppliedFilter;
+import com.example.litrato.filters.BlendType;
+import com.example.litrato.filters.Filter;
+import com.example.litrato.filters.FilterApplyInterface;
+import com.example.litrato.filters.Category;
+import com.example.litrato.filters.FilterFunction;
+import com.example.litrato.filters.FilterPreviewInterface;
+import com.example.litrato.tools.FileInputOutput;
+import com.example.litrato.tools.ImageTools;
+import com.example.litrato.tools.Point;
 import com.google.android.material.snackbar.Snackbar;
 
 /*TODO:
    Bugs:
-        [0001] - When the histogram is resize, the image can get lstretch because the imageView gets bigger or smaller.
-        Refreshing the image doesn't seem to work. I suspect this is because requestLayout is asynchronous, and
-        when the image refresh, it utilizes the imageView's aspect ratio before it actually changed.
-        Thus, refreshing the image will actually make the problem worse.
+        [0001] - If we switch from dark theme and white theme, the icon stay dark in Tools.
+                 A restart solve the problem.
         -------------------------------------------------------------------------------------------
     New functions:
         - An idea to keep the UI interactive while saving the image at high resolution would be to
@@ -74,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     static Filter subActivityFilter;
     static Bitmap subActivityBitmap;
     static Bitmap subMaskBmp;
-    static SharedPreferences preferences;
 
     private final int PICK_IMAGE_REQUEST = 1;
     private final int REQUEST_IMAGE_CAPTURE = 2;
@@ -106,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final Boolean[] hasChanged = {true, true, true, true, true, true};
 
-    private ImageViewZoomScrollWIP layoutImageView;
+    private ImageViewZoomScroll layoutImageView;
     private Toolbar     layoutToolbar;
     private Button      toolsButton;
     private Button      presetsButton;
@@ -148,10 +164,8 @@ public class MainActivity extends AppCompatActivity {
         layoutToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(layoutToolbar);
 
-        preferences = getSharedPreferences(Settings.PREFERENCE_NAME, 0);
-
         // Sets all the layout shortcuts.
-        layoutImageView         = new ImageViewZoomScrollWIP((ImageView) findViewById(R.id.imageView));
+        layoutImageView         = new ImageViewZoomScroll((ImageView) findViewById(R.id.imageView));
 
         toolsButton             = findViewById(R.id.buttonTools);
         presetsButton           = findViewById(R.id.buttonPresets);
@@ -225,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.action_history: {
-                if (isVisible(historyBar)) {
+                if (ViewTools.isVisible(historyBar)) {
                     closeHistory();
                 } else {
                     closeMenus();
@@ -300,8 +314,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             case R.id.action_exif: {
-                //Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
-                //startActivity(intent);
                 Intent intent = new Intent(getApplicationContext(), ExifActivity.class);
                 startActivity(intent);
                 break;
@@ -330,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void applyColorTheme() {
 
-        Settings.setColorTheme(MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE));
+        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
 
         historyBar.setBackgroundColor(Settings.COLOR_GREY);
         historyTitle.setTextColor(Settings.COLOR_TEXT);
@@ -373,7 +385,8 @@ public class MainActivity extends AppCompatActivity {
         window.setStatusBarColor(Settings.COLOR_BACKGROUND);
         window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
 
-        if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
+        if (!PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE)) {
+        //if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             layoutToolbar.setPopupTheme(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         } else {
@@ -383,7 +396,7 @@ public class MainActivity extends AppCompatActivity {
 
         for (DisplayedFilter displayedFilter:displayedFilters) {
             displayedFilter.textView.setTextColor(Settings.COLOR_TEXT);
-            if (displayedFilter.filter.getFilterCategory() == FilterCategory.TOOL) {
+            if (displayedFilter.filter.getFilterCategory() == Category.TOOL) {
                 Drawable drawable = ImageTools.getThemedIcon(getApplicationContext(), displayedFilter.filter.getIcon());
                 displayedFilter.textView.setCompoundDrawablePadding(25);
                 displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
@@ -404,6 +417,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
+
             case CONFIG_REQUEST:
                 hasChanged[0] = true;
                 hasChanged[2] = true;
@@ -453,11 +467,11 @@ public class MainActivity extends AppCompatActivity {
         // If the bmp is null, aborts
         if (bmp == null) return;
 
-        int importedBmpSize = MainActivity.preferences.getInt(Settings.PREFERENCE_IMPORTED_BMP_SIZE, Settings.DEFAULT_IMPORTED_BMP_SIZE);
+        int importedBmpSize = PreferenceManager.getInt(getApplicationContext(), Preference.IMPORTED_BMP_SIZE);
 
         // Resize the image before continuing, if necessary
         if (bmp.getHeight() > importedBmpSize || bmp.getWidth() > importedBmpSize) {
-            bmp = ImageTools.resizeAsContainInARectangle(bmp, importedBmpSize);
+            bmp = ImageTools.scaleToBeContainedInSquare(bmp, importedBmpSize);
         }
 
         // Set this image as the originalImage and reset the UI
@@ -509,7 +523,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onDoubleTap(MotionEvent e) {
 
                 // it it's zoomed
-                if (layoutImageView.verticalScroll || layoutImageView.horizontalScroll) {
+                if (layoutImageView.hasVerticalScroll() || layoutImageView.hasHorizontalScroll()) {
                 //if (layoutImageView.getZoom() != 1f) {
                     layoutImageView.reset();
                 } else {
@@ -549,7 +563,7 @@ public class MainActivity extends AppCompatActivity {
         final View.OnTouchListener defaultImageViewTouchListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 closeMenus();
-                if (isVisible(historyBar)) closeHistory();
+                if (ViewTools.isVisible(historyBar)) closeHistory();
                 myScaleDetector.onTouchEvent(event);
                 myGestureDetector.onTouchEvent(event);
                 //layoutImageView.refresh();
@@ -562,7 +576,7 @@ public class MainActivity extends AppCompatActivity {
         presetsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean visible = isVisible(presetsBar);
+                boolean visible = ViewTools.isVisible(presetsBar);
                 closeMenus();
                 if (!visible) {
                     v.setBackgroundColor(Settings.COLOR_SELECTED);
@@ -576,7 +590,7 @@ public class MainActivity extends AppCompatActivity {
         toolsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean visible = isVisible(toolsBar);
+                boolean visible = ViewTools.isVisible(toolsBar);
                 closeMenus();
                 if (!visible) {
                     v.setBackgroundColor(Settings.COLOR_SELECTED);
@@ -590,7 +604,7 @@ public class MainActivity extends AppCompatActivity {
         filtersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean visible = isVisible(filtersBar);
+                boolean visible = ViewTools.isVisible(filtersBar);
                 closeMenus();
                 if (!visible) {
                     v.setBackgroundColor(Settings.COLOR_SELECTED);
@@ -689,7 +703,7 @@ public class MainActivity extends AppCompatActivity {
 
         Filter newPresets;
         newPresets = new Filter("2 Strip");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -702,7 +716,7 @@ public class MainActivity extends AppCompatActivity {
         });
         filters.add(newPresets);
         newPresets = new Filter("Invert");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -713,7 +727,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Bleach Bypass");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -726,7 +740,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Candle light");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -738,7 +752,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Crisp Warm");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -750,7 +764,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Crisp Winter");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -762,7 +776,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Drop Blues");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -774,7 +788,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Old analog");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -792,7 +806,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         newPresets = new Filter("Tension Green");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -805,7 +819,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Edgy Amber");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -820,7 +834,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Night from Day");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -835,7 +849,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Late Sunset");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -851,7 +865,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Futuristic Bleak");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -865,7 +879,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newPresets);
 
         newPresets = new Filter("Soft Warming");
-        newPresets.setFilterCategory(FilterCategory.PRESET);
+        newPresets.setFilterCategory(Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -888,7 +902,7 @@ public class MainActivity extends AppCompatActivity {
         Filter newTools;
 
         newTools = new Filter("Rotation");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.rotate));
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
@@ -903,7 +917,7 @@ public class MainActivity extends AppCompatActivity {
         filterRotation = newTools;
 
         newTools = new Filter("Crop");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.crop));
         newTools.allowMasking = false;
         newTools.allowScrollZoom = false;
@@ -930,7 +944,7 @@ public class MainActivity extends AppCompatActivity {
         newTools.needFilterActivity = false;
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.flip));
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -942,14 +956,14 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newTools);
 
         newTools = new Filter("Stickers");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.stickers));
         filters.add(newTools);
 
         newTools = new Filter("Luminosity");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.luminosity));
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setSeekBar2(-100, 0, 100, "");
@@ -965,7 +979,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newTools);
 
         newTools = new Filter("Contrast");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.contrast));
         newTools.setSeekBar1(-50, 0, 50, "%");
         newTools.setSeekBar2(-100, 0, 100, "%");
@@ -980,7 +994,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newTools);
 
         newTools = new Filter("Sharpness");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.sharpness));
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -993,7 +1007,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newTools);
 
         newTools = new Filter("Auto");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.auto));
         newTools.setSwitch1(false, "Linear", "Dynamic");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1010,7 +1024,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newTools);
 
         newTools = new Filter("Saturation");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.saturation));
         newTools.setSeekBar1(0, 100, 200, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1023,7 +1037,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newTools);
 
         newTools = new Filter("Add noise");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.add_noise));
         newTools.setSeekBar1(0, 0, 255, "");
         newTools.setSwitch1(false,"B&W Noise", "Color Noise");
@@ -1037,7 +1051,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newTools);
 
         newTools = new Filter("Temperature");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.temperature));
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1050,7 +1064,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newTools);
 
         newTools = new Filter("Tint");
-        newTools.setFilterCategory(FilterCategory.TOOL);
+        newTools.setFilterCategory(Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.tint));
         newTools.setSeekBar1(-100, 0, 100, "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1070,7 +1084,7 @@ public class MainActivity extends AppCompatActivity {
         // Filters > Color
 
         newFilter = new Filter("Colorize");
-        newFilter.setFilterCategory(FilterCategory.COLOR);
+        newFilter.setFilterCategory(Category.COLOR);
         newFilter.setColorSeekBar();
         newFilter.setSeekBar1(0,100,100,"");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1083,7 +1097,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Change hue");
-        newFilter.setFilterCategory(FilterCategory.COLOR);
+        newFilter.setFilterCategory(Category.COLOR);
         newFilter.setColorSeekBar();
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -1095,7 +1109,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Selective coloring");
-        newFilter.setFilterCategory(FilterCategory.COLOR);
+        newFilter.setFilterCategory(Category.COLOR);
         newFilter.setColorSeekBar();
         newFilter.setSeekBar1(1, 25, 360, "deg");
         newFilter.setSwitch1(false, "Keep", "Remove");
@@ -1113,7 +1127,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Hue shift");
-        newFilter.setFilterCategory(FilterCategory.COLOR);
+        newFilter.setFilterCategory(Category.COLOR);
         newFilter.setSeekBar1(-180, 0, 180, "deg");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -1131,7 +1145,7 @@ public class MainActivity extends AppCompatActivity {
         // Filters > Fancy
 
         newFilter = new Filter("Threshold");
-        newFilter.setFilterCategory(FilterCategory.FANCY);
+        newFilter.setFilterCategory(Category.FANCY);
         newFilter.setSeekBar1(0, 128, 256, "");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -1143,7 +1157,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Posterize");
-        newFilter.setFilterCategory(FilterCategory.FANCY);
+        newFilter.setFilterCategory(Category.FANCY);
         newFilter.setSeekBar1(2, 10, 32, "steps");
         newFilter.setSwitch1(true,"Color", "B&W");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1161,7 +1175,7 @@ public class MainActivity extends AppCompatActivity {
         // Filters > Blur
 
         newFilter = new Filter("Average blur");
-        newFilter.setFilterCategory(FilterCategory.BLUR);
+        newFilter.setFilterCategory(Category.BLUR);
         newFilter.setSeekBar1(1, 2, 19, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -1173,7 +1187,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Gaussian blur");
-        newFilter.setFilterCategory(FilterCategory.BLUR);
+        newFilter.setFilterCategory(Category.BLUR);
         newFilter.setSeekBar1(1, 2, 25, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -1185,7 +1199,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Directional blur");
-        newFilter.setFilterCategory(FilterCategory.BLUR);
+        newFilter.setFilterCategory(Category.BLUR);
         newFilter.setSeekBar1(2, 2, 30, "");
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1202,7 +1216,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Filters > Contour
         newFilter = new Filter("Laplacian");
-        newFilter.setFilterCategory(FilterCategory.CONTOUR);
+        newFilter.setFilterCategory(Category.CONTOUR);
         newFilter.setSeekBar1(1, 2, 14, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -1214,7 +1228,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Sobel");
-        newFilter.setFilterCategory(FilterCategory.CONTOUR);
+        newFilter.setFilterCategory(Category.CONTOUR);
         newFilter.setSeekBar1(1, 2, 14, "px");
         newFilter.setSwitch1(false, "Horizontal", "Vertical");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1227,7 +1241,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Sketch");
-        newFilter.setFilterCategory(FilterCategory.CONTOUR);
+        newFilter.setFilterCategory(Category.CONTOUR);
         newFilter.setSeekBar1(1, 4, 14, "");
         newFilter.setSeekBar2(0, 20, 100, "");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1242,7 +1256,7 @@ public class MainActivity extends AppCompatActivity {
         filters.add(newFilter);
 
         newFilter = new Filter("Cartoon");
-        newFilter.setFilterCategory(FilterCategory.CONTOUR);
+        newFilter.setFilterCategory(Category.CONTOUR);
         newFilter.setSeekBar1(1, 0, 100, "px");
         newFilter.setSeekBar2(2, 4, 14, "px");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -1275,8 +1289,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void addToHistory(AppliedFilter appliedFilter) {
         historic.addFilter(appliedFilter);
-        historySeekBar.setProgress(historic.size() - 1);
         historySeekBar.setMax(historic.size() - 1);
+        historySeekBar.setProgress(historySeekBar.getMax());
     }
 
 
@@ -1285,33 +1299,33 @@ public class MainActivity extends AppCompatActivity {
      * If no menu is opened, no image is generated.
      */
     private void generateMiniatureForOpenedMenu() {
-        if (isVisible(presetsBar) && hasChanged[0]) {
-            generateMiniatures(FilterCategory.PRESET);
+        if (ViewTools.isVisible(presetsBar) && hasChanged[0]) {
+            generateMiniatures(Category.PRESET);
             hasChanged[0] = false;
-        } else if (isVisible(toolsBar) && hasChanged[1]) {
-            generateMiniatures(FilterCategory.TOOL);
+        } else if (ViewTools.isVisible(toolsBar) && hasChanged[1]) {
+            generateMiniatures(Category.TOOL);
             hasChanged[1] = false;
-        } else if (isVisible(filtersBar)) {
-            if (isVisible(colorBar) && hasChanged[2]) {
-                generateMiniatures(FilterCategory.COLOR);
+        } else if (ViewTools.isVisible(filtersBar)) {
+            if (ViewTools.isVisible(colorBar) && hasChanged[2]) {
+                generateMiniatures(Category.COLOR);
                 hasChanged[2] = false;
-            } else if (isVisible(fancyBar) && hasChanged[3]) {
-                generateMiniatures(FilterCategory.FANCY);
+            } else if (ViewTools.isVisible(fancyBar) && hasChanged[3]) {
+                generateMiniatures(Category.FANCY);
                 hasChanged[3] = false;
-            } else if (isVisible(blurBar) && hasChanged[4]) {
-                generateMiniatures(FilterCategory.BLUR);
+            } else if (ViewTools.isVisible(blurBar) && hasChanged[4]) {
+                generateMiniatures(Category.BLUR);
                 hasChanged[4] = false;
-            } else if (isVisible(contourBar) && hasChanged[5]) {
-                generateMiniatures(FilterCategory.CONTOUR);
+            } else if (ViewTools.isVisible(contourBar) && hasChanged[5]) {
+                generateMiniatures(Category.CONTOUR);
                 hasChanged[5] = false;
             }
         }
     }
 
-    private void generateMiniatures(FilterCategory onlyThisCategory) {
+    private void generateMiniatures(Category onlyThisCategory) {
         Bitmap resizedMiniature = ImageTools.toSquare(
                 currentImage,
-                MainActivity.preferences.getInt(Settings.PREFERENCE_MINIATURE_BMP_SIZE, Settings.DEFAULT_MINIATURE_BMP_SIZE)
+                PreferenceManager.getInt(getApplicationContext(), Preference.MINIATURE_BMP_SIZE)
         );
 
         for (DisplayedFilter displayedFilter:displayedFilters) {
@@ -1320,7 +1334,7 @@ public class MainActivity extends AppCompatActivity {
             if (displayedFilter.filter.getFilterCategory() == onlyThisCategory) {
 
                 Drawable drawable;
-                if(onlyThisCategory != FilterCategory.TOOL) {
+                if(onlyThisCategory != Category.TOOL) {
                     Bitmap filteredMiniature =  ImageTools.bitmapClone(resizedMiniature);
 
                     // Apply the filter to the miniature
@@ -1351,7 +1365,7 @@ public class MainActivity extends AppCompatActivity {
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setBackgroundColor(Color.TRANSPARENT);
 
-        if (filter.getFilterCategory() == FilterCategory.TOOL) {
+        if (filter.getFilterCategory() == Category.TOOL) {
 
             textView.setMaxWidth(Settings.TOOL_DISPLAYED_SIZE);
             textView.setHeight((int) (Settings.TOOL_DISPLAYED_SIZE * 1.8));
@@ -1454,14 +1468,10 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, FILTER_ACTIVITY_IS_FINISHED);
     }
 
-    static boolean isVisible(View view) {
-        return (view.getVisibility() == View.VISIBLE);
-    }
-
     private void initializeRenderScriptCaching() {
         Bitmap dummyBmp = ImageTools.bitmapCreate(10,10);
         for (Filter filter:filters) {
-            if (filter.getFilterCategory() != FilterCategory.PRESET) {
+            if (filter.getFilterCategory() != Category.PRESET) {
                 filter.preview(dummyBmp, getApplicationContext());
             }
         }

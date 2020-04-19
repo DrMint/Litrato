@@ -164,7 +164,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:context=".ExifActivity" />
+        tools:context=".activities.ExifActivity" />
 
     <ImageButton
         android:id="@+id/returnButton"
@@ -219,7 +219,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-black"
-        android:text="Exif Viewer"
+        android:text="@string/exif_viewer"
         android:textAlignment="center"
         android:textAllCaps="true"
         android:textSize="30sp"

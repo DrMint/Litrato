@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato.filters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -6,7 +6,7 @@ import android.graphics.Bitmap;
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
 
-import static com.example.retouchephoto.RenderScriptTools.*;
+import static com.example.litrato.filters.tools.RenderScriptTools.*;
 
 import androidx.renderscript.Allocation;
 import androidx.renderscript.ScriptIntrinsicBlur;

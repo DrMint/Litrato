@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato.filters.tools;
 
 /**
  * This class implements tools used by any filter that uses convolution without RenderScript.
@@ -8,8 +8,8 @@ package com.example.retouchephoto;
  * @version 1.0
  * @since   2019-01-08
  */
-@SuppressWarnings("deprecation")
-@Deprecated class ConvolutionTools {
+@SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
+@Deprecated public class ConvolutionTools {
 
     /**
      *  Apply the convolution kernel to the image.
@@ -22,7 +22,7 @@ package com.example.retouchephoto;
      *  @param kernelWidth the kernel width
      *  @param kernelHeight the kernel height
      */
-    @Deprecated static void convolution2D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final int kernelWidth, final int kernelHeight) {
+    @Deprecated public static void convolution2D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final int kernelWidth, final int kernelHeight) {
         int[] output = new int[imageWidth * imageHeight];
 
         final int sizeX = (kernelWidth - 1) / 2;
@@ -53,7 +53,7 @@ package com.example.retouchephoto;
      *  @param kernelWidth the kernel width
      *  @param kernelHeight the kernel height
      */
-    @Deprecated static void convolution2DUniform(final int[] pixels, final int imageWidth, final int imageHeight, final int kernelWidth, final int kernelHeight) {
+    @Deprecated public static void convolution2DUniform(final int[] pixels, final int imageWidth, final int imageHeight, final int kernelWidth, final int kernelHeight) {
         int[] output = new int[imageWidth * imageHeight];
 
         final int sizeX = (kernelWidth - 1) / 2;
@@ -83,7 +83,7 @@ package com.example.retouchephoto;
      *  @param horizontal will apply the convolution horizontally if true, otherwise vertically.
      *  @param correctBorders will apply the convolution even on the borders, otherwise not.
      */
-    @Deprecated static void convolution1D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final boolean horizontal, final boolean correctBorders) {
+    @Deprecated public static void convolution1D(final int[] pixels, final int imageWidth, final int imageHeight, final int[] kernel, final boolean horizontal, final boolean correctBorders) {
         int[] output = new int[imageWidth * imageHeight];
 
         final int size = (kernel.length - 1) / 2;
@@ -101,7 +101,7 @@ package com.example.retouchephoto;
                     for (int x = 0; x < size; x++) {
                         index = x + y * imageWidth;
                         for (int convX = -size; convX <= size; convX++) {
-                            correctedX = (x + convX < 0) ? 0 : x + convX;
+                            correctedX = Math.max(x + convX, 0);
                             output[index] += pixels[correctedX + y * imageWidth] * kernel[convX + size];
                         }
                     }
@@ -110,7 +110,7 @@ package com.example.retouchephoto;
                     for (int x = imageWidth - size; x < imageWidth; x++) {
                         index = x + y * imageWidth;
                         for (int convX = -size; convX <= size; convX++) {
-                            correctedX = (x + convX > imageWidth - 1) ? imageWidth - 1 : x + convX;
+                            correctedX = Math.min(x + convX, imageWidth - 1);
                             output[index] += pixels[correctedX + y * imageWidth] * kernel[convX + size];
                         }
                     }
@@ -137,7 +137,7 @@ package com.example.retouchephoto;
                     for (int y = 0; y < size; y++) {
                         index = x + y * imageWidth;
                         for (int convY = -size; convY <= size; convY++) {
-                            correctedY = (y + convY < 0) ? 0 : y + convY;
+                            correctedY = Math.max(y + convY, 0);
                             output[index] += pixels[x + correctedY * imageWidth] * kernel[convY + size];
                         }
                     }
@@ -146,7 +146,7 @@ package com.example.retouchephoto;
                     for (int y = imageHeight - size; y < imageHeight; y++) {
                         index = x + y * imageWidth;
                         for (int convY = -size; convY <= size; convY++) {
-                            correctedY = (y + convY > imageHeight - 1) ? imageHeight - 1 : y + convY;
+                            correctedY = Math.min(y + convY, imageHeight - 1);
                             output[index] += pixels[x + correctedY * imageWidth] * kernel[convY + size];
                         }
                     }
@@ -206,7 +206,7 @@ package com.example.retouchephoto;
      *  that array in a pixel array.
      *  @param pixels the pixel to be converted to color
      */
-    @Deprecated static void convertGreyToColor(final int[] pixels) {
+    @Deprecated public static void convertGreyToColor(final int[] pixels) {
         // Saves the new values as colors
         int outputGrey;
         int pixelLength = pixels.length;
@@ -226,7 +226,7 @@ package com.example.retouchephoto;
      *  @param y the y coordinates of the pixel
      *  @return the pixels at (x, y) if the coordinates are inside the image, otherwise the closest pixel.
      */
-    @Deprecated static int correctedPixelGet(final int[] pixels, final int imageWidth, final int imageHeight, final int x, final int y) {
+    @Deprecated public static int correctedPixelGet(final int[] pixels, final int imageWidth, final int imageHeight, final int x, final int y) {
         int newX = x;
         int newY = y;
 

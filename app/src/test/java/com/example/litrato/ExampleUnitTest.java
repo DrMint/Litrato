@@ -1,4 +1,4 @@
-package com.example.retouchephoto;
+package com.example.litrato;
 
 import org.junit.Test;
 
