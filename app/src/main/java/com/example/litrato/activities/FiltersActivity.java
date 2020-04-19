@@ -51,7 +51,7 @@ public class FiltersActivity extends AppCompatActivity {
 
     static Filter subActivityFilter;
     static Bitmap subActivityBitmap;
-    static Bitmap subMaskBmp;
+    static Bitmap subActivityMaskBmp;
 
     private Bitmap originalImage;
     private Bitmap filteredImage;
@@ -133,8 +133,8 @@ public class FiltersActivity extends AppCompatActivity {
                 layoutCancel.performClick();
             }
 
-            generateMasks(MainActivity.subMaskBmp);
-            MainActivity.subMaskBmp = null;
+            generateMasks(MainActivity.subActivityMaskBmp);
+            MainActivity.subActivityMaskBmp = null;
 
         } else if (getCallingActivity().getClassName().equals(FiltersActivity.class.getName())) {
 
@@ -152,8 +152,8 @@ public class FiltersActivity extends AppCompatActivity {
                 layoutCancel.performClick();
             }
 
-            generateMasks(FiltersActivity.subMaskBmp);
-            FiltersActivity.subMaskBmp = null;
+            generateMasks(FiltersActivity.subActivityMaskBmp);
+            FiltersActivity.subActivityMaskBmp = null;
 
         }
 
@@ -672,39 +672,9 @@ public class FiltersActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                Filter maskFilter;
-                maskFilter = new Filter("Create Mask");
-                maskFilter.allowMasking = false;
-                maskFilter.allowHistogram = false;
-                maskFilter.allowScrollZoom = false;
-                maskFilter.setSeekBar1(5,30,300, "px");
-                maskFilter.setSeekBar2(0,50,100, "%");
-                maskFilter.setSwitch1(true, "Black", "White");
-                maskFilter.seekBar1AutoRefresh = false;
-                maskFilter.switch1AutoRefresh = false;
-                maskFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
-                    @Override
-                    public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-                        if (switch1) {
-                            ImageTools.drawCircle(maskBmp, touchUp, (int) seekBar, Color.WHITE);
-                        } else {
-                            ImageTools.drawCircle(maskBmp, touchUp, (int) seekBar, Color.BLACK);
-                        }
-                        FilterFunction.applyTexture(bmp, maskBmp, BlendType.OVERLAY, seekBar2 / 100f);
-                        return null;
-                    }
-                });
-
-                maskFilter.setFilterApplyFunction(new FilterApplyInterface() {
-                    @Override
-                    public Bitmap apply(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-                        return maskBmp;
-                    }
-                });
-
-                subActivityFilter = maskFilter;
+                subActivityFilter = Filter.getFilterByName(Settings.FILTER_MASK_NAME);
                 subActivityBitmap = originalImage;
-                subMaskBmp = ImageTools.bitmapClone(maskBmp);
+                subActivityMaskBmp = ImageTools.bitmapClone(maskBmp);
 
                 Intent intent = new Intent(getApplicationContext(), FiltersActivity.class);
                 startActivityForResult(intent, GET_MASK_IMAGE);

@@ -89,7 +89,9 @@ public class FilterFunction {
      *  @param bmp the image
      *  @param saturation the amount of saturation (must be between 0 and +inf)
      */
-    public static void saturation(final Bitmap bmp, final float saturation) {
+    public static void saturation(final Bitmap bmp, float saturation) {
+        saturation /= 100f;
+
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -125,9 +127,13 @@ public class FilterFunction {
      *  A filter that change the luminosity of the image.
      *  This filter use RenderScript.
      *  @param bmp the image
-     *  @param exposure the exposure to use (should be between -inf and 255)
+     *  @param exposure the exposure to use (should be between -100 and 100)
      */
-    public static void brightness(final Bitmap bmp, final float exposure) {
+    public static void brightness(final Bitmap bmp, float exposure) {
+
+        if (exposure <= 0) exposure *= -exposure;
+        exposure *= 2.55f;
+
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -167,9 +173,11 @@ public class FilterFunction {
      *  Reduces the number of discrete luminance values.
      *  This filter use RenderScript.
      *  @param bmp the image
-     *  @param level numbers of luminance values.
+     *  @param level numbers of luminance values. (should be between 0 and 255)
      */
-    public static void threshold(final Bitmap bmp, final float level) {
+    public static void threshold(final Bitmap bmp, float level) {
+        level /= 256f;
+
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -186,9 +194,11 @@ public class FilterFunction {
      *  Makes the image warmer or colder.
      *  This filter use RenderScript.
      *  @param bmp the image
-     *  @param level how powerful is the effect.
+     *  @param level how powerful is the effect (should be between -100 and 100)
      */
-    public static void temperature(final Bitmap bmp, final float level) {
+    public static void temperature(final Bitmap bmp, float level) {
+        level /= 10f;
+
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -214,7 +224,9 @@ public class FilterFunction {
      *  @param bmp the image
      *  @param level how much tint to apply.
      */
-    public static void tint(final Bitmap bmp, final float level) {
+    public static void tint(final Bitmap bmp, float level) {
+        level /= 10f;
+
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -263,7 +275,9 @@ public class FilterFunction {
      * @param changeSaturation if we change the saturation or not
      */
 
-    public static void colorize(final Bitmap bmp, final int hue, final float saturation, boolean changeSaturation) {
+    public static void colorize(final Bitmap bmp, final int hue, float saturation, boolean changeSaturation) {
+        saturation /= 100f;
+
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
         ScriptC_colorize colorizeScript = new ScriptC_colorize(rs);
@@ -274,6 +288,10 @@ public class FilterFunction {
         colorizeScript.forEach_colorize(input, output);
         output.copyTo(bmp);
         RenderScriptTools.cleanRenderScript(colorizeScript, input, output);
+    }
+
+    public static void changeHue(final Bitmap bmp, final int hue) {
+        colorize(bmp, hue,0, false);
     }
 
     /**
@@ -443,9 +461,12 @@ public class FilterFunction {
      *  Highlights the contour of an image.
      *  This filter use RenderScript.
      *  @param bmp the image
-     *  @param amount size of the blur (must be between 0 and 25)
+     *  @param amount size of the blur (must be between -100 and 100)
      */
-    public static void sharpen(final Bitmap bmp, final float amount) {
+    public static void sharpen(final Bitmap bmp, float amount) {
+
+        amount /= 200f;
+
         float[] kernel = {
                 0f,         -amount,            0f,
                 -amount,    1f + 4f * amount,   -amount,
@@ -549,21 +570,16 @@ public class FilterFunction {
 
     }
 
+    /**
+     *
+     * @param bmp
+     * @param texture
+     * @param typeOfBlend
+     * @param parameter should be between 0 and 100f
+     */
+    public static void applyTexture(final Bitmap bmp, final Bitmap texture, final BlendType typeOfBlend, float parameter) {
 
-    public static void sketch(final Bitmap bmp, final int contour, final float saturation) {
-
-        Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
-
-        // First layer
-        laplacian(bmp, contour);
-        invert(bmp);
-
-        // Using layer 1's luminosity and apply it to layer 2
-        applyTexture(bmp, bmpCopy, BlendType.LUMINOSITY, saturation);
-    }
-
-
-    public static void applyTexture(final Bitmap bmp, final Bitmap texture, final BlendType typeOfBlend, final float parameter) {
+        parameter /= 100f;
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation pixels = Allocation.createFromBitmap(rs, texture);
@@ -596,7 +612,14 @@ public class FilterFunction {
         RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
-    public static void gamma(final Bitmap bmp, final float gamma) {
+    /**
+     *
+     * @param bmp
+     * @param gamma should be between -100 and 100
+     */
+    public static void gamma(final Bitmap bmp, float gamma) {
+
+        gamma =  gamma / 100f + 1f;
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
@@ -637,7 +660,9 @@ public class FilterFunction {
         RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
-    public static void burnValues(final Bitmap bmp, final float level) {
+    public static void burnValues(final Bitmap bmp, float level) {
+
+        level /= 50f;
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());
@@ -656,7 +681,9 @@ public class FilterFunction {
         RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
-    public static void constrastBurn(final Bitmap bmp, float level) {
+    public static void contrastBurn(final Bitmap bmp, float level) {
+
+        level /= 100f;
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation output = Allocation.createTyped(rs, input.getType());

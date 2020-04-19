@@ -51,6 +51,9 @@ public class Settings {
     public static final int CROP_OPACITY = 100;
     public static final int CROP_BORDER_SIZE = 5;
 
+    public static final String FILTER_MASK_NAME = "Create mask";
+    public static final String FILTER_ROTATION = "Rotation";
+
 
 
     // COLOR
