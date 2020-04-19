@@ -327,19 +327,27 @@ Thus, refreshing the image will actually make the problem worse.
 
 - On emulator, seekbars with a negative minimum value cannot go below 0, but it work just fine on most phones we tested.
 
-## FUTURE FEATURES
+## New features since last release
 
-The following features will **surely** be added before 04/15/2020:
- - [X] A "Cartoon" filter that limits the number of colors and highlight the contour of the image.
- - [X] The ability to rotate the image by 90°, -90° or 180°.
- - [X] New presets that redirect the user to already existing filters. The preset will change the default values of this filter.
- - [X] The ability the remove the last applied filter (currently we can only remove all applied filters).
+Filters:
+ - [X] Added a "Cartoon" and "Sketch" filters that limits the number of colors and highlight the contour of the image.
+ - [X] Added the ability to flip the image horizontally, and also to change the contrast and gamma.
+ - [X] Added rotation of the image at any degrees and crop (also possible to keep the aspect ratio).
+ - [X] Added 14 presets (a quick way to apply filter, without parameters).
+ 
+Tools:
+ - [X] Added “Color Picker”, a tool to select a hue directly from the image.
+ - [X] Added "History" that gives the user the ability to revert to any prior state of the image.
+ - [X] Added a setting menu where the user can tweak some parameters. Those values are saved on the phone.
+ - [X] Added a menu to view most of the EXIF values of the image, such as the ISO, f-number or where the photo was taken.
+ - [X] Ability to only apply a filter to a part of the image. This "mask" is drawn by the user using its finger.
+ 
+UI:
+ - [X] Complete overall of the user interface, with menus, separate interfaces, and the preview of each filter.
+ - [X] Added dark/light theme.
+ - [X] ImageViewZoomScroll has been entirely rewritten. It is now using a matrix to zoom and translate the image.
+ - [X] Bug removal: when the histogram was resized, the image was stretching.
+ 
+Load and save:
+ - [X] It is now possible to save the image in its original resolution, and have a smaller resolution while using the app.
  - [X] Bug removal: take a picture from the camera at higher resolution than 187px by 250px.
-
-The following features will **likely** be added before 04/15/2020:
-- [X] Rotate the image at any degrees, which means that the image should also get cropped.
-- [X] The ability to crop the image.
-- [X] Save all state of the image. That way, we can have a "Filter History" and go back to any prior state.
-- [X] An idea to keep the UI interactive while saving the image at its original resolution would be to work on a preview sized image, save all the filters applied, and then apply them again to the full size image when saving. It is okay for the user to wait a few seconds when saving, but not while using the UI.
-
-
