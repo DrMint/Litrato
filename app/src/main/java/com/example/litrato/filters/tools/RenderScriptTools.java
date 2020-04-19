@@ -165,6 +165,7 @@ public class RenderScriptTools {
      * @param input the Allocations to destroy.
      * @param output the Allocations to destroy.
      */
+    @SuppressWarnings("unused")
     public static void cleanRenderScript(final Script script, final RenderScript rs, Allocation input, Allocation output) {
         Allocation[] allocations = {input, output};
         cleanRenderScript(script, rs, allocations);

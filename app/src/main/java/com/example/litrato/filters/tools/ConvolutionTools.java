@@ -217,7 +217,7 @@ package com.example.litrato.filters.tools;
     }
 
     /**
-     *  If the coodinates given in parameter are outside the image, returns the closest pixel.
+     *  If the coordinates given in parameter are outside the image, returns the closest pixel.
      *  It will be much more efficient to hardcode this "fix" directly in each
      *  @param pixels the pixels of the image
      *  @param imageWidth the image's width

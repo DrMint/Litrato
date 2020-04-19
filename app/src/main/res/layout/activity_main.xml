@@ -211,7 +211,7 @@
             android:id="@+id/toolsBar"
             style="@android:style/ButtonBar"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="wrap_content"
             android:layout_above="@id/bottomBar"
             android:collapseColumns="true"
             android:visibility="gone">

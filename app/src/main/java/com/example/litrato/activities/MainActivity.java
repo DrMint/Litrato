@@ -15,17 +15,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.content.Intent;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-
-import java.util.Objects;
 
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -36,6 +32,7 @@ import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;
 import com.example.litrato.R;
 import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.activities.ui.ColorTheme;
 import com.example.litrato.activities.ui.ImageViewZoomScroll;
 import com.example.litrato.activities.ui.ViewTools;
 import com.example.litrato.filters.AppliedFilter;
@@ -117,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
      * The object history is used to save all prior image state and revert to any of them when
      * the user so desire.
      */
-    private History history = new History();
+    private final History history = new History();
 
     private ImageViewZoomScroll layoutImageView;
     private Toolbar     layoutToolbar;
@@ -136,8 +133,8 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         appContext = getApplicationContext();
-
         setContentView(R.layout.activity_main);
+        Settings.setDPValuesInPixel(getAppContext());
 
         layoutToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(layoutToolbar);
@@ -156,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
         ViewGroup fancyBar = findViewById(R.id.fancyMenu);
         ViewGroup blurBar = findViewById(R.id.blurMenu);
         ViewGroup contourBar = findViewById(R.id.contourMenu);
-
 
         menuItemListener = new View.OnClickListener()  {
 
@@ -185,13 +181,11 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-
         FileInputOutput.askPermissionToReadWriteFiles(this);
 
         // Create the lists of filters and create renderscript object
         Filter.generateFilters(getApplicationContext());
         FilterFunction.initializeRenderScript(getApplicationContext());
-
 
         // Menu creation
         {
@@ -386,38 +380,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void applyColorTheme() {
+        ColorTheme.setColorTheme(getAppContext());
+        ColorTheme.window(getAppContext(), getWindow());
 
-        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
+        ColorTheme.toolBar(getAppContext(), layoutToolbar, getSupportActionBar());
 
-        historyBar.setBackgroundColor(Settings.COLOR_GREY);
-        historyTitle.setTextColor(Settings.COLOR_TEXT);
+        ColorTheme.background(historyBar, false);
+        ColorTheme.textView(historyTitle);
 
-        Objects.requireNonNull(getSupportActionBar()).setTitle("");
-
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
-        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
-
-        if (!PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE)) {
-        //if (!MainActivity.preferences.getBoolean(Settings.PREFERENCE_DARK_MODE, Settings.DEFAULT_DARK_MODE)) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            layoutToolbar.setPopupTheme(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        } else {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            layoutToolbar.setPopupTheme(View.SYSTEM_UI_FLAG_VISIBLE);
-        }
-
-        layoutToolbar.getMenu().getItem(0).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.open));
-        layoutToolbar.getMenu().getItem(1).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.history));
-        layoutToolbar.getMenu().getItem(2).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.save));
-        layoutToolbar.getMenu().getItem(4).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.rotateleft));
-        layoutToolbar.getMenu().getItem(5).setIcon(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.rotateright));
-        layoutToolbar.setOverflowIcon(ImageTools.getThemedIcon(this, R.drawable.overflow));
-
-        BottomMenu.applyColorTheme();
-
+        ColorTheme.bottomMenu();
     }
 
     @Override

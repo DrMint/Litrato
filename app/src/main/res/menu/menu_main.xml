@@ -24,7 +24,7 @@
         android:title="Save"
         app:showAsAction="always" />
     <item
-        android:id="@+id/action_seperator"
+        android:id="@+id/action_separator"
         android:enabled="false"
         android:orderInCategory="2"
         android:title=""

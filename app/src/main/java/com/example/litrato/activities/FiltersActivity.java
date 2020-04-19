@@ -2,20 +2,15 @@ package com.example.litrato.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
@@ -28,15 +23,14 @@ import android.widget.TextView;
 import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;
 import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.activities.ui.ColorTheme;
 import com.example.litrato.activities.ui.ImageViewZoomScroll;
 import com.example.litrato.R;
 import com.example.litrato.activities.ui.ViewTools;
 import com.example.litrato.filters.AppliedFilter;
 import com.example.litrato.filters.BlendType;
 import com.example.litrato.filters.Filter;
-import com.example.litrato.filters.FilterApplyInterface;
 import com.example.litrato.filters.FilterFunction;
-import com.example.litrato.filters.FilterPreviewInterface;
 import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
 import com.example.litrato.tools.PointPercentage;
@@ -49,9 +43,9 @@ public class FiltersActivity extends AppCompatActivity {
     static AppliedFilter activityAppliedFilter;
     static Bitmap activityBitmap;
 
-    static Filter subActivityFilter;
-    static Bitmap subActivityBitmap;
-    static Bitmap subActivityMaskBmp;
+    private static Filter subActivityFilter;
+    private static Bitmap subActivityBitmap;
+    private static Bitmap subActivityMaskBmp;
 
     private Bitmap originalImage;
     private Bitmap filteredImage;
@@ -180,69 +174,29 @@ public class FiltersActivity extends AppCompatActivity {
 
 
     private void applyColorTheme() {
+        ColorTheme.setColorTheme(getApplicationContext());
+        ColorTheme.window(getApplicationContext(), getWindow());
 
-        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
+        ColorTheme.background(filterMenu, true);
+        ColorTheme.background(layoutButtonApply, true);
+        ColorTheme.background(layoutCancel, true);
 
-        filterMenu.setBackgroundColor(Settings.COLOR_SELECTED);
-        layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
+        ColorTheme.textView(layoutSwitchValue1);
+        ColorTheme.textView(layoutSeekBarValue1);
+        ColorTheme.textView(layoutSeekBarValue2);
 
-        layoutButtonApply.setBackgroundColor(Settings.COLOR_GREY);
-        layoutCancel.setBackgroundColor(Settings.COLOR_GREY);
+        ColorTheme.button(layoutFilterMenuButton, true);
 
-        layoutSwitchValue1.setTextColor(Settings.COLOR_TEXT);
+        ColorTheme.switchL(layoutSwitch1);
 
-        layoutFilterMenuButton.setTextColor(Settings.COLOR_TEXT);
+        ColorTheme.seekBar(layoutSeekBar1);
+        ColorTheme.seekBar(layoutSeekBar2);
 
-        layoutSeekBarValue1.setTextColor(Settings.COLOR_TEXT);
-        layoutSeekBarValue2.setTextColor(Settings.COLOR_TEXT);
-        layoutSwitch1.setTextColor(Settings.COLOR_TEXT);
-
-        ColorStateList thumbStates = new ColorStateList(
-                new int[][]{
-                        new int[]{-android.R.attr.state_enabled},
-                        new int[]{android.R.attr.state_checked},
-                        new int[]{}
-                },
-                new int[]{
-                        Settings.COLOR_TEXT,
-                        Settings.COLOR_TEXT,
-                        Settings.COLOR_TEXT
-                }
-        );
-        layoutSwitch1.setThumbTintList(thumbStates);
-        layoutSeekBar1.setThumbTintList(thumbStates);
-        layoutSeekBar2.setThumbTintList(thumbStates);
-
-        ColorStateList trackStates = new ColorStateList(
-                new int[][]{
-                        new int[]{-android.R.attr.state_enabled},
-                        new int[]{}
-                },
-                new int[]{
-                        Settings.COLOR_BACKGROUND,
-                        Settings.COLOR_BACKGROUND
-                }
-        );
-        layoutSwitch1.setTrackTintList(trackStates);
-        layoutSwitch1.setTrackTintMode(PorterDuff.Mode.OVERLAY);
-
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
-        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
-
-        if (!PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE)) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        } else {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-        }
-
-        layoutPickButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.pick));
-        layoutMaskButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.mask));
-        layoutHistogramButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.histogram));
-        layoutCancel.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.cancel));
-        layoutButtonApply.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.valid));
+        ColorTheme.icon(getApplicationContext(), layoutPickButton, R.drawable.pick);
+        ColorTheme.icon(getApplicationContext(), layoutMaskButton, R.drawable.mask);
+        ColorTheme.icon(getApplicationContext(), layoutHistogramButton, R.drawable.histogram);
+        ColorTheme.icon(getApplicationContext(), layoutCancel, R.drawable.cancel);
+        ColorTheme.icon(getApplicationContext(), layoutButtonApply, R.drawable.valid);
     }
 
 
@@ -345,7 +299,7 @@ public class FiltersActivity extends AppCompatActivity {
         } else {
 
             filterMenu.setVisibility(View.GONE);
-            layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_GREY);
+            ColorTheme.button(layoutFilterMenuButton, false);
 
         }
 
@@ -557,10 +511,10 @@ public class FiltersActivity extends AppCompatActivity {
 
                 if (selectedFilter.allowFilterMenu) {
                     if (!ViewTools.isVisible(filterMenu)) {
-                        layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
+                        ColorTheme.button(layoutFilterMenuButton, true);
                         filterMenu.setVisibility(View.VISIBLE);
                     } else {
-                        v.setBackgroundColor(Settings.COLOR_GREY);
+                        ColorTheme.button(layoutFilterMenuButton, false);
                         filterMenu.setVisibility(View.GONE);
                     }
                 }

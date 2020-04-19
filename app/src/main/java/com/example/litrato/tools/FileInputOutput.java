@@ -103,8 +103,8 @@ public class FileInputOutput {
     }
 
     public static Bitmap getBitmap(Uri uri, Context context) {
-        String[] proj = { MediaStore.Images.Media.DATA };
-        CursorLoader loader = new CursorLoader(context, uri, proj, null, null, null);
+        String[] strings = { MediaStore.Images.Media.DATA };
+        CursorLoader loader = new CursorLoader(context, uri, strings, null, null, null);
         Cursor cursor = loader.loadInBackground();
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
@@ -153,6 +153,7 @@ public class FileInputOutput {
     }
 
     private static String createUniqueFileName(Context context) {
+        //noinspection SpellCheckingInspection
         return new SimpleDateFormat("yyyyMMdd_HHmmss", context.getResources().getConfiguration().getLocales().get(0)).format(new Date());
     }
 

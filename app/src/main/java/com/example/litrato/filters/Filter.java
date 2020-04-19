@@ -24,7 +24,7 @@ import java.util.List;
 
 public class Filter {
 
-    public static List<Filter> filters = new ArrayList<>();
+    public static final List<Filter> filters = new ArrayList<>();
 
     /**
      * The name displayed in the spinner.
@@ -35,7 +35,7 @@ public class Filter {
      * Does this filter utilize the colorSeekBar.
      */
     public boolean colorSeekBar = false;
-    public boolean colorSeekBarAutoRefresh = true;
+    public final boolean colorSeekBarAutoRefresh = true;
 
     /**
      * Does this filter utilize the first seekBar.
@@ -52,7 +52,7 @@ public class Filter {
      * Does this filter utilize the second seekBar.
      */
     public boolean seekBar2 = false;
-    public boolean seekBar2AutoRefresh = true;
+    public final boolean seekBar2AutoRefresh = true;
     public int seekBar2Min;
     public int seekBar2Set;
     public int seekBar2Max;
@@ -76,12 +76,12 @@ public class Filter {
     private FilterApplyInterface myApplyInterface;
     private FilterPreviewInterface myPreviewInterface;
 
-    private Category category;
+    private final Category category;
     public boolean needFilterActivity = true;
     public boolean allowMasking = true;
     public boolean allowHistogram = true;
     public boolean allowScrollZoom = true;
-    public boolean allowFilterMenu = true;
+    public final boolean allowFilterMenu = true;
 
     public Filter(String name, Category category) {
         this.name = name;
@@ -156,10 +156,12 @@ public class Filter {
         return null;
     }
 
+    @SuppressWarnings("unused")
     public Bitmap preview(final Bitmap bmp, final Bitmap maskBmp, final Context context) {
         return preview(bmp, maskBmp, context, 0, seekBar1Set, seekBar2Set, switch1Default, new Point(0,0), new Point(0,0));
     }
 
+    @SuppressWarnings("unused")
     public Bitmap preview(final Bitmap bmp, final Context context) {
         final Bitmap maskBmp = ImageTools.bitmapClone(bmp);
         ImageTools.fillWithColor(maskBmp, Color.WHITE);

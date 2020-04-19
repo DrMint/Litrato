@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class History {
 
-    private ArrayList<AppliedFilter> historic;
+    private final ArrayList<AppliedFilter> historic;
 
     public History() {
         this.historic = new ArrayList<>();

@@ -36,7 +36,6 @@ public class ImageTools {
 
     @SuppressWarnings({"SuspiciousNameCombination", "SameParameterValue"})
     public static Bitmap toSquare(Bitmap bmp, int newSize) {
-
         int currentWidth = bmp.getWidth();
         int currentHeight =  bmp.getHeight();
 
@@ -56,10 +55,7 @@ public class ImageTools {
 
         bmp = Bitmap.createBitmap(bmp, newX, newY, newWidth, newHeight);
 
-        // L'image est maintenant un carrée
-
         return Bitmap.createScaledBitmap(bmp, newSize, newSize, true);
-
     }
 
     /**

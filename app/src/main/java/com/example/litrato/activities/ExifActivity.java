@@ -6,8 +6,6 @@ import android.os.Bundle;
 
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -16,21 +14,18 @@ import androidx.exifinterface.media.ExifInterface;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 import com.example.litrato.R;
-import com.example.litrato.activities.tools.Preference;
-import com.example.litrato.activities.tools.PreferenceManager;
-import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.activities.ui.ColorTheme;
 import com.example.litrato.tools.FileInputOutput;
-import com.example.litrato.tools.ImageTools;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
@@ -48,7 +43,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView fNumber;
     private TextView exposureTime;
     private TextView exposureBias;
-    private TextView focalLenght;
+    private TextView focalLength;
     private TextView exposureMode;
     private TextView exposureProgram;
     private TextView flash;
@@ -58,7 +53,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView imageResolution;
     private TextView imageSize;
 
-    private TextView lattitude;
+    private TextView latitude;
     private TextView longitude;
     private TextView altitude;
 
@@ -83,7 +78,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         fNumber = findViewById(R.id.fNumber);
         exposureTime = findViewById(R.id.exposureTime);
         exposureBias = findViewById(R.id.exposureBias);
-        focalLenght = findViewById(R.id.focalLenght);
+        focalLength = findViewById(R.id.focalLenght);
         exposureMode = findViewById(R.id.exposureMode);
         exposureProgram = findViewById(R.id.exposureProgram);
         flash = findViewById(R.id.flash);
@@ -93,7 +88,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         imageResolution = findViewById(R.id.imageResolution);
         imageSize = findViewById(R.id.imageSize);
 
-        lattitude = findViewById(R.id.lattitude);
+        latitude = findViewById(R.id.latitude);
         longitude = findViewById(R.id.longitude);
         altitude = findViewById(R.id.altitude);
 
@@ -120,74 +115,67 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void applyColorTheme() {
+        ColorTheme.setColorTheme(getApplicationContext());
+        ColorTheme.window(getApplicationContext(), getWindow());
 
-        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
+        ColorTheme.textView(exifTitle);
+        ColorTheme.textView(cameraModel);
+        ColorTheme.textView(cameraConstructor);
+        ColorTheme.textView(timeDate);
+        ColorTheme.textView(iso);
+        ColorTheme.textView(fNumber);
+        ColorTheme.textView(exposureTime);
+        ColorTheme.textView(exposureBias);
+        ColorTheme.textView(focalLength);
+        ColorTheme.textView(exposureMode);
+        ColorTheme.textView(exposureProgram);
+        ColorTheme.textView(flash);
+        ColorTheme.textView(colorMode);
+        ColorTheme.textView(fileName);
+        ColorTheme.textView(imageMpx);
+        ColorTheme.textView(imageResolution);
+        ColorTheme.textView(imageSize);
+        ColorTheme.textView(latitude);
+        ColorTheme.textView(longitude);
+        ColorTheme.textView(altitude);
 
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
-        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
-
-
-        exifTitle.setTextColor(Settings.COLOR_TEXT);
-        cameraModel.setTextColor(Settings.COLOR_TEXT);
-        cameraConstructor.setTextColor(Settings.COLOR_TEXT);
-        timeDate.setTextColor(Settings.COLOR_TEXT);
-        iso.setTextColor(Settings.COLOR_TEXT);
-        fNumber.setTextColor(Settings.COLOR_TEXT);
-        exposureTime.setTextColor(Settings.COLOR_TEXT);
-        exposureBias.setTextColor(Settings.COLOR_TEXT);
-        focalLenght.setTextColor(Settings.COLOR_TEXT);
-        exposureMode.setTextColor(Settings.COLOR_TEXT);
-        exposureProgram.setTextColor(Settings.COLOR_TEXT);
-        flash.setTextColor(Settings.COLOR_TEXT);
-        colorMode.setTextColor(Settings.COLOR_TEXT);
-        fileName.setTextColor(Settings.COLOR_TEXT);
-        imageMpx.setTextColor(Settings.COLOR_TEXT);
-        imageResolution.setTextColor(Settings.COLOR_TEXT);
-        imageSize.setTextColor(Settings.COLOR_TEXT);
-
-        lattitude.setTextColor(Settings.COLOR_TEXT);
-        longitude.setTextColor(Settings.COLOR_TEXT);
-        altitude.setTextColor(Settings.COLOR_TEXT);
-
-        returnButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.goback));
-
+        ColorTheme.icon(getApplicationContext(), returnButton, R.drawable.goback);
     }
 
 
 
-    void refreshValues(ExifInterface exif, File imgFile) {
+    private void refreshValues(ExifInterface exif, File imgFile) {
         cameraModel.setText(exif.getAttribute(ExifInterface.TAG_MODEL));
         cameraConstructor.setText(exif.getAttribute(ExifInterface.TAG_MAKE));
 
         timeDate.setText(exif.getAttribute(ExifInterface.TAG_DATETIME));
 
+        //noinspection deprecation
         if (exif.hasAttribute(ExifInterface.TAG_ISO_SPEED_RATINGS)) {
+            //noinspection deprecation
             iso.setText(exif.getAttribute(ExifInterface.TAG_ISO_SPEED_RATINGS));
-            fNumber.setText("f/" + exif.getAttribute(ExifInterface.TAG_F_NUMBER));
+            fNumber.setText(MessageFormat.format("f/{0}", exif.getAttribute(ExifInterface.TAG_F_NUMBER)));
         }
 
         if (exif.hasAttribute(ExifInterface.TAG_FOCAL_LENGTH)) {
-            String tmpFocalLenght = exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH);
-            String[] parts = tmpFocalLenght.split(Pattern.quote("/"));
-            focalLenght.setText(Integer.parseInt(parts[0]) / Integer.parseInt(parts[1]) + " mm");
+            String tmpFocalLength = exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH);
+            String[] parts = tmpFocalLength.split(Pattern.quote("/"));
+            focalLength.setText(MessageFormat.format("{0} mm", Integer.parseInt(parts[0]) / Integer.parseInt(parts[1])));
         }
 
 
         if (exif.hasAttribute(ExifInterface.TAG_EXPOSURE_TIME)) {
-            int tmpExposure = (int) (1 / Double.parseDouble(exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)));
-            exposureTime.setText("1/" + tmpExposure + " s");
+            int tmpExposure = (int) (1 / Double.parseDouble(Objects.requireNonNull(exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME))));
+            exposureTime.setText(MessageFormat.format("1/{0} s", tmpExposure));
 
         }
 
         if (exif.hasAttribute(ExifInterface.TAG_EXPOSURE_BIAS_VALUE)) {
             String value = exif.getAttribute(ExifInterface.TAG_EXPOSURE_BIAS_VALUE);
-            if (value.startsWith("0")) {
-                exposureBias.setText("0 EV");
+            if (Objects.requireNonNull(value).startsWith("0")) {
+                exposureBias.setText(R.string.EV_0);
             } else {
-                exposureBias.setText(value + " EV");
+                exposureBias.setText(MessageFormat.format("{0} EV", value));
             }
 
         } else {
@@ -251,7 +239,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         if (exif.hasAttribute(ExifInterface.TAG_COLOR_SPACE)) {
-            if (Integer.parseInt(exif.getAttribute(ExifInterface.TAG_COLOR_SPACE)) == ExifInterface.COLOR_SPACE_S_RGB) {
+            if (Integer.parseInt(Objects.requireNonNull(exif.getAttribute(ExifInterface.TAG_COLOR_SPACE))) == ExifInterface.COLOR_SPACE_S_RGB) {
                 colorMode.setText("RBG");
             } else {
                 colorMode.setText("UNCALIBRATED");
@@ -264,12 +252,12 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         if (exif.hasAttribute(ExifInterface.TAG_GPS_LATITUDE)) {
             double[] latLong;
             latLong = exif.getLatLong();
-            lattitude.setText(df.format(latLong[0]));
+            latitude.setText(df.format(Objects.requireNonNull(latLong)[0]));
             longitude.setText(df.format(latLong[1]));
 
             if (exif.hasAttribute(ExifInterface.TAG_GPS_ALTITUDE)) {
                 String tmpAltitude = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE);
-                String[] parts = tmpAltitude.split(Pattern.quote("/"));
+                String[] parts = Objects.requireNonNull(tmpAltitude).split(Pattern.quote("/"));
                 if (parts.length == 2) {
                     altitude.setText(Integer.parseInt(parts[0]) / Integer.parseInt(parts[1]) + " m");
                 } else if (parts.length == 1) {
@@ -315,11 +303,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
                 latLong = exif.getLatLong();
 
                 // If dark theme, applies dark theme for the map
-                if (PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE)) {
-                    googleMap.setMapStyle(
-                            MapStyleOptions.loadRawResourceStyle(
-                                    this, R.raw.style_gmap_night));
-                }
+                ColorTheme.googleMap(getApplicationContext(), googleMap);
 
                 // Add a marker in Sydney and move the camera
                 LatLng photoGPS = new LatLng(latLong[0], latLong[1]);

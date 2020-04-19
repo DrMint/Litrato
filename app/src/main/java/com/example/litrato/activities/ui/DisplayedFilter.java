@@ -4,7 +4,7 @@ import android.widget.TextView;
 
 import com.example.litrato.filters.Filter;
 
-public class DisplayedFilter {
+class DisplayedFilter {
 
     public final TextView textView;
     public final Filter filter;

@@ -136,7 +136,7 @@ public class BottomMenu {
                     drawable = new BitmapDrawable(MainActivity.getAppContext().getResources(), filteredMiniature);
                     drawable.setBounds(0, 0, Settings.MINIATURE_DISPLAYED_SIZE, Settings.MINIATURE_DISPLAYED_SIZE);
 
-                    displayedFilter.textView.setCompoundDrawablePadding(25);
+                    displayedFilter.textView.setCompoundDrawablePadding(Settings.PADDING_BETWEEN_MINIATURE_AND_LABEL);
                     displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
                 }
             }
@@ -151,25 +151,22 @@ public class BottomMenu {
         textView.setClickable(true);
         textView.setText(filter.getName());
         textView.setAllCaps(true);
-        textView.setMaxLines(2);
-        textView.setHorizontallyScrolling(false);
-        textView.setTextColor(Settings.COLOR_TEXT);
-        textView.setTextSize(12);
+        ColorTheme.textView(textView);
+        textView.setTextSize(Settings.MINIATURE_AND_TOOL_TEXT_SIZE_SP);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setBackgroundColor(Color.TRANSPARENT);
 
         if (filter.getFilterCategory() == Category.TOOL) {
-
             textView.setMaxWidth(Settings.TOOL_DISPLAYED_SIZE);
-            textView.setHeight((int) (Settings.TOOL_DISPLAYED_SIZE * 1.8));
+            textView.setHeight(Settings.TOOL_DISPLAYED_SIZE + Settings.PADDING_BETWEEN_MINIATURE_AND_LABEL + Settings.MINIATURE_AND_TOOL_TEXT_SIZE * 3);
             TableRow.LayoutParams params = new TableRow.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT,4);
             params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
             textView.setLayoutParams(params);
-
         } else {
-
+            textView.setMaxLines(2);
+            textView.setHorizontallyScrolling(false);
             textView.setMaxWidth(Settings.MINIATURE_DISPLAYED_SIZE);
-            textView.setHeight((int) (Settings.MINIATURE_DISPLAYED_SIZE * 1.4));
+            textView.setHeight(Settings.MINIATURE_DISPLAYED_SIZE + Settings.PADDING_BETWEEN_MINIATURE_AND_LABEL + Settings.MINIATURE_AND_TOOL_TEXT_SIZE * 3);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
             params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
             textView.setLayoutParams(params);
@@ -188,12 +185,12 @@ public class BottomMenu {
 
     private void close() {
         button.setTypeface(submenuUnselected);
-        if (parent == null) button.setBackgroundColor(Settings.COLOR_GREY);
+        ColorTheme.button(button, parent != null);
         bar.setVisibility(View.GONE);
     }
 
     private void open() {
-        this.button.setBackgroundColor(Settings.COLOR_SELECTED);
+        ColorTheme.button(this.button, true);
         button.setTypeface(submenuSelected);
         bar.setVisibility(View.VISIBLE);
 
@@ -234,7 +231,6 @@ public class BottomMenu {
                     } else {
                         bottomMenu.container.addView(textView);
                     }
-
                     displayedFilters.add(new DisplayedFilter(textView, currentFilter));
                 }
             }
@@ -245,7 +241,7 @@ public class BottomMenu {
         for (BottomMenu bottomMenu:bottomMenus) {
             if (bottomMenu.parent == null) {
                 bottomMenu.button.setTypeface(submenuUnselected);
-                bottomMenu.button.setBackgroundColor(Settings.COLOR_GREY);
+                ColorTheme.button(bottomMenu.button, false);
                 bottomMenu.bar.setVisibility(View.GONE);
             }
         }
@@ -260,19 +256,12 @@ public class BottomMenu {
 
     static public void applyColorTheme() {
         for (BottomMenu bottomMenu:bottomMenus) {
+            ColorTheme.button(bottomMenu.button, bottomMenu.parent != null);
             bottomMenu.button.setTypeface(submenuUnselected);
-            bottomMenu.button.setTextColor(Settings.COLOR_TEXT);
-            if (bottomMenu.parent == null) bottomMenu.button.setBackgroundColor(Settings.COLOR_GREY);
-            bottomMenu.bar.setBackgroundColor(Settings.COLOR_SELECTED);
+            ColorTheme.background(bottomMenu.bar, true);
         }
-
         for (DisplayedFilter displayedFilter:displayedFilters) {
-            displayedFilter.textView.setTextColor(Settings.COLOR_TEXT);
-            if (displayedFilter.filter.getFilterCategory() == Category.TOOL) {
-                Drawable drawable = ImageTools.getThemedIcon(MainActivity.getAppContext(), displayedFilter.filter.getIcon());
-                displayedFilter.textView.setCompoundDrawablePadding(25);
-                displayedFilter.textView.setCompoundDrawables(null, drawable,null,null);
-            }
+            ColorTheme.icon(displayedFilter);
         }
     }
 }

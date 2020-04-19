@@ -20,7 +20,7 @@ import static android.graphics.Bitmap.createBitmap;
  * @version 1.0
  * @since   2020-31-01
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "deprecation"})
 @Deprecated class ImageViewZoomScrollDeprecated {
 
     /**
@@ -59,22 +59,22 @@ import static android.graphics.Bitmap.createBitmap;
 
 
     @SuppressLint("ClickableViewAccessibility")
-    void setOnTouchListener(View.OnTouchListener myTouchListener) {
+    @Deprecated void setOnTouchListener(View.OnTouchListener myTouchListener) {
         imageView.setOnTouchListener(myTouchListener);
     }
 
     @SuppressWarnings("WeakerAccess")
-    ImageViewZoomScrollDeprecated(ImageView imageView, Bitmap bmp) {
+    @Deprecated ImageViewZoomScrollDeprecated(ImageView imageView, Bitmap bmp) {
         this.imageView = imageView;
         this.bmp = bmp;
     }
 
-    ImageViewZoomScrollDeprecated(ImageView imageView) {
+    @Deprecated ImageViewZoomScrollDeprecated(ImageView imageView) {
         // Generate a empty image
         this(imageView, ImageTools.bitmapCreate(100,100));
     }
 
-    void refresh() {
+    @Deprecated void refresh() {
         calculateNewBmpSize();
         if (newWidth == 0 || newHeight == 0) {
             imageView.setImageBitmap(bmp);
@@ -85,7 +85,7 @@ import static android.graphics.Bitmap.createBitmap;
         }
     }
 
-    void reset() {
+    @Deprecated void reset() {
         setZoom(1.f);
         setX(newWidth / 2);
         setY(newHeight / 2);
@@ -97,19 +97,19 @@ import static android.graphics.Bitmap.createBitmap;
      * @param x the shift in X axis.
      * @param y the shift in Y axis.
      */
-    void translate(int x, int y) {
+    @Deprecated void translate(int x, int y) {
         setX(center.x + x);
         setY(center.y + y);
     }
 
-    void sanitizeBmpCoordinates(Point p) {
+    @Deprecated void sanitizeBmpCoordinates(Point p) {
         if (p.x < 0) p.x = 0;
         if (p.y < 0) p.y = 0;
         if (p.x > bmp.getWidth() - 1) p.x = bmp.getWidth() - 1;
         if (p.y > bmp.getHeight() - 1) p.y = bmp.getHeight() - 1;
     }
 
-    void setImageBitmap(Bitmap newBmp) {
+    @Deprecated void setImageBitmap(Bitmap newBmp) {
         if (newBmp.getWidth() != bmp.getWidth() || newBmp.getHeight() != bmp.getHeight()) {
             reset();
         }
@@ -117,7 +117,8 @@ import static android.graphics.Bitmap.createBitmap;
         refresh();
     }
 
-    void setZoom(float zoom) {
+    @SuppressWarnings("SameParameterValue")
+    @Deprecated void setZoom(float zoom) {
         this.zoom = zoom;
         if (zoom > maxZoom) this.zoom = maxZoom;
         if (this.zoom < 1f) {
@@ -131,14 +132,14 @@ import static android.graphics.Bitmap.createBitmap;
         translate((tmpWidth - newWidth) / 2, (tmpHeight - newHeight) / 2);
     }
 
-    private void setX(int x) {
+    @Deprecated private void setX(int x) {
         center.x = x;
         if (center.x < 0) center.x = 0;
         if (center.x > bmp.getWidth()) center.x = bmp.getWidth();
         if (center.x + newWidth > bmp.getWidth()) center.x = bmp.getWidth() - newWidth;
     }
 
-    private void setY(int y) {
+    @Deprecated private void setY(int y) {
         center.y = y;
         if (center.y < 0) center.y = 0;
         if (center.y > bmp.getHeight()) center.y = bmp.getHeight();
@@ -146,22 +147,22 @@ import static android.graphics.Bitmap.createBitmap;
     }
 
     @SuppressWarnings("WeakerAccess")
-    void setCenter(int x, int y) {
+    @Deprecated void setCenter(int x, int y) {
         setX(x - newWidth / 2);
         setY(y - newHeight / 2);
     }
 
-    void setCenter(Point p) {
+    @Deprecated void setCenter(Point p) {
         setCenter(p.x, p.y);
     }
 
     @SuppressWarnings("SameParameterValue")
-    void setMaxZoom(float maxZoom) {
+    @Deprecated void setMaxZoom(float maxZoom) {
         if (maxZoom < 1f) maxZoom = 1f;
         this.maxZoom = maxZoom;
     }
 
-    float getZoom() {return zoom;}
+    @Deprecated float getZoom() {return zoom;}
 
     /**
      * Returns the top left point of the image.
@@ -169,7 +170,7 @@ import static android.graphics.Bitmap.createBitmap;
      * It makes it unintuitive to get this important points.
      * @return the top left point of the image.
      */
-    private Point getDisplayedImageTopLeft() {
+    @Deprecated private Point getDisplayedImageTopLeft() {
 
         int iViewWidth = imageView.getMeasuredWidth();
         int iViewHeight = imageView.getMeasuredHeight();
@@ -204,14 +205,14 @@ import static android.graphics.Bitmap.createBitmap;
      * It makes it unintuitive to get this important points.
      * @return the down right point of the image.
      */
-    private Point getDisplayedImageDownRight() {
+    @Deprecated private Point getDisplayedImageDownRight() {
         Point result = getDisplayedImageTopLeft();
         result.x = imageView.getMeasuredWidth() - result.x;
         result.y = imageView.getMeasuredHeight() - result.y;
         return result;
     }
 
-    Point imageViewTouchPointToBmpCoordinates(Point touch) {
+    @Deprecated Point imageViewTouchPointToBmpCoordinates(Point touch) {
         Point a = getDisplayedImageTopLeft();
         Point b = getDisplayedImageDownRight();
         Point result = new Point();
@@ -220,7 +221,7 @@ import static android.graphics.Bitmap.createBitmap;
         return result;
     }
 
-    private void selectCorrectScaleType() {
+    @Deprecated private void selectCorrectScaleType() {
         Point p = getDisplayedImageTopLeft();
         if (p.isEquals(0,0)) {
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -229,7 +230,7 @@ import static android.graphics.Bitmap.createBitmap;
         }
     }
 
-    private void calculateNewBmpSize() {
+    @Deprecated private void calculateNewBmpSize() {
 
         int iViewWidth = imageView.getMeasuredWidth();
         int iViewHeight = imageView.getMeasuredHeight();
@@ -272,7 +273,7 @@ import static android.graphics.Bitmap.createBitmap;
         selectCorrectScaleType();
     }
 
-    int getPixelAt(Point p) {
+    @Deprecated int getPixelAt(Point p) {
         sanitizeBmpCoordinates(p);
         return bmp.getPixel(p.x, p.y);
     }

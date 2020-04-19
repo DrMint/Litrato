@@ -1,11 +1,7 @@
 package com.example.litrato.activities;
 
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
@@ -18,8 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.litrato.R;
 import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;
-import com.example.litrato.activities.tools.Settings;
-import com.example.litrato.tools.ImageTools;
+import com.example.litrato.activities.ui.ColorTheme;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -46,11 +41,11 @@ public class SettingsActivity extends AppCompatActivity {
 
     private ImageButton returnButton;
 
-    private String[] importedBmpArray = new String[] {
+    private final String[] importedBmpArray = new String[] {
             "200", "350", "500", "750", "1000", "1200", "1500", "2000"
     };
 
-    private String[] miniatureArray = new String[] {
+    private final String[] miniatureArray = new String[] {
             "30", "50", "75", "100", "120", "150", "200", "250"
     };
 
@@ -120,66 +115,28 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     private void applyColorTheme() {
+        ColorTheme.setColorTheme(getApplicationContext());
+        ColorTheme.window(getApplicationContext(), getWindow());
 
-        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
+        ColorTheme.textView(settingsTitle);
+        ColorTheme.textView(darkModeTitle);
+        ColorTheme.textView(importedBmpTitle);
+        ColorTheme.textView(importedBmpDesc);
+        ColorTheme.textView(miniatureTitle);
+        ColorTheme.textView(miniatureDesc);
+        ColorTheme.textView(saveOriginalResolutionTitle);
+        ColorTheme.textView(saveOriginalResolutionDesc);
+        ColorTheme.textView(openHistogramByDefaultTitle);
+        ColorTheme.textView(openHistogramByDefaultDesc);
 
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
-        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
+        ColorTheme.switchL(darkModeSwitch);
+        ColorTheme.switchL(saveOriginalResolutionSwitch);
+        ColorTheme.switchL(openHistogramByDefaultSwitch);
 
-        settingsTitle.setTextColor(Settings.COLOR_TEXT);
+        ColorTheme.spinner(miniatureSpinner);
+        ColorTheme.spinner(importedBmpSpinner);
 
-        darkModeTitle.setTextColor(Settings.COLOR_TEXT);
-        darkModeSwitch.setTextColor(Settings.COLOR_TEXT);
-
-        importedBmpTitle.setTextColor(Settings.COLOR_TEXT);
-        importedBmpDesc.setTextColor(Settings.COLOR_TEXT);
-
-        miniatureTitle.setTextColor(Settings.COLOR_TEXT);
-        miniatureDesc.setTextColor(Settings.COLOR_TEXT);
-
-        saveOriginalResolutionTitle.setTextColor(Settings.COLOR_TEXT);
-        saveOriginalResolutionDesc.setTextColor(Settings.COLOR_TEXT);
-        saveOriginalResolutionSwitch.setTextColor(Settings.COLOR_TEXT);
-
-        openHistogramByDefaultTitle.setTextColor(Settings.COLOR_TEXT);
-        openHistogramByDefaultDesc.setTextColor(Settings.COLOR_TEXT);
-        openHistogramByDefaultSwitch.setTextColor(Settings.COLOR_TEXT);
-
-        ColorStateList thumbStates = new ColorStateList(
-                new int[][]{
-                        new int[]{-android.R.attr.state_enabled},
-                        new int[]{android.R.attr.state_checked},
-                        new int[]{}
-                },
-                new int[]{
-                        Settings.COLOR_TEXT,
-                        Settings.COLOR_TEXT,
-                        Settings.COLOR_TEXT
-                }
-        );
-        darkModeSwitch.setThumbTintList(thumbStates);
-        saveOriginalResolutionSwitch.setThumbTintList(thumbStates);
-        openHistogramByDefaultSwitch.setThumbTintList(thumbStates);
-
-        importedBmpSpinner.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                ((TextView) importedBmpSpinner.getSelectedView()).setTextColor(Settings.COLOR_TEXT);
-            }
-        });
-
-        miniatureSpinner.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                ((TextView) miniatureSpinner.getSelectedView()).setTextColor(Settings.COLOR_TEXT);
-            }
-        });
-
-        returnButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.goback));
-
+        ColorTheme.icon(getApplicationContext(), returnButton, R.drawable.goback);
     }
 
     private void initializeListener() {

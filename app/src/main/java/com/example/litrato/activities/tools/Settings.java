@@ -1,7 +1,9 @@
 package com.example.litrato.activities.tools;
 
-import android.graphics.Color;
+import android.content.Context;
 import android.os.Environment;
+
+import com.example.litrato.activities.ui.ViewTools;
 
 /**
  * This class is where all the constant are store. It gives easy access to some settings.
@@ -42,8 +44,21 @@ public class Settings {
 
     public static final int ITEMS_MARGIN_IN_MENU = 20;
 
-    public static final int MINIATURE_DISPLAYED_SIZE = 250;
-    public static final int TOOL_DISPLAYED_SIZE = 120;
+    // Values in DP
+    private static final int MINIATURE_DISPLAYED_SIZE_DP = 80;
+    private static final int TOOL_DISPLAYED_SIZE_DP = 45;
+
+    public static int MINIATURE_DISPLAYED_SIZE;
+    public static int TOOL_DISPLAYED_SIZE;
+    public static final int PADDING_BETWEEN_MINIATURE_AND_LABEL = 25;
+    public static final int MINIATURE_AND_TOOL_TEXT_SIZE_SP = 12;
+    public static int MINIATURE_AND_TOOL_TEXT_SIZE;
+
+    public static void setDPValuesInPixel(Context context) {
+        MINIATURE_DISPLAYED_SIZE = ViewTools.convertDpToPixel(MINIATURE_DISPLAYED_SIZE_DP, context);
+        TOOL_DISPLAYED_SIZE = ViewTools.convertDpToPixel(TOOL_DISPLAYED_SIZE_DP, context);
+        MINIATURE_AND_TOOL_TEXT_SIZE = ViewTools.convertSpToPixel(MINIATURE_AND_TOOL_TEXT_SIZE_SP , context);
+    }
 
     public static final int HISTOGRAM_BACKGROUND_TRANSPARENCY = 100;
     public static final int HISTOGRAM_FOREGROUND_TRANSPARENCY = 200;
@@ -53,30 +68,6 @@ public class Settings {
 
     public static final String FILTER_MASK_NAME = "Create mask";
     public static final String FILTER_ROTATION = "Rotation";
-
-
-
-    // COLOR
-
-    public static void setColorTheme(boolean darkMode) {
-        if (darkMode) {
-            COLOR_BACKGROUND = Color.rgb(0,0,0);
-            COLOR_GREY = Color.rgb(40,40,40);
-            COLOR_SELECTED = Color.rgb(70,70,70);
-            COLOR_TEXT = Color.rgb(255,255,255);
-        } else {
-            COLOR_BACKGROUND = Color.rgb(255,255,255);
-            COLOR_GREY = Color.rgb(215,215,215);
-            COLOR_SELECTED = Color.rgb(190,190,190);
-            COLOR_TEXT = Color.rgb(0,0,0);
-        }
-    }
-
-    public static int COLOR_BACKGROUND;
-    public static int COLOR_GREY;
-    public static int COLOR_SELECTED;
-    public static int COLOR_TEXT;
-
 
     public static final String ACTIVITY_EXTRA_CALLER = "CallerActivity";
 
