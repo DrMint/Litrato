@@ -50,6 +50,15 @@
         app:layout_constraintTop_toTopOf="@+id/saveOriginalResolutionTitle"
         tools:checked="true" />
 
+    <Switch
+        android:id="@+id/openHistogramByDefaultSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/openHistogramByDefaultTitle"
+        tools:checked="true" />
+
     <TextView
         android:id="@+id/importedBmpTitle"
         android:layout_width="wrap_content"
@@ -100,6 +109,16 @@
         app:layout_constraintTop_toBottomOf="@+id/miniatureDesc" />
 
     <TextView
+        android:id="@+id/openHistogramByDefaultTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Open the histogram automatically"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/saveOriginalResolutionDesc"
+        app:layout_constraintTop_toBottomOf="@+id/saveOriginalResolutionDesc" />
+
+    <TextView
         android:id="@+id/miniatureDesc"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
@@ -116,6 +135,15 @@
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/saveOriginalResolutionTitle"
         app:layout_constraintTop_toBottomOf="@+id/saveOriginalResolutionTitle" />
+
+    <TextView
+        android:id="@+id/openHistogramByDefaultDesc"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="When using a filter, the histogram will also open automatically."
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/openHistogramByDefaultTitle"
+        app:layout_constraintTop_toBottomOf="@+id/openHistogramByDefaultTitle" />
 
     <Spinner
         android:id="@+id/miniatureSpinner"

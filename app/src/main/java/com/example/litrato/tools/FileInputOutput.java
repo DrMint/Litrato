@@ -113,7 +113,7 @@ public class FileInputOutput {
         return getLastImportedImagePath;
     }
 
-    private static boolean askPermissionToReadWriteFiles(Activity activity){
+    public static boolean askPermissionToReadWriteFiles(Activity activity){
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 10);
         int checkVal = activity.getApplicationContext().checkCallingOrSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         return (checkVal == PackageManager.PERMISSION_GRANTED);

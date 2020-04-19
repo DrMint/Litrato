@@ -11,6 +11,7 @@ public class PreferenceManager {
     private static final int DEFAULT_IMPORTED_BMP_SIZE = 1000;
     private static final int DEFAULT_MINIATURE_BMP_SIZE = 100;
     private static final boolean DEFAULT_SAVE_ORIGINAL_RESOLUTION = true;
+    private static final boolean DEFAULT_OPEN_HISTOGRAM_BY_DEFAULT = true;
 
     public static boolean getBoolean(Context context, Preference pref) {
         SharedPreferences sp = context.getSharedPreferences(PREFERENCE_NAME, 0);
@@ -18,6 +19,7 @@ public class PreferenceManager {
         switch (pref) {
             case DARK_MODE: return sp.getBoolean(pref.toString(), DEFAULT_DARK_MODE);
             case SAVE_ORIGINAL_RESOLUTION: return sp.getBoolean(pref.toString(), DEFAULT_SAVE_ORIGINAL_RESOLUTION);
+            case OPEN_HISTOGRAM_BY_DEFAULT: return sp.getBoolean(pref.toString(), DEFAULT_OPEN_HISTOGRAM_BY_DEFAULT);
             default: return false;
         }
     }

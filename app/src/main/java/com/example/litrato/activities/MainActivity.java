@@ -219,9 +219,11 @@ public class MainActivity extends AppCompatActivity {
         submenuUnselected = fancyButton.getTypeface();
 
         // If this is the first launch, compiles the RenderScript's functions
-        if (appGetFirstTimeRun() == 0) {
+        if (appGetFirstTimeRun() != 0) {
             initializeRenderScriptCaching();
         }
+
+        FileInputOutput.askPermissionToReadWriteFiles(this);
 
         // Create the lists of filters and create renderscript object
         Filter.generateFilters(getApplicationContext());

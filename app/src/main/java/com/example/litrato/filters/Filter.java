@@ -443,7 +443,7 @@ public class Filter {
         newTools = new Filter("Contrast", Category.TOOL);
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.contrast));
         newTools.setSeekBar1(-50, 0, 50, "Contrast","%");
-        newTools.setSeekBar2(-100, 0, 100, "Burn","%");
+        newTools.setSeekBar2(-100, 0, 100, "Offset","%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -686,7 +686,7 @@ public class Filter {
 
         newFilter = new Filter("Sketch", Category.CONTOUR);
         newFilter.setSeekBar1(1, 4, 14, "Contour finesse","");
-        newFilter.setSeekBar2(0, 20, 100, "Colors washing","");
+        newFilter.setSeekBar2(0, 20, 100, "Color washing","");
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {

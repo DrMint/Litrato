@@ -40,6 +40,10 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView saveOriginalResolutionDesc;
     private Switch saveOriginalResolutionSwitch;
 
+    private TextView openHistogramByDefaultTitle;
+    private TextView openHistogramByDefaultDesc;
+    private Switch openHistogramByDefaultSwitch;
+
     private ImageButton returnButton;
 
     private String[] importedBmpArray = new String[] {
@@ -73,6 +77,9 @@ public class SettingsActivity extends AppCompatActivity {
         saveOriginalResolutionDesc = findViewById(R.id.saveOriginalResolutionDesc);
         saveOriginalResolutionSwitch = findViewById(R.id.saveOriginalResolutionSwitch);
 
+        openHistogramByDefaultTitle = findViewById(R.id.openHistogramByDefaultTitle);
+        openHistogramByDefaultDesc = findViewById(R.id.openHistogramByDefaultDesc);
+        openHistogramByDefaultSwitch = findViewById(R.id.openHistogramByDefaultSwitch);
 
 
         applyColorTheme();
@@ -106,6 +113,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         saveOriginalResolutionSwitch.setChecked(PreferenceManager.getBoolean(getApplicationContext(), Preference.SAVE_ORIGINAL_RESOLUTION));
+        openHistogramByDefaultSwitch.setChecked(PreferenceManager.getBoolean(getApplicationContext(), Preference.OPEN_HISTOGRAM_BY_DEFAULT));
 
 
     }
@@ -136,6 +144,10 @@ public class SettingsActivity extends AppCompatActivity {
         saveOriginalResolutionDesc.setTextColor(Settings.COLOR_TEXT);
         saveOriginalResolutionSwitch.setTextColor(Settings.COLOR_TEXT);
 
+        openHistogramByDefaultTitle.setTextColor(Settings.COLOR_TEXT);
+        openHistogramByDefaultDesc.setTextColor(Settings.COLOR_TEXT);
+        openHistogramByDefaultSwitch.setTextColor(Settings.COLOR_TEXT);
+
         ColorStateList thumbStates = new ColorStateList(
                 new int[][]{
                         new int[]{-android.R.attr.state_enabled},
@@ -150,6 +162,7 @@ public class SettingsActivity extends AppCompatActivity {
         );
         darkModeSwitch.setThumbTintList(thumbStates);
         saveOriginalResolutionSwitch.setThumbTintList(thumbStates);
+        openHistogramByDefaultSwitch.setThumbTintList(thumbStates);
 
         importedBmpSpinner.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -188,6 +201,7 @@ public class SettingsActivity extends AppCompatActivity {
                 PreferenceManager.setInt(getApplicationContext(), Preference.IMPORTED_BMP_SIZE, Integer.parseInt(importedBmpSpinner.getSelectedItem().toString()));
                 PreferenceManager.setInt(getApplicationContext(), Preference.MINIATURE_BMP_SIZE, Integer.parseInt(miniatureSpinner.getSelectedItem().toString()));
                 PreferenceManager.setBoolean(getApplicationContext(), Preference.SAVE_ORIGINAL_RESOLUTION, saveOriginalResolutionSwitch.isChecked());
+                PreferenceManager.setBoolean(getApplicationContext(), Preference.OPEN_HISTOGRAM_BY_DEFAULT, openHistogramByDefaultSwitch.isChecked());
                 finish();
             }
         });

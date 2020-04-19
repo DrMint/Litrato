@@ -300,7 +300,13 @@ public class FiltersActivity extends AppCompatActivity {
 
 
             if (selectedFilter.allowMasking) layoutMaskButton.setVisibility(View.VISIBLE);
-            if (selectedFilter.allowHistogram) layoutHistogramButton.setVisibility(View.VISIBLE);
+            if (selectedFilter.allowHistogram) {
+                layoutHistogramButton.setVisibility(View.VISIBLE);
+                if (PreferenceManager.getBoolean(getApplicationContext(), Preference.OPEN_HISTOGRAM_BY_DEFAULT)) {
+                    layoutHistogramButton.performClick();
+                }
+            }
+
 
             if (selectedFilter.seekBar1) {
                 layoutSeekBar1.setVisibility(View.VISIBLE);
