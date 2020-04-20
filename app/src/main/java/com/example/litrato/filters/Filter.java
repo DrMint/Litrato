@@ -421,9 +421,19 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Stickers", Category.TOOL);
+        newTools.allowScrollZoom=false;
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
+        newTools.setSeekBar1(1,1,10,"size","unit");
+        newTools.setSeekBar2(0,0,360,"rotation","deg");
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.stickers));
+        newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
+            @Override
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+                FilterFunction.putSticker(bmp,touchDown,BitmapFactory.decodeResource(context.getResources(),R.drawable.cellphone),(int)seekBar,(int)seekBar2);
+                return null;
+            }
+        });
         filters.add(newTools);
 
         newTools = new Filter("Luminosity", Category.TOOL);

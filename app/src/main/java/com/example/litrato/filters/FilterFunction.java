@@ -1,8 +1,15 @@
 package com.example.litrato.filters;
 
+import android.app.Application;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 
 import androidx.renderscript.Allocation;
 import androidx.renderscript.Element;
@@ -26,7 +33,9 @@ import com.android.retouchephoto.ScriptC_posterizing;
 import com.android.retouchephoto.ScriptC_rgbWeights;
 import com.android.retouchephoto.ScriptC_saturation;
 import com.android.retouchephoto.ScriptC_threshold;
+import com.example.litrato.R;
 import com.example.litrato.filters.tools.RenderScriptTools;
+import com.example.litrato.tools.FileInputOutput;
 import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
 
@@ -702,6 +711,20 @@ public class FilterFunction {
 
         output.copyTo(bmp);
         RenderScriptTools.cleanRenderScript(script, input, output);
+    }
+
+    public static Bitmap putSticker(final Bitmap bmp, Point touch, Bitmap sticker, int size, int degrees){
+        if(touch!=null) {
+            Canvas canvas = new Canvas(bmp);
+            Bitmap scaledSticker=ImageTools.scale(sticker,sticker.getWidth()*size,sticker.getHeight()*size);
+            Point center = new Point(scaledSticker.getWidth() / 2, scaledSticker.getHeight() / 2);
+            Rect dst = new Rect((touch.x - center.x), (touch.y - center.y), (touch.x - center.x + scaledSticker.getWidth()), (touch.y - center.y + scaledSticker.getWidth()));
+            Rect src = new Rect(0, 0, scaledSticker.getWidth(), scaledSticker.getHeight());
+            canvas.rotate(degrees,touch.x,touch.y);
+            canvas.drawBitmap(scaledSticker, src, dst, null);
+            canvas.rotate(-degrees,touch.x,touch.y);
+        }
+        return bmp;
     }
 
 
