@@ -4,7 +4,7 @@ package com.example.litrato.filters.tools;
  * This class implements tools used by any filter that uses convolution without RenderScript.
  * This class will be deprecated as soon as all convolution is done through RS.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2019-01-08
  */
@@ -217,7 +217,7 @@ package com.example.litrato.filters.tools;
     }
 
     /**
-     *  If the coodinates given in parameter are outside the image, returns the closest pixel.
+     *  If the coordinates given in parameter are outside the image, returns the closest pixel.
      *  It will be much more efficient to hardcode this "fix" directly in each
      *  @param pixels the pixels of the image
      *  @param imageWidth the image's width

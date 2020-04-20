@@ -92,7 +92,7 @@ public class PointPercentage {
      * @param other the other point.
      * @return true if both points are equal, false otherwise.
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    @SuppressWarnings({"BooleanMethodIsAlwaysInverted", "unused"})
     public boolean isEquals(PointPercentage other) {
         return isEquals(other.x, other.y);
     }
@@ -103,6 +103,7 @@ public class PointPercentage {
      * @param y the coordinates on the y axis.
      * @return true if both points are equal, false otherwise.
      */
+    @SuppressWarnings("WeakerAccess")
     public boolean isEquals(float x, float y) {
         return this.x == x && this.y == y;
     }

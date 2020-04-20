@@ -15,7 +15,7 @@ import com.android.retouchephoto.ScriptC_convolution;
 /**
  * This class implements useful tools for functions that use RS.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2019-01-08
  */
@@ -165,6 +165,7 @@ public class RenderScriptTools {
      * @param input the Allocations to destroy.
      * @param output the Allocations to destroy.
      */
+    @SuppressWarnings("unused")
     public static void cleanRenderScript(final Script script, final RenderScript rs, Allocation input, Allocation output) {
         Allocation[] allocations = {input, output};
         cleanRenderScript(script, rs, allocations);

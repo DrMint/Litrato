@@ -90,7 +90,7 @@
                     android:layout_width="75dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:background="@android:color/black"
+                    android:background="#00000000"
                     android:fontFamily="sans-serif-black"
                     android:text="@string/colorMenu"
                     android:textAllCaps="true"
@@ -103,7 +103,7 @@
                     android:layout_width="75dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:background="@android:color/black"
+                    android:background="#00000000"
                     android:fontFamily="sans-serif-light"
                     android:text="@string/fancyMenu"
                     android:textAllCaps="true"
@@ -116,7 +116,7 @@
                     android:layout_width="75dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:background="@android:color/black"
+                    android:background="#00000000"
                     android:fontFamily="sans-serif-light"
                     android:text="@string/blurMenu"
                     android:textAllCaps="true"
@@ -129,7 +129,7 @@
                     android:layout_width="75dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:background="@android:color/black"
+                    android:background="#00000000"
                     android:fontFamily="sans-serif-light"
                     android:text="@string/contourMenu"
                     android:textAllCaps="true"
@@ -143,6 +143,7 @@
                 style="@android:style/ButtonBar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="#00000000"
                 android:scrollbars="none">
 
 
@@ -210,7 +211,7 @@
             android:id="@+id/toolsBar"
             style="@android:style/ButtonBar"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="wrap_content"
             android:layout_above="@id/bottomBar"
             android:collapseColumns="true"
             android:visibility="gone">

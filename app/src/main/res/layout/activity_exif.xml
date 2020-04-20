@@ -64,7 +64,7 @@
         app:layout_constraintTop_toBottomOf="@+id/fileName" />
 
     <TextView
-        android:id="@+id/lattitude"
+        android:id="@+id/latitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -79,8 +79,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@+id/lattitude"
-        app:layout_constraintTop_toTopOf="@+id/lattitude" />
+        app:layout_constraintStart_toEndOf="@+id/latitude"
+        app:layout_constraintTop_toTopOf="@+id/latitude" />
 
     <TextView
         android:id="@+id/altitude"
@@ -89,7 +89,7 @@
         android:layout_marginStart="32dp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/longitude"
-        app:layout_constraintTop_toTopOf="@+id/lattitude" />
+        app:layout_constraintTop_toTopOf="@+id/latitude" />
 
     <TextView
         android:id="@+id/colorMode"

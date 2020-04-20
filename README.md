@@ -85,7 +85,7 @@ The luminance and colors are inverted: whites become blacks and reds become blue
 ### Keep a color
 ![](https://www.r-entries.com/etuliens/img/PT/10.jpg)
 
-Turns everything grayscales except for a specific color.
+Turns everything grayscale except for a specific color.
 - `Color seek bar`: the color you which to keep.
 - `Seek bar`: how far off the color can be before turning grey (in degrees).
 
@@ -152,7 +152,7 @@ Used to highlight all the image’s contours.
 
 ## CLASSES AND FUNCTIONS
 ### ColorTools Class
-This class implements all the functions necessary for conversions between RGB and HSV. **As our goal is to eventually remove all the FilterFunctions that doesn't utilize RenderScript, and HSV <> RBG convertions are done directly in Renderscript, this Class will soon be deprecated**. HSV is used by several filters, and because of that, it has been refined a little bit since the first version. First of all, each value (the hue, the saturation, and the luminosity) can now be converted separately. This has improved the performance substantially in some functions such as colorize (-40% in run-time when using rgb2v instead of rgb2hsv). Furthermore, we can reduce the run-time by another 10% by using integers instead of floats in rgb2s. Finally, by using some bit-level trickery such as using (color >> 16) & 0x000000FF instead of Color.red(color), we can expect another 14% improvement.
+This class implements all the functions necessary for conversions between RGB and HSV. **As our goal is to eventually remove all the FilterFunctions that doesn't utilize RenderScript, and HSV <> RBG conversions are done directly in Renderscript, this Class will soon be deprecated**. HSV is used by several filters, and because of that, it has been refined a little bit since the first version. First of all, each value (the hue, the saturation, and the luminosity) can now be converted separately. This has improved the performance substantially in some functions such as colorize (-40% in run-time when using rgb2v instead of rgb2hsv). Furthermore, we can reduce the run-time by another 10% by using integers instead of floats in rgb2s. Finally, by using some bit-level trickery such as using (color >> 16) & 0x000000FF instead of Color.red(color), we can expect another 14% improvement.
 
 ColorTools also implements to removeAlpha function. It simply set the alpha value of all pixels to 255. This is useful for function that uses ScriptIntrinsicConvolve3x3 as it also apply the convolution kernel over the alpha values, which result in transparent images.
 
@@ -160,13 +160,13 @@ ColorTools also implements to removeAlpha function. It simply set the alpha valu
 The RenderScriptTools implements tools useful for functions that use RS. The applyConvolution3x3RS function applies any 3x3 kernel to any image. However, it uses ScriptIntrinsicConvolve3x3. The applyConvolution function uses our own RenderScript convolution and isn't limited to 3x3 kernel. Actually, the kernel can even be rectangular. The cleanRenderScript function can be called after any RS function to destroy the Script, RenderScript, and a list of Allocation for input(s) and output(s).
 
 ### ConvolutionTools Class (Deprecated)
-This class implements tools used by any filter that uses convolution without RenderScript. **It is now deprecated as all FilterFunctions now use RenderScript based convolution**. The two functions convulution1D and convulution2D are used to apply a 1D and 2D kernel on an image. This kernel can be of any size as long as it is odd. convulution1D also implements an optional correction for the pixels near the edge of the image; when the kernel tries to take the value of a pixel outside the image, it will instead take the closest one on the border of the image. convulution2DUniform can be used when the kernel has uniform weights such as with the Average filter.
+This class implements tools used by any filter that uses convolution without RenderScript. **It is now deprecated as all FilterFunctions now use RenderScript based convolution**. The two functions convolution1D and convolution2D are used to apply a 1D and 2D kernel on an image. This kernel can be of any size as long as it is odd. convulution1D also implements an optional correction for the pixels near the edge of the image; when the kernel tries to take the value of a pixel outside the image, it will instead take the closest one on the border of the image. convulution2DUniform can be used when the kernel has uniform weights such as with the Average filter.
 
 After every convolution algorithm, we want to make sure the values are still between 0 and 255. For that, we can use the normalizeOutput function. This function will make sure that even in the worst cases, the resulting values are kept between this range.
 
 There is the convertGreyToColor function which can be to turn a array of integer to a array of android.graphics.Color which is what Bitmap uses. It is only used by functions that also uses ConvolutionTools.
 
-Finally there is the correctedPixelGet which isn’t used right now. This function corrects the pixel coordinates when the kernel is asking for a pixel outside the image. This is essentially what convulution1D is using but in a 2D context. However, I would advise against using it. Some properties can be used to correct pixel coordinates more efficiently when done directly in the loops.
+Finally there is the correctedPixelGet which isn’t used right now. This function corrects the pixel coordinates when the kernel is asking for a pixel outside the image. This is essentially what convolution1D is using but in a 2D context. However, I would advise against using it. Some properties can be used to correct pixel coordinates more efficiently when done directly in the loops.
 
 
 
@@ -209,7 +209,7 @@ Filter newFilter = new Filter("Name");       // We starts by creating a new Filt
 newFilter.setColorSeekBar();                 // This filter will use the ColorSeekBar
 newFilter.setSeekBar1(0, 100, 100, "%");     // It will also use the first SeekBar and the minimum, set, maximum value and unit is given in parameter.
 newFilter.setSeekBar2(0, 100, 100, "%");     // It will also use the second SeekBar
-newFilter.setSwitch1(true,"Off", "On");   // It will use the switch, default state, false state displayed name, and true state dispayed name
+newFilter.setSwitch1(true,"Off", "On");   // It will use the switch, default state, false state displayed name, and true state displayed name
 
 // We override its apply method to redirect towards the appropriate FilterFunction.
 newFilter.setFilterFunction(new FilterInterface() {
@@ -225,7 +225,7 @@ Then we populate the spinner with the names of filters in our array of filter. T
 
 
 ### ImageViewZoomScroll Class
-This class is used to add new functionalities to ImageView objects: the ability to zoom and scroll on the image.
+This class is used to add new functionality to ImageView objects: the ability to zoom and scroll on the image.
 Zoom and scroll events are handle by the MainActivity class, this class is used to calculate which portion of the image should be displayed. The more we zoom, the smaller this surface. When we scroll, we are moving this surface around.
 
 This surface is a rectangle defined by `newHeight`, `newWidth`, and `center`.

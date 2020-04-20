@@ -3,8 +3,10 @@ package com.example.litrato.tools;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import androidx.exifinterface.media.ExifInterface;
@@ -24,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Objects;
 
 public class FileInputOutput {
 
@@ -101,8 +102,15 @@ public class FileInputOutput {
         return rotateImgAccordingToExif(fullPath);
     }
 
-    public static Bitmap getBitmap(Uri uri) {
-        return getBitmap(Objects.requireNonNull(uri.getPath()));
+    public static Bitmap getBitmap(Uri uri, Context context) {
+        String[] strings = { MediaStore.Images.Media.DATA };
+        CursorLoader loader = new CursorLoader(context, uri, strings, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String result = cursor.getString(column_index);
+        cursor.close();
+        return getBitmap(result);
     }
 
     public static Bitmap getLastTakenBitmap() {
@@ -145,6 +153,7 @@ public class FileInputOutput {
     }
 
     private static String createUniqueFileName(Context context) {
+        //noinspection SpellCheckingInspection
         return new SimpleDateFormat("yyyyMMdd_HHmmss", context.getResources().getConfiguration().getLocales().get(0)).format(new Date());
     }
 

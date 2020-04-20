@@ -68,7 +68,7 @@
             android:theme="@style/AppTheme" />
 
         <activity
-            android:name="com.example.litrato.activities.SettingsActivity"
+            android:name="com.example.litrato.activities.PreferencesActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"

@@ -14,7 +14,7 @@ import com.example.litrato.tools.Point;
  * @version 1.0
  * @since   2019-01-08
  */
-public interface FilterApplyInterface {
+interface FilterApplyInterface {
 
     /**
      * Calls the correct function to apply the filter

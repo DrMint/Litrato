@@ -2,20 +2,15 @@ package com.example.litrato.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
@@ -28,15 +23,14 @@ import android.widget.TextView;
 import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;
 import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.activities.ui.ColorTheme;
 import com.example.litrato.activities.ui.ImageViewZoomScroll;
 import com.example.litrato.R;
 import com.example.litrato.activities.ui.ViewTools;
 import com.example.litrato.filters.AppliedFilter;
 import com.example.litrato.filters.BlendType;
 import com.example.litrato.filters.Filter;
-import com.example.litrato.filters.FilterApplyInterface;
 import com.example.litrato.filters.FilterFunction;
-import com.example.litrato.filters.FilterPreviewInterface;
 import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
 import com.example.litrato.tools.PointPercentage;
@@ -44,22 +38,82 @@ import com.example.litrato.tools.PointPercentage;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * An activity used to prompt the user to tweak the filter parameter.
+ * This activity can also start a new instance of itself, most notably to create a mask.
+ *
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
+ * @version 1.0
+ * @since   2020-31-01
+ */
 public class FiltersActivity extends AppCompatActivity {
 
+    /* We call subActivities, activities started by the current activity.
+       Those subActivities needs values and object provided by the current activity.
+       Which is why those static values exits. By convention, those values are reverted to null
+       by the subActivity once it received them.
+     */
+
+    /**
+     * This is the AppliedFilter returned to this activity Caller.
+     * This a object representing the action done on the image.
+     */
     static AppliedFilter activityAppliedFilter;
+
+    /**
+     * This is the Bitmap returned to this activity Caller.
+     * This is the image after applying the filter.
+     */
     static Bitmap activityBitmap;
 
-    static Filter subActivityFilter;
-    static Bitmap subActivityBitmap;
-    static Bitmap subActivityMaskBmp;
+    /**
+     * This is the Filter given to the called Activity.
+     * FilterActivity calls a new instance of itself to create a mask.
+     */
+    private static Filter subActivityFilter;
 
+    /**
+     * This is the Bitmap given to the called Activity.
+     * This is usually originalImage.
+     */
+    private static Bitmap subActivityBitmap;
+
+    /**
+     * This is the Mask given to the called Activity.
+     * This is usually maskBmp.
+     */
+    private static Bitmap subActivityMaskBmp;
+
+    /**
+     * The image as it was before applying any filter.
+     */
     private Bitmap originalImage;
+
+    /**
+     * The current image displayed on the ImageView
+     */
     private Bitmap filteredImage;
+
+    /**
+     * The mask used to only apply the filter to a part of the image.
+     * A mask is a black and white image, black means that the image won't be applied, and
+     * white is where the image is applied.
+     */
     private Bitmap maskBmp;
+
+    /**
+     * This is the originalImage masked by the inverse mask of maskBmp.
+     */
     private Bitmap originalImageMasked;
 
+    /**
+     * The filter used in this FilterActivity.
+     */
     private Filter selectedFilter;
 
+    /**
+     * A value used to know when the subActivity is finished.
+     */
     private final int GET_MASK_IMAGE = 4;
 
     /**
@@ -67,7 +121,16 @@ public class FiltersActivity extends AppCompatActivity {
      * the seeks bars minimum, progress, or maximum value.
      */
     private boolean inputsReady = false;
-    private boolean pickBool = false;
+
+    /**
+     * Is true if the user is using pick-a-color.
+     */
+    private boolean isUsingPick = false;
+
+    /**
+     * This value is false by default.
+     * If it's true, the filter is only apply to the masked part of the image.
+     */
     private boolean shouldUseMask = false;
 
     private ImageViewZoomScroll layoutImageView;
@@ -87,7 +150,14 @@ public class FiltersActivity extends AppCompatActivity {
     private Switch      layoutSwitch1;
     private RelativeLayout filterMenu;
 
+    /**
+     * Where the user started touching ImageView.
+     */
     private Point imageTouchDown;
+
+    /**
+     * Where the user last touched ImageView.
+     */
     private Point imageTouchCurrent;
 
     @Override
@@ -180,73 +250,37 @@ public class FiltersActivity extends AppCompatActivity {
 
 
     private void applyColorTheme() {
+        ColorTheme.setColorTheme(getApplicationContext());
+        ColorTheme.window(getApplicationContext(), getWindow());
 
-        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
+        ColorTheme.background(filterMenu, true);
+        ColorTheme.background(layoutButtonApply, true);
+        ColorTheme.background(layoutCancel, true);
 
-        filterMenu.setBackgroundColor(Settings.COLOR_SELECTED);
-        layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
+        ColorTheme.textView(layoutSwitchValue1);
+        ColorTheme.textView(layoutSeekBarValue1);
+        ColorTheme.textView(layoutSeekBarValue2);
 
-        layoutButtonApply.setBackgroundColor(Settings.COLOR_GREY);
-        layoutCancel.setBackgroundColor(Settings.COLOR_GREY);
+        ColorTheme.button(layoutFilterMenuButton, true);
 
-        layoutSwitchValue1.setTextColor(Settings.COLOR_TEXT);
+        ColorTheme.switchL(layoutSwitch1);
 
-        layoutFilterMenuButton.setTextColor(Settings.COLOR_TEXT);
+        ColorTheme.seekBar(layoutSeekBar1);
+        ColorTheme.seekBar(layoutSeekBar2);
 
-        layoutSeekBarValue1.setTextColor(Settings.COLOR_TEXT);
-        layoutSeekBarValue2.setTextColor(Settings.COLOR_TEXT);
-        layoutSwitch1.setTextColor(Settings.COLOR_TEXT);
-
-        ColorStateList thumbStates = new ColorStateList(
-                new int[][]{
-                        new int[]{-android.R.attr.state_enabled},
-                        new int[]{android.R.attr.state_checked},
-                        new int[]{}
-                },
-                new int[]{
-                        Settings.COLOR_TEXT,
-                        Settings.COLOR_TEXT,
-                        Settings.COLOR_TEXT
-                }
-        );
-        layoutSwitch1.setThumbTintList(thumbStates);
-        layoutSeekBar1.setThumbTintList(thumbStates);
-        layoutSeekBar2.setThumbTintList(thumbStates);
-
-        ColorStateList trackStates = new ColorStateList(
-                new int[][]{
-                        new int[]{-android.R.attr.state_enabled},
-                        new int[]{}
-                },
-                new int[]{
-                        Settings.COLOR_BACKGROUND,
-                        Settings.COLOR_BACKGROUND
-                }
-        );
-        layoutSwitch1.setTrackTintList(trackStates);
-        layoutSwitch1.setTrackTintMode(PorterDuff.Mode.OVERLAY);
-
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
-        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
-
-        if (!PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE)) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        } else {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-        }
-
-        layoutPickButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.pick));
-        layoutMaskButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.mask));
-        layoutHistogramButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.histogram));
-        layoutCancel.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.cancel));
-        layoutButtonApply.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.valid));
+        ColorTheme.icon(getApplicationContext(), layoutPickButton, R.drawable.pick);
+        ColorTheme.icon(getApplicationContext(), layoutMaskButton, R.drawable.mask);
+        ColorTheme.icon(getApplicationContext(), layoutHistogramButton, R.drawable.histogram);
+        ColorTheme.icon(getApplicationContext(), layoutCancel, R.drawable.cancel);
+        ColorTheme.icon(getApplicationContext(), layoutButtonApply, R.drawable.valid);
     }
 
 
-
+    /**
+     * The mask are only generated when the mask is changed or loaded.
+     * If no mask is provided, creates a completely black mask.
+     * @param bmp the mask.
+     */
     private void generateMasks(Bitmap bmp) {
 
         if (bmp == null) {
@@ -277,11 +311,11 @@ public class FiltersActivity extends AppCompatActivity {
         }
     }
 
-
+    /**
+     * Makes sure the the interface correspond to what the filter demands.
+     */
     private void initializeInterface() {
         inputsReady = false;
-
-        //selectedFilter.init();
 
         if (selectedFilter.allowFilterMenu) {
 
@@ -294,10 +328,9 @@ public class FiltersActivity extends AppCompatActivity {
             layoutSwitch1.setVisibility(View.GONE);
             layoutSwitchValue1.setVisibility(View.GONE);
 
+
             // And add anything we need.
-
             if (selectedFilter.colorSeekBar) layoutColorSeekBar.setVisibility(View.VISIBLE);
-
 
             if (selectedFilter.allowMasking) layoutMaskButton.setVisibility(View.VISIBLE);
             if (selectedFilter.allowHistogram) {
@@ -306,7 +339,6 @@ public class FiltersActivity extends AppCompatActivity {
                     layoutHistogramButton.performClick();
                 }
             }
-
 
             if (selectedFilter.seekBar1) {
                 layoutSeekBar1.setVisibility(View.VISIBLE);
@@ -331,7 +363,6 @@ public class FiltersActivity extends AppCompatActivity {
                 } else {
                     layoutSwitchValue1.setText(selectedFilter.switch1UnitFalse);
                 }
-
             }
 
             // Only shows the seekBarValues when the seekBars are visible.
@@ -345,7 +376,7 @@ public class FiltersActivity extends AppCompatActivity {
         } else {
 
             filterMenu.setVisibility(View.GONE);
-            layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_GREY);
+            ColorTheme.button(layoutFilterMenuButton, false);
 
         }
 
@@ -356,7 +387,6 @@ public class FiltersActivity extends AppCompatActivity {
         layoutSeekBarValue1.setText(layoutSeekBarValue1.getText());
         layoutSeekBarValue2.setText(layoutSeekBarValue2.getText());
         layoutSwitch1.setChecked(layoutSwitch1.isChecked());
-
     }
 
 
@@ -419,10 +449,6 @@ public class FiltersActivity extends AppCompatActivity {
         if (!apply) refreshImageView();
     }
 
-    /**
-     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
-     * seek bars and color bar. Refreshes the histogram and imageViewer after.
-     */
     private void applyFilter() {
         previewOrApply(true);
     }
@@ -432,7 +458,7 @@ public class FiltersActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays filteredImage on the imageView, also refreshes Histogram and ImageInfo
+     * Displays filteredImage on the imageView, also refreshes Histogram.
      */
     private void refreshImageView() {
         layoutImageView.setImageBitmap(filteredImage);
@@ -448,8 +474,8 @@ public class FiltersActivity extends AppCompatActivity {
         }
     }
 
-    private void initializeListener() {
 
+    private void initializeListener() {
 
         // Create the GestureDetector which handles the scrolling and double tap.
         final GestureDetector myGestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.OnGestureListener() {
@@ -557,10 +583,10 @@ public class FiltersActivity extends AppCompatActivity {
 
                 if (selectedFilter.allowFilterMenu) {
                     if (!ViewTools.isVisible(filterMenu)) {
-                        layoutFilterMenuButton.setBackgroundColor(Settings.COLOR_SELECTED);
+                        ColorTheme.button(layoutFilterMenuButton, true);
                         filterMenu.setVisibility(View.VISIBLE);
                     } else {
-                        v.setBackgroundColor(Settings.COLOR_GREY);
+                        ColorTheme.button(layoutFilterMenuButton, false);
                         filterMenu.setVisibility(View.GONE);
                     }
                 }
@@ -727,8 +753,8 @@ public class FiltersActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v){
-                pickBool = !pickBool;
-                if (pickBool) {
+                isUsingPick = !isUsingPick;
+                if (isUsingPick) {
                     inputsReady = false;
                     layoutImageView.setImageBitmap(originalImage);
                     layoutImageView.setOnTouchListener(pickTouchListener);

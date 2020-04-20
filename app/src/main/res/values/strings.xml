@@ -32,4 +32,5 @@
     <string name="historyConfirmButton">Confirm</string>
     <string name="title_activity_maps">Map</string>
     <string name="exif_viewer">Exif Viewer</string>
+    <string name="EV_0">0 EV</string>
 </resources>

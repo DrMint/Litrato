@@ -2,12 +2,11 @@ package com.example.litrato.activities;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -16,25 +15,31 @@ import androidx.exifinterface.media.ExifInterface;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 import com.example.litrato.R;
-import com.example.litrato.activities.tools.Preference;
-import com.example.litrato.activities.tools.PreferenceManager;
-import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.activities.ui.ColorTheme;
 import com.example.litrato.tools.FileInputOutput;
-import com.example.litrato.tools.ImageTools;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
-
+/**
+ * An activity to view the image EXIF data.
+ * EXIF is a meta-data format used by a lot of image formats and even sounds files.
+ * It contains most notably the camera model and manufacturer, the exposure, ISO, focal length...
+ * Also the GPS coordinates where the image was taken.
+ *
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
+ * @version 1.0
+ * @since   2020-31-01
+ */
 public class ExifActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private ImageButton returnButton;
@@ -48,7 +53,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView fNumber;
     private TextView exposureTime;
     private TextView exposureBias;
-    private TextView focalLenght;
+    private TextView focalLength;
     private TextView exposureMode;
     private TextView exposureProgram;
     private TextView flash;
@@ -58,7 +63,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView imageResolution;
     private TextView imageSize;
 
-    private TextView lattitude;
+    private TextView latitude;
     private TextView longitude;
     private TextView altitude;
 
@@ -71,7 +76,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        Objects.requireNonNull(mapFragment).getMapAsync(this);
 
         exifTitle = findViewById(R.id.exifTitle);
 
@@ -83,7 +88,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         fNumber = findViewById(R.id.fNumber);
         exposureTime = findViewById(R.id.exposureTime);
         exposureBias = findViewById(R.id.exposureBias);
-        focalLenght = findViewById(R.id.focalLenght);
+        focalLength = findViewById(R.id.focalLenght);
         exposureMode = findViewById(R.id.exposureMode);
         exposureProgram = findViewById(R.id.exposureProgram);
         flash = findViewById(R.id.flash);
@@ -93,7 +98,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         imageResolution = findViewById(R.id.imageResolution);
         imageSize = findViewById(R.id.imageSize);
 
-        lattitude = findViewById(R.id.lattitude);
+        latitude = findViewById(R.id.latitude);
         longitude = findViewById(R.id.longitude);
         altitude = findViewById(R.id.altitude);
 
@@ -120,74 +125,68 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void applyColorTheme() {
+        ColorTheme.setColorTheme(getApplicationContext());
+        ColorTheme.window(getApplicationContext(), getWindow());
 
-        Settings.setColorTheme(PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE));
+        ColorTheme.textView(exifTitle);
+        ColorTheme.textView(cameraModel);
+        ColorTheme.textView(cameraConstructor);
+        ColorTheme.textView(timeDate);
+        ColorTheme.textView(iso);
+        ColorTheme.textView(fNumber);
+        ColorTheme.textView(exposureTime);
+        ColorTheme.textView(exposureBias);
+        ColorTheme.textView(focalLength);
+        ColorTheme.textView(exposureMode);
+        ColorTheme.textView(exposureProgram);
+        ColorTheme.textView(flash);
+        ColorTheme.textView(colorMode);
+        ColorTheme.textView(fileName);
+        ColorTheme.textView(imageMpx);
+        ColorTheme.textView(imageResolution);
+        ColorTheme.textView(imageSize);
+        ColorTheme.textView(latitude);
+        ColorTheme.textView(longitude);
+        ColorTheme.textView(altitude);
 
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Settings.COLOR_BACKGROUND);
-        window.getDecorView().setBackgroundColor(Settings.COLOR_BACKGROUND);
-
-
-        exifTitle.setTextColor(Settings.COLOR_TEXT);
-        cameraModel.setTextColor(Settings.COLOR_TEXT);
-        cameraConstructor.setTextColor(Settings.COLOR_TEXT);
-        timeDate.setTextColor(Settings.COLOR_TEXT);
-        iso.setTextColor(Settings.COLOR_TEXT);
-        fNumber.setTextColor(Settings.COLOR_TEXT);
-        exposureTime.setTextColor(Settings.COLOR_TEXT);
-        exposureBias.setTextColor(Settings.COLOR_TEXT);
-        focalLenght.setTextColor(Settings.COLOR_TEXT);
-        exposureMode.setTextColor(Settings.COLOR_TEXT);
-        exposureProgram.setTextColor(Settings.COLOR_TEXT);
-        flash.setTextColor(Settings.COLOR_TEXT);
-        colorMode.setTextColor(Settings.COLOR_TEXT);
-        fileName.setTextColor(Settings.COLOR_TEXT);
-        imageMpx.setTextColor(Settings.COLOR_TEXT);
-        imageResolution.setTextColor(Settings.COLOR_TEXT);
-        imageSize.setTextColor(Settings.COLOR_TEXT);
-
-        lattitude.setTextColor(Settings.COLOR_TEXT);
-        longitude.setTextColor(Settings.COLOR_TEXT);
-        altitude.setTextColor(Settings.COLOR_TEXT);
-
-        returnButton.setImageDrawable(ImageTools.getThemedIcon(getApplicationContext(), R.drawable.goback));
-
+        ColorTheme.icon(getApplicationContext(), returnButton, R.drawable.goback);
     }
 
 
 
-    void refreshValues(ExifInterface exif, File imgFile) {
+    @SuppressLint("SetTextI18n")
+    private void refreshValues(ExifInterface exif, File imgFile) {
         cameraModel.setText(exif.getAttribute(ExifInterface.TAG_MODEL));
         cameraConstructor.setText(exif.getAttribute(ExifInterface.TAG_MAKE));
 
         timeDate.setText(exif.getAttribute(ExifInterface.TAG_DATETIME));
 
+        //noinspection deprecation
         if (exif.hasAttribute(ExifInterface.TAG_ISO_SPEED_RATINGS)) {
+            //noinspection deprecation
             iso.setText(exif.getAttribute(ExifInterface.TAG_ISO_SPEED_RATINGS));
-            fNumber.setText("f/" + exif.getAttribute(ExifInterface.TAG_F_NUMBER));
+            fNumber.setText(MessageFormat.format("f/{0}", exif.getAttribute(ExifInterface.TAG_F_NUMBER)));
         }
 
         if (exif.hasAttribute(ExifInterface.TAG_FOCAL_LENGTH)) {
-            String tmpFocalLenght = exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH);
-            String[] parts = tmpFocalLenght.split(Pattern.quote("/"));
-            focalLenght.setText(Integer.parseInt(parts[0]) / Integer.parseInt(parts[1]) + " mm");
+            String tmpFocalLength = exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH);
+            String[] parts = Objects.requireNonNull(tmpFocalLength).split(Pattern.quote("/"));
+            focalLength.setText(MessageFormat.format("{0}mm", Integer.parseInt(parts[0]) / Integer.parseInt(parts[1])));
         }
 
 
         if (exif.hasAttribute(ExifInterface.TAG_EXPOSURE_TIME)) {
-            int tmpExposure = (int) (1 / Double.parseDouble(exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)));
-            exposureTime.setText("1/" + tmpExposure + " s");
+            int tmpExposure = (int) (1 / Double.parseDouble(Objects.requireNonNull(exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME))));
+            exposureTime.setText(MessageFormat.format("1/{0}s", tmpExposure));
 
         }
 
         if (exif.hasAttribute(ExifInterface.TAG_EXPOSURE_BIAS_VALUE)) {
             String value = exif.getAttribute(ExifInterface.TAG_EXPOSURE_BIAS_VALUE);
-            if (value.startsWith("0")) {
-                exposureBias.setText("0 EV");
+            if (Objects.requireNonNull(value).startsWith("0")) {
+                exposureBias.setText(R.string.EV_0);
             } else {
-                exposureBias.setText(value + " EV");
+                exposureBias.setText(MessageFormat.format("{0} EV", value));
             }
 
         } else {
@@ -251,7 +250,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         if (exif.hasAttribute(ExifInterface.TAG_COLOR_SPACE)) {
-            if (Integer.parseInt(exif.getAttribute(ExifInterface.TAG_COLOR_SPACE)) == ExifInterface.COLOR_SPACE_S_RGB) {
+            if (Integer.parseInt(Objects.requireNonNull(exif.getAttribute(ExifInterface.TAG_COLOR_SPACE))) == ExifInterface.COLOR_SPACE_S_RGB) {
                 colorMode.setText("RBG");
             } else {
                 colorMode.setText("UNCALIBRATED");
@@ -264,16 +263,16 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         if (exif.hasAttribute(ExifInterface.TAG_GPS_LATITUDE)) {
             double[] latLong;
             latLong = exif.getLatLong();
-            lattitude.setText(df.format(latLong[0]));
+            latitude.setText(df.format(Objects.requireNonNull(latLong)[0]));
             longitude.setText(df.format(latLong[1]));
 
             if (exif.hasAttribute(ExifInterface.TAG_GPS_ALTITUDE)) {
                 String tmpAltitude = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE);
-                String[] parts = tmpAltitude.split(Pattern.quote("/"));
+                String[] parts = Objects.requireNonNull(tmpAltitude).split(Pattern.quote("/"));
                 if (parts.length == 2) {
-                    altitude.setText(Integer.parseInt(parts[0]) / Integer.parseInt(parts[1]) + " m");
+                    altitude.setText(MessageFormat.format("{0}m", Integer.parseInt(parts[0]) / Integer.parseInt(parts[1])));
                 } else if (parts.length == 1) {
-                    altitude.setText(Integer.parseInt(parts[0]) + " m");
+                    altitude.setText(MessageFormat.format("{0}m", Integer.parseInt(parts[0])));
                 }
             }
         }
@@ -283,16 +282,17 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
 
         String tmpPath = imgFile.getPath();
         fileName.setText(tmpPath.substring(tmpPath.lastIndexOf("/") + 1));
-        int imageWidth = Integer.parseInt(exif.getAttribute(ExifInterface.TAG_IMAGE_WIDTH));
-        int imageHeight = Integer.parseInt(exif.getAttribute(ExifInterface.TAG_IMAGE_LENGTH));
-        imageResolution.setText(imageWidth + " x " + imageHeight);
+        int imageWidth = Integer.parseInt(Objects.requireNonNull(exif.getAttribute(ExifInterface.TAG_IMAGE_WIDTH)));
+        int imageHeight = Integer.parseInt(Objects.requireNonNull(exif.getAttribute(ExifInterface.TAG_IMAGE_LENGTH)));
+        imageResolution.setText(MessageFormat.format("{0} x {1}", imageWidth, imageHeight));
         int mpx = (imageWidth * imageHeight) / 1000 / 1000;
-        imageMpx.setText(mpx + "MP");
+        imageMpx.setText(MessageFormat.format("{0}MP", mpx));
         imageSize.setText(df.format(imgFile.length() / 1024.0 / 1024.0) + " MB");
     }
 
 
     /**
+     * Generated by the GoogleMap app Template.
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera. In this case,
@@ -315,14 +315,10 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
                 latLong = exif.getLatLong();
 
                 // If dark theme, applies dark theme for the map
-                if (PreferenceManager.getBoolean(getApplicationContext(), Preference.DARK_MODE)) {
-                    googleMap.setMapStyle(
-                            MapStyleOptions.loadRawResourceStyle(
-                                    this, R.raw.style_gmap_night));
-                }
+                ColorTheme.googleMap(getApplicationContext(), googleMap);
 
                 // Add a marker in Sydney and move the camera
-                LatLng photoGPS = new LatLng(latLong[0], latLong[1]);
+                LatLng photoGPS = new LatLng(Objects.requireNonNull(latLong)[0], Objects.requireNonNull(latLong)[1]);
                 googleMap.addMarker(new MarkerOptions().position(photoGPS).title("Photo location"));
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(photoGPS, 8.0f));
 
@@ -330,12 +326,9 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
                 findViewById(R.id.map).setVisibility(View.GONE);
             }
 
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void initializeListener() {
