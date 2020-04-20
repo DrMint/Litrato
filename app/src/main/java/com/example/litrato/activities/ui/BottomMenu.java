@@ -247,7 +247,6 @@ public class BottomMenu {
             public void onClick(View v) {
                 MainActivity.subActivityFilter = filter;
                 MainActivity.getMenuItemListener().onClick(v);
-                MainActivity.subActivityFilter = null;
             }
         });
 

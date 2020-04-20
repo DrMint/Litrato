@@ -432,7 +432,7 @@ public class Filter {
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-                FilterFunction.putSticker(bmp,touchDown,BitmapFactory.decodeResource(context.getResources(),R.drawable.cellphone),(int)seekBar,(int)seekBar2);
+                FilterFunction.putSticker(bmp,touchDown,BitmapFactory.decodeResource(context.getResources(),R.drawable.stickers),(int)seekBar,(int)seekBar2);
                 return null;
             }
         });
