@@ -38,22 +38,82 @@ import com.example.litrato.tools.PointPercentage;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * An activity used to prompt the user to tweak the filter parameter.
+ * This activity can also start a new instance of itself, most notably to create a mask.
+ *
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
+ * @version 1.0
+ * @since   2020-31-01
+ */
 public class FiltersActivity extends AppCompatActivity {
 
+    /* We call subActivities, activities started by the current activity.
+       Those subActivities needs values and object provided by the current activity.
+       Which is why those static values exits. By convention, those values are reverted to null
+       by the subActivity once it received them.
+     */
+
+    /**
+     * This is the AppliedFilter returned to this activity Caller.
+     * This a object representing the action done on the image.
+     */
     static AppliedFilter activityAppliedFilter;
+
+    /**
+     * This is the Bitmap returned to this activity Caller.
+     * This is the image after applying the filter.
+     */
     static Bitmap activityBitmap;
 
+    /**
+     * This is the Filter given to the called Activity.
+     * FilterActivity calls a new instance of itself to create a mask.
+     */
     private static Filter subActivityFilter;
+
+    /**
+     * This is the Bitmap given to the called Activity.
+     * This is usually originalImage.
+     */
     private static Bitmap subActivityBitmap;
+
+    /**
+     * This is the Mask given to the called Activity.
+     * This is usually maskBmp.
+     */
     private static Bitmap subActivityMaskBmp;
 
+    /**
+     * The image as it was before applying any filter.
+     */
     private Bitmap originalImage;
+
+    /**
+     * The current image displayed on the ImageView
+     */
     private Bitmap filteredImage;
+
+    /**
+     * The mask used to only apply the filter to a part of the image.
+     * A mask is a black and white image, black means that the image won't be applied, and
+     * white is where the image is applied.
+     */
     private Bitmap maskBmp;
+
+    /**
+     * This is the originalImage masked by the inverse mask of maskBmp.
+     */
     private Bitmap originalImageMasked;
 
+    /**
+     * The filter used in this FilterActivity.
+     */
     private Filter selectedFilter;
 
+    /**
+     * A value used to know when the subActivity is finished.
+     */
     private final int GET_MASK_IMAGE = 4;
 
     /**
@@ -61,7 +121,16 @@ public class FiltersActivity extends AppCompatActivity {
      * the seeks bars minimum, progress, or maximum value.
      */
     private boolean inputsReady = false;
-    private boolean pickBool = false;
+
+    /**
+     * Is true if the user is using pick-a-color.
+     */
+    private boolean isUsingPick = false;
+
+    /**
+     * This value is false by default.
+     * If it's true, the filter is only apply to the masked part of the image.
+     */
     private boolean shouldUseMask = false;
 
     private ImageViewZoomScroll layoutImageView;
@@ -81,7 +150,14 @@ public class FiltersActivity extends AppCompatActivity {
     private Switch      layoutSwitch1;
     private RelativeLayout filterMenu;
 
+    /**
+     * Where the user started touching ImageView.
+     */
     private Point imageTouchDown;
+
+    /**
+     * Where the user last touched ImageView.
+     */
     private Point imageTouchCurrent;
 
     @Override
@@ -200,7 +276,11 @@ public class FiltersActivity extends AppCompatActivity {
     }
 
 
-
+    /**
+     * The mask are only generated when the mask is changed or loaded.
+     * If no mask is provided, creates a completely black mask.
+     * @param bmp the mask.
+     */
     private void generateMasks(Bitmap bmp) {
 
         if (bmp == null) {
@@ -231,11 +311,11 @@ public class FiltersActivity extends AppCompatActivity {
         }
     }
 
-
+    /**
+     * Makes sure the the interface correspond to what the filter demands.
+     */
     private void initializeInterface() {
         inputsReady = false;
-
-        //selectedFilter.init();
 
         if (selectedFilter.allowFilterMenu) {
 
@@ -248,10 +328,9 @@ public class FiltersActivity extends AppCompatActivity {
             layoutSwitch1.setVisibility(View.GONE);
             layoutSwitchValue1.setVisibility(View.GONE);
 
+
             // And add anything we need.
-
             if (selectedFilter.colorSeekBar) layoutColorSeekBar.setVisibility(View.VISIBLE);
-
 
             if (selectedFilter.allowMasking) layoutMaskButton.setVisibility(View.VISIBLE);
             if (selectedFilter.allowHistogram) {
@@ -260,7 +339,6 @@ public class FiltersActivity extends AppCompatActivity {
                     layoutHistogramButton.performClick();
                 }
             }
-
 
             if (selectedFilter.seekBar1) {
                 layoutSeekBar1.setVisibility(View.VISIBLE);
@@ -285,7 +363,6 @@ public class FiltersActivity extends AppCompatActivity {
                 } else {
                     layoutSwitchValue1.setText(selectedFilter.switch1UnitFalse);
                 }
-
             }
 
             // Only shows the seekBarValues when the seekBars are visible.
@@ -310,7 +387,6 @@ public class FiltersActivity extends AppCompatActivity {
         layoutSeekBarValue1.setText(layoutSeekBarValue1.getText());
         layoutSeekBarValue2.setText(layoutSeekBarValue2.getText());
         layoutSwitch1.setChecked(layoutSwitch1.isChecked());
-
     }
 
 
@@ -373,10 +449,6 @@ public class FiltersActivity extends AppCompatActivity {
         if (!apply) refreshImageView();
     }
 
-    /**
-     * Applies whichever filter is selected in the spinner, with the appropriate parameters from the
-     * seek bars and color bar. Refreshes the histogram and imageViewer after.
-     */
     private void applyFilter() {
         previewOrApply(true);
     }
@@ -386,7 +458,7 @@ public class FiltersActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays filteredImage on the imageView, also refreshes Histogram and ImageInfo
+     * Displays filteredImage on the imageView, also refreshes Histogram.
      */
     private void refreshImageView() {
         layoutImageView.setImageBitmap(filteredImage);
@@ -402,8 +474,8 @@ public class FiltersActivity extends AppCompatActivity {
         }
     }
 
-    private void initializeListener() {
 
+    private void initializeListener() {
 
         // Create the GestureDetector which handles the scrolling and double tap.
         final GestureDetector myGestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.OnGestureListener() {
@@ -681,8 +753,8 @@ public class FiltersActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v){
-                pickBool = !pickBool;
-                if (pickBool) {
+                isUsingPick = !isUsingPick;
+                if (isUsingPick) {
                     inputsReady = false;
                     layoutImageView.setImageBitmap(originalImage);
                     layoutImageView.setOnTouchListener(pickTouchListener);

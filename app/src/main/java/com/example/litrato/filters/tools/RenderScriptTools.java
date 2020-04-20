@@ -15,7 +15,7 @@ import com.android.retouchephoto.ScriptC_convolution;
 /**
  * This class implements useful tools for functions that use RS.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2019-01-08
  */

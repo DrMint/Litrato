@@ -51,10 +51,6 @@ import com.google.android.material.snackbar.Snackbar;
                  A restart solve the problem.
         -------------------------------------------------------------------------------------------
     New functions:
-        - An idea to keep the UI interactive while saving the image at high resolution would be to
-          make all the modification on a smaller size image, save all the filter applied, and then
-          apply them again to the full size image when saving. It is okay for the user to wait a few
-          seconds when saving, but not while using a seekBar.
  */
 
 /**
@@ -62,9 +58,9 @@ import com.google.android.material.snackbar.Snackbar;
  * It can load an image, apply some filter and, eventually, it will be able to save that image.
  * Please read the README file for more information.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
- * @since   2019-01-08
+ * @since   2020-31-01
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -89,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
      */
     static Bitmap subActivityMaskBmp;
 
+    /**
+     * We shouldn't do this, at least that's what the Android Documentation and IDE seems to
+     * indicate. Right now, only BottomMenu uses this value.
+     */
     private static Context appContext;
 
     // Numerous set values for REQUESTS. They have to differ from one another that's all.
@@ -124,8 +124,10 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar     historySeekBar;
     private Button      historyConfirmButton;
 
+    /**
+     * This is a listener used by menuItem in BottomMenu.
+     */
     static private View.OnClickListener menuItemListener;
-
 
 
     @Override
@@ -202,8 +204,8 @@ public class MainActivity extends AppCompatActivity {
             ViewGroup presetsBar = findViewById(R.id.presetsBar);
             ViewGroup filtersBar = findViewById(R.id.filtersBar);
 
-            BottomMenu.submenuSelected = colorButton.getTypeface();
-            BottomMenu.submenuUnselected = fancyButton.getTypeface();
+            BottomMenu.selected = colorButton.getTypeface();
+            BottomMenu.unselected = fancyButton.getTypeface();
 
             new BottomMenu(presetsButton, presetsBar, presetsLinearLayout, Category.PRESET);
             BottomMenu menuTools = new BottomMenu(toolsButton, toolsBar, Category.TOOL);
@@ -241,6 +243,11 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * This is the actions done when clicking on a element on the Toolbar.
+     * @param item the element clicked.
+     * @return whatever super is returning.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -347,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             case R.id.action_settings: {
-                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                Intent intent = new Intent(getApplicationContext(), PreferencesActivity.class);
                 startActivityForResult(intent, CONFIG_REQUEST);
                 break;
             }
@@ -360,15 +367,13 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_history) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
-
+    /**
+     * Get called when the interface is properly loaded.
+     * @param hasFocus
+     */
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
@@ -391,6 +396,12 @@ public class MainActivity extends AppCompatActivity {
         ColorTheme.bottomMenu();
     }
 
+    /**
+     * This is how the Activity reacts to REQUESTS result.
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -435,6 +446,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Function called when a new image is loaded by the program.
+     * From the camera or the gallery.
      * @param bmp the image to load
      */
     private void setBitmap(Bitmap bmp) {
@@ -442,9 +454,9 @@ public class MainActivity extends AppCompatActivity {
         // If the bmp is null, aborts
         if (bmp == null) return;
 
+        // Resize the image before continuing, if necessary
         int importedBmpSize = PreferenceManager.getInt(getApplicationContext(), Preference.IMPORTED_BMP_SIZE);
 
-        // Resize the image before continuing, if necessary
         if (bmp.getHeight() > importedBmpSize || bmp.getWidth() > importedBmpSize) {
             bmp = ImageTools.scaleToBeContainedInSquare(bmp, importedBmpSize);
         }
@@ -459,14 +471,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays currentImage on the imageView, also refreshes Histogram and ImageInfo
+     * Displays currentImage on the imageView
      */
     private void refreshImageView() {
 
         layoutImageView.setImageBitmap(currentImage);
         BottomMenu.currentImage = currentImage;
         BottomMenu.invalidateMiniatures();
-        //generateMiniatureForOpenedMenu();
     }
 
     private void initializeListener() {
@@ -577,12 +588,19 @@ public class MainActivity extends AppCompatActivity {
         historyBar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
     }
 
+    /**
+     * Add a appliedFilter to history, and move the history's seekbar accordingly.
+     * @param appliedFilter the appliedFilter to add.
+     */
     private void addToHistory(AppliedFilter appliedFilter) {
         history.addFilter(appliedFilter);
         historySeekBar.setMax(history.size() - 1);
         historySeekBar.setProgress(historySeekBar.getMax());
     }
 
+    /**
+     * Close the history menu.
+     */
     private void closeHistory() {
         historyBar.setVisibility(View.GONE);
         if (historySeekBar.getProgress() != historySeekBar.getMax()) {

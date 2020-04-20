@@ -13,8 +13,9 @@ import com.example.litrato.tools.Point;
  * This class implements a way to zoom and scroll.
  * It creates a rectangle that represent the part of the image that should be displayed by a imageView,
  * depending to a zoom level and center of zoom (a point).
+ * The image display mode is similar the fit-start on the Y axis, but fit-center on the X-axis.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2020-31-01
  */
@@ -36,6 +37,11 @@ public class ImageViewZoomScroll {
      * How large can zoom be.
      */
     private float maxZoom = 5f;
+
+    /**
+     * The zoom value such as the image fit perfectly vertically
+     * or horizontally in the imageView.
+     */
     private float minZoom;
 
     private int bmpWidth = 0;
@@ -44,23 +50,34 @@ public class ImageViewZoomScroll {
     private int viewWidth = 0;
     private int viewHeight = 0;
 
+    /**
+     * This value is true if the image is now totally shown horizontally (it overflows on the x axis).
+     */
     private boolean horizontalScroll = false;
+
+    /**
+     * This value is true if the image is now totally shown vertically (it overflows on the y axis).
+     */
     private boolean verticalScroll = false;
 
 
     /**
-     * The imageView on which the image will be drawn.
+     * The imageView on which the image will be displayed.
      */
     private final ImageView imageView;
 
 
+    public ImageViewZoomScroll(ImageView imageView) {
+        this.imageView = imageView;
+    }
+
+    /**
+     * The listener to use when the imageView is touched.
+     * @param myTouchListener the listener to use.
+     */
     @SuppressLint("ClickableViewAccessibility")
     public void setOnTouchListener(View.OnTouchListener myTouchListener) {
         imageView.setOnTouchListener(myTouchListener);
-    }
-
-    public ImageViewZoomScroll(ImageView imageView) {
-        this.imageView = imageView;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -102,7 +119,10 @@ public class ImageViewZoomScroll {
         refresh();
     }
 
-
+    /**
+     * Set the zoom level back to minZoom and
+     * center the image.
+     */
     public void reset() {
         setZoom(minZoom);
         setX(0);
@@ -120,6 +140,12 @@ public class ImageViewZoomScroll {
         setY(topLeft.y + y);
     }
 
+    /**
+     * Makes sure the value of this point is on the image bmp.
+     * If the point is outside of bitmap, it will be put back at the closest point on the border
+     * of the image. (ie. For an image 100x100, a point 150x80 will be change to 100x80)
+     * @param p the point to sanitize.
+     */
     public void sanitizeBmpCoordinates(Point p) {
         if (p.x < 0) p.x = 0;
         if (p.y < 0) p.y = 0;
@@ -142,6 +168,11 @@ public class ImageViewZoomScroll {
         refresh();
     }
 
+    /**
+     * In order to get the displayed size of imageView, imageView has to be displayed.
+     * As this process is asynchronous, we have to call this function when the imageView has
+     * already been created. I
+     */
     public void setInternalValues() {
         viewWidth = imageView.getMeasuredWidth();
         viewHeight = imageView.getMeasuredHeight();
@@ -161,12 +192,25 @@ public class ImageViewZoomScroll {
 
     public float getZoom() {return zoom;}
 
+    /**
+     * Convert a point in screen coordinates to bmp coordinates.
+     * No correction are applied if the point is outside the bmp.
+     * @param p the point to convert
+     * @return a point in bmp coordinates system.
+     */
     public Point imageViewTouchPointToBmpCoordinates(Point p) {
         p.x = (int) (topLeft.x + (p.x / zoom));
         p.y = (int) (topLeft.y + (p.y / zoom));
         return p;
     }
 
+    /**
+     * Returns the pixel value of the image at this point touch on the screen.
+     * This means that the value is converted to bmp coordinates in this function and
+     * should not be applied beforehand.
+     * @param p
+     * @return
+     */
     public int getPixelAt(Point p) {
         p = imageViewTouchPointToBmpCoordinates(p);
         sanitizeBmpCoordinates(p);
@@ -206,6 +250,9 @@ public class ImageViewZoomScroll {
         refresh();
     }
 
+    /**
+     * Recalculate the matrix and set to its imageView.
+     */
     private void refresh() {
         Matrix test = new Matrix();
         test.setTranslate(-topLeft.x, -topLeft.y);

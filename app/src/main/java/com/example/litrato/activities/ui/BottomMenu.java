@@ -27,6 +27,14 @@ import com.example.litrato.tools.ImageTools;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Those menus are used in the bottom part of the UI, in the MainActivity.
+ * It can be the main menus, such as Filters, Tools, Presets, or the submenus in Filters.
+ *
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
+ * @version 1.0
+ * @since   2020-31-01
+ */
 public class BottomMenu {
 
     /**
@@ -34,23 +42,64 @@ public class BottomMenu {
      * representation on the UI).
      */
     private static final List<DisplayedFilter> displayedFilters = new ArrayList<>();
+
+    /**
+     * A list of all create bottomMenus.
+     */
     private static final List<BottomMenu> bottomMenus = new ArrayList<>();
 
-    public static Typeface submenuSelected;
-    public static Typeface submenuUnselected;
+    public static Typeface selected;
+    public static Typeface unselected;
+
+    /**
+     * The image used for the miniatures.
+     */
     public static Bitmap currentImage;
 
+    /**
+     * The miniatures are only calculated once when the image is changed.
+     * Also, they are only calculated when the menu is opened.
+     */
     private boolean needRefreshMiniature;
+
+    /**
+     * Each menu displays the filter of one category.
+     * This category can be null if no filter should be displayed, or if its a menu containing
+     * submenus.
+     */
     private final Category category;
+
+    /**
+     * The layout element that is turned visible when the menu is opened.
+     */
     private final ViewGroup bar;
+
+    /**
+     * The layout element which contain the TextView for each filter of that category.
+     */
     private final ViewGroup container;
+
+    /**
+     * The button that is used to open or close the menu.
+     * If this menu is a submenu, clicking on the button while the menu is opened won't close
+     * the menu as it would lead to an empty parent menu.
+     */
     private final Button button;
+
+    /**
+     * Is null by default. Used to set which menu is the parent.
+     */
     private final BottomMenu parent;
 
     private ViewGroup   toolsLineOne;
     private ViewGroup   toolsLineTwo;
     private ViewGroup   toolsLineThree;
 
+    /**
+     * Used to display the tools.
+     * There is only 4 tools by row in the gridLayout,
+     * and this value is used to return to a new row.
+     */
     private int numberOfTools;
 
     @SuppressWarnings("WeakerAccess")
@@ -95,6 +144,13 @@ public class BottomMenu {
         this(button, bar, bar, category, null);
     }
 
+    /**
+     * Right now this is the way we decided to used to save those element.
+     * Maybe it is possible to retrieve those from the tool's bar itself.
+     * @param toolsLineOne the first line
+     * @param toolsLineTwo the second line
+     * @param toolsLineThree the third line
+     */
     public void setToolsRows(ViewGroup toolsLineOne, ViewGroup toolsLineTwo, ViewGroup toolsLineThree) {
         this.toolsLineOne = toolsLineOne;
         this.toolsLineTwo = toolsLineTwo;
@@ -112,6 +168,11 @@ public class BottomMenu {
         }
     }
 
+    /**
+     * Refreshes/Generates the miniatures of filter of one category.
+     * As each menu are one category, it is the same as refreshing all the filters from a menu.
+     * @param onlyThisCategory the category of filter's miniature to refresh.
+     */
     private void generateMiniatures(Category onlyThisCategory) {
 
         Bitmap resizedMiniature = ImageTools.toSquare(
@@ -145,7 +206,15 @@ public class BottomMenu {
 
     }
 
-    static private TextView generateATextView(Filter filter, Context context) {
+    /**
+     * Generate the visual representation of a filter.
+     * It can be a miniature with a title for the Filters and Preset,
+     * or a icon and title for the Tools. Also creates the listener for it.
+     * @param filter the filter from which the TextView is generated.
+     * @param context the context to use
+     * @return a TextView
+     */
+    static private TextView generateATextView(final Filter filter, Context context) {
         TextView textView;
         textView = new TextView(context);
         textView.setClickable(true);
@@ -172,9 +241,23 @@ public class BottomMenu {
             textView.setLayoutParams(params);
 
         }
+
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.subActivityFilter = filter;
+                MainActivity.getMenuItemListener().onClick(v);
+                MainActivity.subActivityFilter = null;
+            }
+        });
+
         return textView;
     }
 
+    /**
+     * Close all menus except itself.
+     * If it is a submenu, its parent will also be kept open.
+     */
     private void closeOtherMenus() {
         for (BottomMenu menu:bottomMenus) {
             if (menu != this && menu != this.parent) {
@@ -183,15 +266,21 @@ public class BottomMenu {
         }
     }
 
+    /**
+     * Close itself.
+     */
     private void close() {
-        button.setTypeface(submenuUnselected);
+        button.setTypeface(unselected);
         ColorTheme.button(button, parent != null);
         bar.setVisibility(View.GONE);
     }
 
+    /**
+     * Open itself.
+     */
     private void open() {
         ColorTheme.button(this.button, true);
-        button.setTypeface(submenuSelected);
+        button.setTypeface(selected);
         bar.setVisibility(View.VISIBLE);
 
         for (BottomMenu menu:bottomMenus) {
@@ -204,6 +293,9 @@ public class BottomMenu {
         generateMiniatureForOpenedMenu();
     }
 
+    /**
+     * Has to be called before using the menus to populate them.
+     */
     static public void initializeMenus(){
 
         TextView textView;
@@ -213,13 +305,6 @@ public class BottomMenu {
                 if (bottomMenu.category == currentFilter.getFilterCategory()) {
 
                     textView = BottomMenu.generateATextView(currentFilter, MainActivity.getAppContext());
-                    textView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            MainActivity.subActivityFilter = currentFilter;
-                            MainActivity.getMenuItemListener().onClick(v);
-                        }
-                    });
 
                     if (currentFilter.getFilterCategory() == Category.TOOL) {
                         switch (bottomMenu.numberOfTools / 4) {
@@ -237,16 +322,22 @@ public class BottomMenu {
         }
     }
 
+    /**
+     * Close all menus
+     */
     static public void closeMenus(){
         for (BottomMenu bottomMenu:bottomMenus) {
             if (bottomMenu.parent == null) {
-                bottomMenu.button.setTypeface(submenuUnselected);
+                bottomMenu.button.setTypeface(unselected);
                 ColorTheme.button(bottomMenu.button, false);
                 bottomMenu.bar.setVisibility(View.GONE);
             }
         }
     }
 
+    /**
+     * Invalidates all miniatures, which mean the image has changed.
+     */
     static public void invalidateMiniatures() {
         for (BottomMenu bottomMenu:bottomMenus) {
             bottomMenu.needRefreshMiniature = true;
@@ -254,10 +345,13 @@ public class BottomMenu {
         }
     }
 
-    static public void applyColorTheme() {
+    /**
+     * Apply the proper color for the UI element, in accordance with the global theme.
+     */
+    static void applyColorTheme() {
         for (BottomMenu bottomMenu:bottomMenus) {
             ColorTheme.button(bottomMenu.button, bottomMenu.parent != null);
-            bottomMenu.button.setTypeface(submenuUnselected);
+            bottomMenu.button.setTypeface(unselected);
             ColorTheme.background(bottomMenu.bar, true);
         }
         for (DisplayedFilter displayedFilter:displayedFilters) {

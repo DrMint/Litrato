@@ -16,7 +16,14 @@ import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;
 import com.example.litrato.activities.ui.ColorTheme;
 
-public class SettingsActivity extends AppCompatActivity {
+/**
+ * This class is where the user can view and change app's preferences.
+ *
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
+ * @version 1.0
+ * @since   2020-31-01
+ */
+public class PreferencesActivity extends AppCompatActivity {
 
     private TextView settingsTitle;
 
@@ -52,7 +59,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.activity_preferences);
 
         settingsTitle = findViewById(R.id.exifTitle);
         returnButton =  findViewById(R.id.returnButton);

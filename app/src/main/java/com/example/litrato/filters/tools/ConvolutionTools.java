@@ -4,7 +4,7 @@ package com.example.litrato.filters.tools;
  * This class implements tools used by any filter that uses convolution without RenderScript.
  * This class will be deprecated as soon as all convolution is done through RS.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2019-01-08
  */

@@ -32,12 +32,19 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 
 import java.util.Objects;
 
-
+/**
+ * ColorTheme is used to change the color and style of UI elements to reflect the global style.
+ *
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
+ * @version 1.0
+ * @since   2020-31-01
+ */
 public class ColorTheme {
 
-
-    // COLOR
-
+    /**
+     * Change the colors used by the class, depending on which global theme is used.
+     * @param darkMode is it in dark mode ?
+     */
     private static void setColorTheme(boolean darkMode) {
         if (darkMode) {
             COLOR_BACKGROUND = Color.rgb(0,0,0);

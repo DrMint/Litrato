@@ -6,7 +6,7 @@ import android.graphics.Color;
 /**
  * This class implements all the functions necessary for conversions between RGB and HSV, among others.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2019-01-08
  */
