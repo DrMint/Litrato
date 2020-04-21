@@ -194,6 +194,15 @@ public class Filter {
     private static void createPresets(Context context){
 
         Filter newPresets;
+        newPresets = new Filter("B&W", Category.PRESET);
+        newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
+            @Override
+            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
+                FilterFunction.saturation(bmp, 0);
+                return null;
+            }
+        });
+        filters.add(newPresets);
         newPresets = new Filter("2 Strip", Category.PRESET);
         newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -433,16 +442,11 @@ public class Filter {
         newTools.allowScrollZoom = false;
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
-        final List<Bitmap> stickers = new ArrayList<>();
-        /*stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_asleep));
-        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_banchor));
-        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bbubble));
-        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bcake));
-        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bear));
-        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bee));*/
         newTools.setSeekBar1(10,100,300,"Size","%");
         newTools.setSeekBar2(-180,0,180,"Rotation","deg");
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_stickers));
+
+        final List<Bitmap> stickers = new ArrayList<>();
         ArrayList<Integer> imageListId = new ArrayList<>();
         Field[] drawables = R.drawable.class.getFields();
         for (Field f : drawables) {
@@ -452,6 +456,7 @@ public class Filter {
         for (int imgResourceId : imageListId) {
             stickers.add(FileInputOutput.getBitmap(context.getResources(), imgResourceId));
         }
+
         newTools.setBitmaps(stickers);
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
