@@ -263,6 +263,9 @@ The last column is the ratio between the processing time for 1 Mpx and 3.6 Mpx. 
 
 |          Filter         | RS | HSV | 0.185 Mpx | 0.750 Mpx | 3.00 Mpx |  %  |  %  |
 |:-----------------------:|:--:|:---:|:---------:|:---------:|:--------:|:---:|:---:|
+| Old analog              |  ✖ |     |    210    |    302    |    506   | 144 | 168 |
+| Night from day          |  ✖ |     |    200    |    642    |   1720   | 321 | 268 |
+|                         |    |     |           |           |          |     |     |
 | Rotation                |    |     |     23    |     53    |    209   | 230 | 394 |
 | Crop                    |    |     |     4     |     6     |    14    | 150 | 233 |
 | Flip                    |  ✖ |     |     19    |     20    |    32    | 105 | 160 |
@@ -275,9 +278,6 @@ The last column is the ratio between the processing time for 1 Mpx and 3.6 Mpx. 
 | Add   noise             |  ✖ |     |    115    |    380    |   1320   | 330 | 347 |
 | Temperature             |  ✖ |     |     14    |     16    |    23    | 114 | 144 |
 | Tint                    |  ✖ |     |     15    |     16    |    22    | 107 | 138 |
-|                         |    |     |           |           |          |     |     |
-| Mask   apply            |    |     |     26    |     62    |    96    | 238 | 155 |
-| Histogram               |    |     |     70    |     72    |    79    | 103 | 110 |
 |                         |    |     |           |           |          |     |     |
 | Colorize                |  ✖ |  ✖  |     13    |     20    |    37    | 154 | 185 |
 | Change   hue            |  ✖ |  ✖  |     12    |     25    |    45    | 208 | 180 |
@@ -295,8 +295,8 @@ The last column is the ratio between the processing time for 1 Mpx and 3.6 Mpx. 
 | Sketch                  |  ✖ |     |    168    |    288    |    566   | 171 | 197 |
 | Cartoon                 |  ✖ |     |    221    |    398    |   1120   | 180 | 281 |
 |                         |    |     |           |           |          |     |     |
-| Old analog              |  ✖ |     |    210    |    302    |    506   | 144 | 168 |
-| Night from day          |  ✖ |     |    200    |    642    |   1720   | 321 | 268 |
+| Mask apply              |    |     |     26    |     62    |    96    | 238 | 155 |
+| Histogram               |    |     |     70    |     72    |    79    | 103 | 110 |
 
 Those results show that the program still needs some improvements and optimizations. It makes it clear that filters using RenderScript are way faster than the others. The filters that use convolution kernels are expectedly slower than the rest. The Average blur filter is extremely slow at high kernel size. It is clear that the Gaussian blur being a separable filter makes a huge difference in performance when compared with the Average blur filter. Also, the Add noise filter is particularly slow despite using RenderScript. This is because it’s generating up to three random numbers for each pixel. It would be much faster—but more complicated—to superpose a pre-fetched noisy layer on top of the image.
 
