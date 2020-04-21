@@ -176,7 +176,7 @@
         android:background="#00FFFFFF"
         android:contentDescription="@string/pickButton"
         android:scaleType="fitCenter"
-        android:src="@drawable/pick"
+        android:src="@drawable/icon_pick"
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

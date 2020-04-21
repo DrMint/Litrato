@@ -149,7 +149,7 @@ public class ExifActivity extends FragmentActivity implements OnMapReadyCallback
         ColorTheme.textView(longitude);
         ColorTheme.textView(altitude);
 
-        ColorTheme.icon(getApplicationContext(), returnButton, R.drawable.goback);
+        ColorTheme.icon(getApplicationContext(), returnButton, R.drawable.icon_goback);
     }
 
 

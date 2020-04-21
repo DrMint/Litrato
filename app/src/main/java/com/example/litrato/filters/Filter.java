@@ -25,7 +25,6 @@ import java.util.List;
 public class Filter {
 
     public static final List<Filter> filters = new ArrayList<>();
-    public final List<Bitmap> bitmaps = new ArrayList<>();
 
     /**
      * The name displayed in the spinner.
@@ -77,6 +76,8 @@ public class Filter {
     private FilterApplyInterface myApplyInterface;
     private FilterPreviewInterface myPreviewInterface;
 
+    private List<Bitmap> bitmaps;
+
     private final Category category;
     public boolean needFilterActivity = true;
     public boolean allowMasking = true;
@@ -116,6 +117,9 @@ public class Filter {
         this.switch1UnitFalse = switch1UnitFalse;
         this.switch1UnitTrue = switch1UnitTrue;
     }
+
+    private void setBitmaps(List<Bitmap> bitmaps) {this.bitmaps = bitmaps;}
+    private List<Bitmap> getBitmaps() {return this.bitmaps;}
 
     private void setColorSeekBar() {this.colorSeekBar = true;}
 
@@ -273,8 +277,8 @@ public class Filter {
                 FilterFunction.gaussianBlur(bmp, 2);
                 FilterFunction.saturation(bmp, 0);
                 FilterFunction.temperature(bmp, 100);
-                Bitmap texture = FileInputOutput.getBitmap(context.getResources(), R.drawable.grunge_texture, bmp.getWidth(), bmp.getHeight());
-                Bitmap texture2 = FileInputOutput.getBitmap(context.getResources(), R.drawable.white_noise, bmp.getWidth(), bmp.getHeight());
+                Bitmap texture = FileInputOutput.getBitmap(context.getResources(), R.drawable.img_grunge, bmp.getWidth(), bmp.getHeight());
+                Bitmap texture2 = FileInputOutput.getBitmap(context.getResources(), R.drawable.img_white_noise, bmp.getWidth(), bmp.getHeight());
                 FilterFunction.applyTexture(bmp, texture, BlendType.MULTIPLY);
                 FilterFunction.applyTexture(bmp, texture2, BlendType.ADD);
                 return null;
@@ -374,7 +378,7 @@ public class Filter {
         Filter newTools;
 
         newTools = new Filter(Settings.FILTER_ROTATION, Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.rotate));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_rotate));
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
         newTools.setSeekBar1(-180, 0, 180, "Angle", "deg");
@@ -387,7 +391,7 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Crop", Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.crop));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_crop));
         newTools.allowMasking = false;
         newTools.allowScrollZoom = false;
         newTools.allowHistogram = false;
@@ -413,7 +417,7 @@ public class Filter {
         newTools.needFilterActivity = false;
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.flip));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_flip));
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
@@ -424,23 +428,31 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Stickers", Category.TOOL);
-        newTools.allowScrollZoom=false;
+        newTools.allowScrollZoom = false;
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
-        newTools.setSeekBar1(1,1,10,"size","unit");
-        newTools.setSeekBar2(0,0,360,"rotation","deg");
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.stickers));
+        List<Bitmap> stickers = new ArrayList<>();
+        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_asleep));
+        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_banchor));
+        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bbubble));
+        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bcake));
+        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bear));
+        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bee));
+        newTools.setBitmaps(stickers);
+        newTools.setSeekBar1(10,100,300,"Size","%");
+        newTools.setSeekBar2(-180,0,180,"Rotation","deg");
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_stickers));
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-                FilterFunction.putSticker(bmp,touchDown,BitmapFactory.decodeResource(context.getResources(),R.drawable.stickers),(int)seekBar,(int)seekBar2);
+                FilterFunction.applySticker(bmp, touchUp, BitmapFactory.decodeResource(context.getResources(),R.drawable.sticker_asleep), seekBar, (int) seekBar2);
                 return null;
             }
         });
         filters.add(newTools);
 
         newTools = new Filter("Luminosity", Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.luminosity));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_luminosity));
         newTools.setSeekBar1(-100, 0, 100, "Brightness","%");
         newTools.setSeekBar2(-100, 0, 100, "Gamma", "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -454,7 +466,7 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Contrast", Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.contrast));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_contrast));
         newTools.setSeekBar1(-50, 0, 50, "Contrast","%");
         newTools.setSeekBar2(-100, 0, 100, "Offset","%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -468,7 +480,7 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Sharpness", Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.sharpness));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_sharpness));
         newTools.setSeekBar1(-100, 0, 100, "Intensity","%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -480,7 +492,7 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Auto", Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.auto));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_auto));
         newTools.setSwitch1(false, "Linear", "Dynamic");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -496,7 +508,7 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Saturation", Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.saturation));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_saturation));
         newTools.setSeekBar1(0, 100, 200, "Intensity", "%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -508,7 +520,7 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Add noise", Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.add_noise));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_add_noise));
         newTools.setSeekBar1(0, 0, 255, "Amount visible","");
         newTools.setSwitch1(false,"B&W Noise", "Color Noise");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
@@ -521,7 +533,7 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Temperature", Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.temperature));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_temperature));
         newTools.setSeekBar1(-100, 0, 100, "Cold <---> Warm","%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -533,7 +545,7 @@ public class Filter {
         filters.add(newTools);
 
         newTools = new Filter("Tint", Category.TOOL);
-        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.tint));
+        newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_tint));
         newTools.setSeekBar1(-100, 0, 100, "Green <---> Magenta","%");
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
@@ -703,7 +715,7 @@ public class Filter {
         newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
-                Bitmap texture = FileInputOutput.getBitmap(context.getResources(), R.drawable.canvas_texture, bmp.getWidth(), bmp.getHeight());
+                Bitmap texture = FileInputOutput.getBitmap(context.getResources(), R.drawable.img_canvas, bmp.getWidth(), bmp.getHeight());
 
                 // First layer
                 Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
@@ -766,14 +778,5 @@ public class Filter {
         filters.add(newFilter);
 
     }
-
-    public void createStickers(Context context){
-        Bitmap newBmp;
-
-        newBmp = BitmapFactory.decodeResource(context.getResources(),R.drawable.add_noise);
-        this.bitmaps.add(newBmp);
-
-    }
-
 }
 

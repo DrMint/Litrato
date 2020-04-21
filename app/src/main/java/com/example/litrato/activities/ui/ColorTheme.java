@@ -94,12 +94,12 @@ public class ColorTheme {
         }
         Objects.requireNonNull(actionBar).setTitle("");
 
-        icon(context, toolbar.getMenu().getItem(0), R.drawable.open);
-        icon(context, toolbar.getMenu().getItem(1), R.drawable.history);
-        icon(context, toolbar.getMenu().getItem(2), R.drawable.save);
-        icon(context, toolbar.getMenu().getItem(4), R.drawable.rotateleft);
-        icon(context, toolbar.getMenu().getItem(5), R.drawable.rotateright);
-        icon(context, toolbar, R.drawable.overflow);
+        icon(context, toolbar.getMenu().getItem(0), R.drawable.icon_open);
+        icon(context, toolbar.getMenu().getItem(1), R.drawable.icon_history);
+        icon(context, toolbar.getMenu().getItem(2), R.drawable.icon_save);
+        icon(context, toolbar.getMenu().getItem(4), R.drawable.icon_rotateleft);
+        icon(context, toolbar.getMenu().getItem(5), R.drawable.icon_rotateright);
+        icon(context, toolbar, R.drawable.icon_overflow);
     }
 
     public static void switchL(final Switch layoutSwitch) {

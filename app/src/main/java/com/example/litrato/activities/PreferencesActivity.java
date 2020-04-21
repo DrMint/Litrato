@@ -143,7 +143,7 @@ public class PreferencesActivity extends AppCompatActivity {
         ColorTheme.spinner(miniatureSpinner);
         ColorTheme.spinner(importedBmpSpinner);
 
-        ColorTheme.icon(getApplicationContext(), returnButton, R.drawable.goback);
+        ColorTheme.icon(getApplicationContext(), returnButton, R.drawable.icon_goback);
     }
 
     private void initializeListener() {

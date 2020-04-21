@@ -185,7 +185,7 @@ public class FiltersActivity extends AppCompatActivity {
         layoutSwitch1           = findViewById(R.id.switch1);
         layoutSwitchValue1      = findViewById(R.id.switchValue1);
         filterMenu              = findViewById(R.id.filtersMenu);
-        stickersMenu            = findViewById(R.id.stickersMenu);
+        stickersMenu            = findViewById(R.id.itemMenu);
 
         // Gets the resources from the caller activity. If something crucial is missing aborts.
         // Once resources have been gathered, they are deleted from they original location to avoid
@@ -272,11 +272,11 @@ public class FiltersActivity extends AppCompatActivity {
         ColorTheme.seekBar(layoutSeekBar1);
         ColorTheme.seekBar(layoutSeekBar2);
 
-        ColorTheme.icon(getApplicationContext(), layoutPickButton, R.drawable.pick);
-        ColorTheme.icon(getApplicationContext(), layoutMaskButton, R.drawable.mask);
-        ColorTheme.icon(getApplicationContext(), layoutHistogramButton, R.drawable.histogram);
-        ColorTheme.icon(getApplicationContext(), layoutCancel, R.drawable.cancel);
-        ColorTheme.icon(getApplicationContext(), layoutButtonApply, R.drawable.valid);
+        ColorTheme.icon(getApplicationContext(), layoutPickButton, R.drawable.icon_pick);
+        ColorTheme.icon(getApplicationContext(), layoutMaskButton, R.drawable.icon_mask);
+        ColorTheme.icon(getApplicationContext(), layoutHistogramButton, R.drawable.icon_histogram);
+        ColorTheme.icon(getApplicationContext(), layoutCancel, R.drawable.icon_cancel);
+        ColorTheme.icon(getApplicationContext(), layoutButtonApply, R.drawable.icon_valid);
     }
 
 

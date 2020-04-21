@@ -27,7 +27,7 @@
             android:adjustViewBounds="true"
             android:contentDescription="@string/imageViewDescription"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/default_image" />
+            app:srcCompat="@drawable/img_default" />
 
         <RelativeLayout
             android:id="@+id/historyBar"

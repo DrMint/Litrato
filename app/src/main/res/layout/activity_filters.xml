@@ -21,7 +21,7 @@
             android:layout_above="@id/linearLayoutFilters"
             android:contentDescription="@string/imageViewDescription"
             android:scaleType="fitStart"
-            app:srcCompat="@drawable/default_image" />
+            app:srcCompat="@drawable/img_default" />
 
         <ImageView
             android:id="@+id/histogramView"
@@ -55,7 +55,7 @@
                 android:background="#00FFFFFF"
                 android:contentDescription="@string/cancelButton"
                 android:scaleType="fitCenter"
-                android:src="@drawable/cancel"
+                android:src="@drawable/icon_cancel"
                 android:visibility="visible" />
 
             <Button
@@ -77,7 +77,7 @@
                 android:background="#00FFFFFF"
                 android:contentDescription="@string/cancelButton"
                 android:scaleType="fitCenter"
-                android:src="@drawable/valid"
+                android:src="@drawable/icon_valid"
                 android:visibility="visible" />
 
         </LinearLayout>
@@ -90,7 +90,7 @@
             android:layout_marginBottom="0dp">
 
             <HorizontalScrollView
-                android:id="@+id/stickersScrollView"
+                android:id="@+id/itemMenuSchrollView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
@@ -98,9 +98,9 @@
                 android:visibility="visible">
 
                 <LinearLayout
-                    android:id="@+id/stickersMenu"
+                    android:id="@+id/itemMenu"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical" />
             </HorizontalScrollView>
 
@@ -108,14 +108,14 @@
                 android:id="@+id/pickButton"
                 android:layout_width="40dp"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/itemMenuSchrollView"
                 android:layout_marginStart="10dp"
                 android:adjustViewBounds="true"
                 android:background="#00FFFFFF"
                 android:contentDescription="@string/pickButton"
                 android:scaleType="fitCenter"
-                android:src="@drawable/pick"
-                android:visibility="visible"
-                android:layout_below="@+id/stickersScrollView"/>
+                android:src="@drawable/icon_pick"
+                android:visibility="visible" />
 
             <ImageButton
                 android:id="@+id/maskButton"
@@ -127,7 +127,7 @@
                 android:background="#00FFFFFF"
                 android:contentDescription="@string/maskButton"
                 android:scaleType="fitCenter"
-                android:src="@drawable/mask"
+                android:src="@drawable/icon_mask"
                 android:visibility="visible" />
 
             <ImageButton
@@ -140,13 +140,14 @@
                 android:background="#00FFFFFF"
                 android:contentDescription="@string/histogramButton"
                 android:scaleType="fitCenter"
-                android:src="@drawable/histogram"
+                android:src="@drawable/icon_histogram"
                 android:visibility="visible" />
 
             <TextView
                 android:id="@+id/switchValue1"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/itemMenuSchrollView"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="10dp"
                 android:textAlignment="center"
@@ -167,6 +168,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/itemMenuSchrollView"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:layout_toStartOf="@+id/switchValue1"

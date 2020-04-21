@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
         BottomMenu.initializeMenus();
 
         // Selects the default image in the resource folder and set it
-        setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.default_image));
+        setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.img_default));
 
     }
 

@@ -1,15 +1,10 @@
 package com.example.litrato.filters;
 
-import android.app.Application;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 
 import androidx.renderscript.Allocation;
 import androidx.renderscript.Element;
@@ -33,9 +28,7 @@ import com.android.retouchephoto.ScriptC_posterizing;
 import com.android.retouchephoto.ScriptC_rgbWeights;
 import com.android.retouchephoto.ScriptC_saturation;
 import com.android.retouchephoto.ScriptC_threshold;
-import com.example.litrato.R;
 import com.example.litrato.filters.tools.RenderScriptTools;
-import com.example.litrato.tools.FileInputOutput;
 import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
 
@@ -582,6 +575,28 @@ public class FilterFunction {
     /**
      *
      * @param bmp
+     * @param gamma should be between -100 and 100
+     */
+    public static void gamma(final Bitmap bmp, float gamma) {
+
+        gamma =  gamma / 100f + 1f;
+
+        Allocation input = Allocation.createFromBitmap(rs, bmp);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptC_gamma script = new ScriptC_gamma(rs);
+
+        script.invoke_setGamma(gamma);
+        script.forEach_gamma(input, output);
+
+        output.copyTo(bmp);
+        RenderScriptTools.cleanRenderScript(script, input, output);
+
+    }
+
+    /**
+     *
+     * @param bmp
      * @param texture
      * @param typeOfBlend
      * @param parameter should be between 0 and 100f
@@ -621,34 +636,25 @@ public class FilterFunction {
         RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
-    /**
-     *
-     * @param bmp
-     * @param gamma should be between -100 and 100
-     */
-    public static void gamma(final Bitmap bmp, float gamma) {
-
-        gamma =  gamma / 100f + 1f;
-
-        Allocation input = Allocation.createFromBitmap(rs, bmp);
-        Allocation output = Allocation.createTyped(rs, input.getType());
-
-        ScriptC_gamma script = new ScriptC_gamma(rs);
-
-        script.invoke_setGamma(gamma);
-        script.forEach_gamma(input, output);
-
-        output.copyTo(bmp);
-        RenderScriptTools.cleanRenderScript(script, input, output);
-
-    }
-
     public static void applyTexture(final Bitmap bmp, final Bitmap texture, final BlendType typeOfBlend) {
         applyTexture(bmp, texture, typeOfBlend,0);
     }
 
     public static void applyTexture(final Bitmap bmp, final Bitmap texture) {
         applyTexture(bmp, texture, BlendType.MULTIPLY);
+    }
+
+    public static void applySticker(final Bitmap bmp, Point touch, Bitmap sticker, float size, int degrees){
+        if(touch!=null) {
+            Canvas canvas = new Canvas(bmp);
+            Bitmap scaledSticker = ImageTools.scale(sticker, (int) (sticker.getWidth() * size / 100f), (int) (sticker.getHeight() * size / 100f));
+            Point center = new Point(scaledSticker.getWidth() / 2, scaledSticker.getHeight() / 2);
+            Rect dst = new Rect((touch.x - center.x), (touch.y - center.y), (touch.x - center.x + scaledSticker.getWidth()), (touch.y - center.y + scaledSticker.getHeight()));
+            Rect src = new Rect(0, 0, scaledSticker.getWidth(), scaledSticker.getHeight());
+            canvas.rotate(degrees,touch.x,touch.y);
+            canvas.drawBitmap(scaledSticker, src, dst, null);
+            canvas.rotate(-degrees,touch.x,touch.y);
+        }
     }
 
     public static void mirror(final Bitmap bmp) {
@@ -712,20 +718,4 @@ public class FilterFunction {
         output.copyTo(bmp);
         RenderScriptTools.cleanRenderScript(script, input, output);
     }
-
-    public static Bitmap putSticker(final Bitmap bmp, Point touch, Bitmap sticker, int size, int degrees){
-        if(touch!=null) {
-            Canvas canvas = new Canvas(bmp);
-            Bitmap scaledSticker=ImageTools.scale(sticker,sticker.getWidth()*size,sticker.getHeight()*size);
-            Point center = new Point(scaledSticker.getWidth() / 2, scaledSticker.getHeight() / 2);
-            Rect dst = new Rect((touch.x - center.x), (touch.y - center.y), (touch.x - center.x + scaledSticker.getWidth()), (touch.y - center.y + scaledSticker.getWidth()));
-            Rect src = new Rect(0, 0, scaledSticker.getWidth(), scaledSticker.getHeight());
-            canvas.rotate(degrees,touch.x,touch.y);
-            canvas.drawBitmap(scaledSticker, src, dst, null);
-            canvas.rotate(-degrees,touch.x,touch.y);
-        }
-        return bmp;
-    }
-
-
 }
