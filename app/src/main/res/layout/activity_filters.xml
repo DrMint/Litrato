@@ -89,6 +89,21 @@
             android:layout_alignBottom="@+id/imageView"
             android:layout_marginBottom="0dp">
 
+            <HorizontalScrollView
+                android:id="@+id/stickersScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:id="@+id/stickersMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" />
+            </HorizontalScrollView>
+
             <ImageButton
                 android:id="@+id/pickButton"
                 android:layout_width="40dp"
@@ -99,7 +114,8 @@
                 android:contentDescription="@string/pickButton"
                 android:scaleType="fitCenter"
                 android:src="@drawable/pick"
-                android:visibility="visible" />
+                android:visibility="visible"
+                android:layout_below="@+id/stickersScrollView"/>
 
             <ImageButton
                 android:id="@+id/maskButton"

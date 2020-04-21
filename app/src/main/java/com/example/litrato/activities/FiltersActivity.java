@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -149,6 +150,7 @@ public class FiltersActivity extends AppCompatActivity {
     private TextView    layoutSwitchValue1;
     private Switch      layoutSwitch1;
     private RelativeLayout filterMenu;
+    private LinearLayout stickersMenu;
 
     /**
      * Where the user started touching ImageView.
@@ -183,6 +185,7 @@ public class FiltersActivity extends AppCompatActivity {
         layoutSwitch1           = findViewById(R.id.switch1);
         layoutSwitchValue1      = findViewById(R.id.switchValue1);
         filterMenu              = findViewById(R.id.filtersMenu);
+        stickersMenu            = findViewById(R.id.stickersMenu);
 
         // Gets the resources from the caller activity. If something crucial is missing aborts.
         // Once resources have been gathered, they are deleted from they original location to avoid
@@ -254,6 +257,7 @@ public class FiltersActivity extends AppCompatActivity {
         ColorTheme.window(getApplicationContext(), getWindow());
 
         ColorTheme.background(filterMenu, true);
+        ColorTheme.background(stickersMenu,true);
         ColorTheme.background(layoutButtonApply, true);
         ColorTheme.background(layoutCancel, true);
 
@@ -327,6 +331,7 @@ public class FiltersActivity extends AppCompatActivity {
             layoutSeekBar2.setVisibility(View.GONE);
             layoutSwitch1.setVisibility(View.GONE);
             layoutSwitchValue1.setVisibility(View.GONE);
+            stickersMenu.setVisibility(View.GONE);
 
 
             // And add anything we need.

@@ -25,6 +25,7 @@ import java.util.List;
 public class Filter {
 
     public static final List<Filter> filters = new ArrayList<>();
+    public final List<Bitmap> bitmaps = new ArrayList<>();
 
     /**
      * The name displayed in the spinner.
@@ -763,6 +764,14 @@ public class Filter {
             }
         });
         filters.add(newFilter);
+
+    }
+
+    public void createStickers(Context context){
+        Bitmap newBmp;
+
+        newBmp = BitmapFactory.decodeResource(context.getResources(),R.drawable.add_noise);
+        this.bitmaps.add(newBmp);
 
     }
 
