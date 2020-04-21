@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.util.Log;
 
 import com.example.litrato.R;
 import com.example.litrato.activities.tools.Settings;
@@ -11,6 +12,7 @@ import com.example.litrato.tools.FileInputOutput;
 import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -431,17 +433,26 @@ public class Filter {
         newTools.allowScrollZoom = false;
         newTools.allowMasking = false;
         newTools.allowHistogram = false;
-        List<Bitmap> stickers = new ArrayList<>();
-        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_asleep));
+        final List<Bitmap> stickers = new ArrayList<>();
+        /*stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_asleep));
         stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_banchor));
         stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bbubble));
         stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bcake));
         stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bear));
-        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bee));
-        newTools.setBitmaps(stickers);
+        stickers.add(FileInputOutput.getBitmap(context.getResources(), R.drawable.sticker_bee));*/
         newTools.setSeekBar1(10,100,300,"Size","%");
         newTools.setSeekBar2(-180,0,180,"Rotation","deg");
         newTools.setIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.icon_stickers));
+        ArrayList<Integer> imageListId = new ArrayList<>();
+        Field[] drawables = R.drawable.class.getFields();
+        for (Field f : drawables) {
+            if (f.getName().contains("sticker_"))
+                imageListId.add(context.getResources().getIdentifier(f.getName(), "drawable", context.getPackageName()));
+        }
+        for (int imgResourceId : imageListId) {
+            stickers.add(FileInputOutput.getBitmap(context.getResources(), imgResourceId));
+        }
+        newTools.setBitmaps(stickers);
         newTools.setFilterPreviewFunction(new FilterPreviewInterface() {
             @Override
             public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp) {
