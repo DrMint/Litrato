@@ -261,44 +261,42 @@ According to Device Atlas, France still most used phone in 2019 is the iPhone 7 
 
 The last column is the ratio between the processing time for 1 Mpx and 3.6 Mpx. If the process is linear, is should be 360%.
 
-| Filter                                          | Use RS | HSV RGB | 1 Mpx (ms) | 3.6 Mpx (ms) |  %  |
-|-------------------------------------------------|:------:|:-------:|:----------:|:------------:|:---:|
-| Exposure                                        |    ✖   |         |     20     |      64      | 320 |
-| Saturation                                      |    ✖   |         |     42     |      161     | 383 |
-| Temperature                                     |    ✖   |         |     15     |      36      | 240 |
-| Tint                                            |    ✖   |         |     13     |      43      | 331 |
-| Sharpening                                      |    ✖   |         |     20     |      61      | 305 |
-| Colorize                                        |        |    ✖    |     81     |      328     | 405 |
-| Colorize                                        |    ✖   |    ✖    |     25     |      102     | 291 |
-| Change hue                                      |        |    ✖    |     92     |      349     | 379 |
-| Change hue                                      |    ✖   |    ✖    |     35     |      102     | 291 |
-| Hue shift                                       |        |    ✖    |     208    |      592     | 285 |
-| Invert                                          |    ✖   |         |     38     |      132     | 347 |
-| Keep a color                                    |        |    ✖    |     246    |      762     | 310 |
-| Keep a color                                    |    ✖   |    ✖    |     29     |      125     | 431 |
-| Remove a color                                  |        |    ✖    |     258    |      730     | 283 |
-| Remove a color                                  |    ✖   |    ✖    |     26     |      103     | 396 |
-| Posterize                                       |    ✖   |         |     16     |      72      | 450 |
-| Threshold                                       |    ✖   |         |     12     |      56      | 466 |
-| Add noise                                       |    ✖   |         |     544    |     1650     | 303 |
-| Linear contrast stretching                      |        |    ✖    |     272    |      979     | 360 |
-| Linear contrast stretching                      |    ✖   |         |    125     |     503      | 402 |
-| Histogram equalization                          |        |    ✖    |     321    |      974     | 303 |
-| Histogram equalization                          |    ✖   |         |     76     |     311      | 409 |
-| Average blur (2px)                              |        |         |     538    |     3030     | 563 |
-| Average blur (20px)                             |        |         |    16010   |       ?      |  ?  |
-| Average blur (20px)                             |    ✖   |         |    4210    |       ?      |  ?  |
-| Gaussian blur (25px)                            |        |         |    1400    |     7390     | 527 |
-| Gaussian blur (25px)                            |    ✖   |         |    385     |     1290     | 335 |
-| Gaussian blur (50px)                            |        |         |    3080    |     16300    | 529 |
-| Gaussian blur (50px) (without border correction) |        |        |    2630    |     15400    | 586 |
-| Gaussian blur (INTRINSIC) (25px)                |    ✖   |         |     39     |      188     | 482 |
-| Directional blur (25px)                         |    ✖   |         |    173     |     503      | 291 |
-| Laplacian (2px)                                 |        |         |     839    |     6040     | 720 |
-| Laplacian (2px)                                 |    ✖    |        |    230     |      371     | 161 |
-| Laplacian (INTRINSIC) (2px)                     |    ✖   |         |     19     |      56      | 294 |
-| Sobel (2px)                                     |    ✖   |         |     232    |      335     | 144 |
-| Histogram                                       |        |         |     31     |      110     | 355 |
+|          Filter         | RS | HSV | 0.185 Mpx | 0.750 Mpx | 3.00 Mpx |  %  |  %  |
+|:-----------------------:|:--:|:---:|:---------:|:---------:|:--------:|:---:|:---:|
+| Rotation                |    |     |     23    |     53    |    209   | 230 | 394 |
+| Crop                    |    |     |     4     |     6     |    14    | 150 | 233 |
+| Flip                    |  ✖ |     |     19    |     20    |    32    | 105 | 160 |
+| Stickers                |    |     |     5     |     6     |    16    | 120 | 267 |
+| Luminosity              |  ✖ |     |     35    |     33    |    155   |  94 | 470 |
+| Contrast                |  ✖ |     |     23    |     22    |    49    |  96 | 223 |
+| Sharpness               |  ✖ |     |     22    |     45    |    102   | 205 | 227 |
+| Auto                    |  ✖ |     |     35    |    100    |    361   | 286 | 361 |
+| Saturation              |  ✖ |     |     15    |     18    |    35    | 120 | 194 |
+| Add   noise             |  ✖ |     |    115    |    380    |   1320   | 330 | 347 |
+| Temperature             |  ✖ |     |     14    |     16    |    23    | 114 | 144 |
+| Tint                    |  ✖ |     |     15    |     16    |    22    | 107 | 138 |
+|                         |    |     |           |           |          |     |     |
+| Mask   apply            |    |     |     26    |     62    |    96    | 238 | 155 |
+| Histogram               |    |     |     70    |     72    |    79    | 103 | 110 |
+|                         |    |     |           |           |          |     |     |
+| Colorize                |  ✖ |  ✖  |     13    |     20    |    37    | 154 | 185 |
+| Change   hue            |  ✖ |  ✖  |     12    |     25    |    45    | 208 | 180 |
+| Selective coloring      |  ✖ |  ✖  |     19    |     30    |    81    | 158 | 270 |
+| Hue shift               |  ✖ |  ✖  |     13    |     30    |    71    | 231 | 237 |
+| Threshold               |  ✖ |     |     11    |     17    |    30    | 155 | 176 |
+| Posterize               |  ✖ |     |     22    |     20    |    54    |  91 | 270 |
+| Average blur (2px)      |  ✖ |     |     21    |     55    |    150   | 262 | 273 |
+| Average blur (20px)     |  ✖ |     |    309    |    1034   |   5820   | 335 | 563 |
+| Gaussian blur (2px)     |  ✖ |     |     39    |     62    |    165   | 159 | 266 |
+| Gaussian blur (20px)    |  ✖ |     |     60    |    168    |    507   | 280 | 302 |
+| Directional blur (20px) |  ✖ |     |     38    |     69    |    231   | 182 | 335 |
+| Laplacian (2px)         |  ✖ |     |     68    |     98    |    264   | 144 | 269 |
+| Sobel (2px)             |  ✖ |     |     53    |    102    |    285   | 192 | 279 |
+| Sketch                  |  ✖ |     |    168    |    288    |    566   | 171 | 197 |
+| Cartoon                 |  ✖ |     |    221    |    398    |   1120   | 180 | 281 |
+|                         |    |     |           |           |          |     |     |
+| Old analog              |  ✖ |     |    210    |    302    |    506   | 144 | 168 |
+| Night from day          |  ✖ |     |    200    |    642    |   1720   | 321 | 268 |
 
 Those results show that the program still needs some improvements and optimizations. It makes it clear that filters using RenderScript are way faster than the others. The filters that use convolution kernels are expectedly slower than the rest. The Average blur filter is extremely slow at high kernel size. It is clear that the Gaussian blur being a separable filter makes a huge difference in performance when compared with the Average blur filter. Also, the Add noise filter is particularly slow despite using RenderScript. This is because it’s generating up to three random numbers for each pixel. It would be much faster—but more complicated—to superpose a pre-fetched noisy layer on top of the image.
 
