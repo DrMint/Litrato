@@ -8,7 +8,9 @@ import android.graphics.Rect;
 
 import androidx.renderscript.Allocation;
 import androidx.renderscript.Element;
+import androidx.renderscript.Float4;
 import androidx.renderscript.RenderScript;
+import androidx.renderscript.Type;
 
 import com.android.retouchephoto.ScriptC_addNoise;
 import com.android.retouchephoto.ScriptC_brightness;
@@ -287,11 +289,16 @@ public class FilterFunction {
         if (changeSaturation) {
             colorizeScript.set_saturation(saturation);
         }
-        colorizeScript.forEach_colorize(input, output);
+        colorizeScript.forEach_colorize(input,output);
         output.copyTo(bmp);
         RenderScriptTools.cleanRenderScript(colorizeScript, input, output);
     }
 
+    /**
+     * A filter to change only the hue of an image (saturation =0)
+     * @param bmp the image
+     * @param hue choosed hue value
+     */
     public static void changeHue(final Bitmap bmp, final int hue) {
         colorize(bmp, hue,0, false);
     }
@@ -545,11 +552,11 @@ public class FilterFunction {
 
     /** A filter to cartoon an image.
      * @param bmp the image
-     * @param contour
-     * @param posterize
+     * @param blackLevel
+     * @param posterize number of luminance values
      */
 
-    public static void cartoon(final Bitmap bmp, final int contour, final int posterize) {
+    public static void cartoon(final Bitmap bmp, final int blackLevel, final int posterize) {
 
         Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
 
@@ -561,7 +568,7 @@ public class FilterFunction {
 
         // Second layer
         posterize(bmpCopy, posterize, false);
-        toExtDyn(bmpCopy, contour, 255);
+        toExtDyn(bmpCopy, blackLevel, 255);
 
         Allocation input = Allocation.createFromBitmap(rs, bmp);
         Allocation pixels = Allocation.createFromBitmap(rs, bmpCopy);
@@ -579,7 +586,7 @@ public class FilterFunction {
 
     /**
      *
-     * @param bmp
+     * @param bmp the image
      * @param gamma should be between -100 and 100
      */
     public static void gamma(final Bitmap bmp, float gamma) {
@@ -601,9 +608,9 @@ public class FilterFunction {
 
     /**
      *
-     * @param bmp the bitmap
-     * @param texture
-     * @param typeOfBlend
+     * @param bmp the image
+     * @param texture another bitmap to blend with the previous
+     * @param typeOfBlend type of blend between the two bitmaps
      * @param parameter should be between 0 and 100f
      */
     public static void applyTexture(final Bitmap bmp, final Bitmap texture, final BlendType typeOfBlend, float parameter) {
@@ -651,7 +658,7 @@ public class FilterFunction {
 
     /**
      * A filter to apply a sticker at a certain position, choosing the size of it and its rotation.
-     * @param bmp the bitmap
+     * @param bmp the image
      * @param touch point where we want to put the sticker
      * @param sticker bitmap sticker we want to put on the bitmap
      * @param size size of sticker
@@ -671,8 +678,8 @@ public class FilterFunction {
     }
 
     /**
-     * A filter that makes a vertical symmetry of the image (mirror effect -right goes to left and left goes to right)
-     * @param bmp the bitmap
+     * A filter that applies a vertical symmetry on the image (mirror effect -right goes to left and left goes to right)
+     * @param bmp the image
      */
     public static void mirror(final Bitmap bmp) {
 
@@ -694,7 +701,7 @@ public class FilterFunction {
 
     /**
      *
-     * @param bmp
+     * @param bmp the image
      * @param level
      */
     public static void burnValues(final Bitmap bmp, float level) {
@@ -720,7 +727,7 @@ public class FilterFunction {
 
     /**
      *
-     * @param bmp
+     * @param bmp the image
      * @param level
      */
     public static void contrastBurn(final Bitmap bmp, float level) {

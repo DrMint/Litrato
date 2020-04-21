@@ -33,7 +33,7 @@ class FilterFunctionIntrinsic {
      * @param bmp the image.
      * @param context the context.
      * @param radius how blurry the image should be (the size of the kernel).
-     *               Cannot be more than 25. because of Intrinsic's implementation limitations.
+     * Cannot be more than 25. because of Intrinsic's implementation limitations.
      */
     private static void gaussianBlur(final Bitmap bmp, final Context context, final float radius) {
 

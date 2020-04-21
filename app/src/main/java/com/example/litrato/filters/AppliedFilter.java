@@ -23,6 +23,17 @@ public class AppliedFilter {
     private final PointPercentage touchDown;
     private final PointPercentage touchUp;
 
+    /**
+     * Constructor
+     * @param filter the filter
+     * @param maskBmp the mask
+     * @param colorSeekHue value of color seekbar
+     * @param seekBar value of seekbar1
+     * @param seekBar2 value of seekbar2
+     * @param switch1 state of switch
+     * @param touchDown point
+     * @param touchUp point
+     */
     public AppliedFilter(Filter filter, Bitmap maskBmp, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, PointPercentage touchDown, PointPercentage touchUp) {
         this.filter = filter;
         this.maskBmp = maskBmp;
@@ -34,12 +45,26 @@ public class AppliedFilter {
         this.touchUp = touchUp;
     }
 
+    /**
+     * Constructor when no parameters are required to apply the correct filter
+     * @param filter the filter
+     */
     public AppliedFilter(Filter filter){
         this(filter, null, 0, filter.seekBar1Set, filter.seekBar2Set, filter.switch1Default,  new PointPercentage(0,0), new PointPercentage(0,0));
     }
 
+    /**
+     * getter
+     * @return name of the filter
+     */
     public String getName() {return filter.getName();}
 
+    /**
+     * Apply the filter
+     * @param bmp the image
+     * @param context the context
+     * @return the modified image
+     */
     public Bitmap apply(Bitmap bmp, Context context) {
 
         Point a = null;
