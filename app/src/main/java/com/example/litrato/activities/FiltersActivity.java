@@ -258,8 +258,8 @@ public class FiltersActivity extends AppCompatActivity {
 
         ColorTheme.background(filterMenu, true);
         ColorTheme.background(stickersMenu,true);
-        ColorTheme.background(layoutButtonApply, true);
-        ColorTheme.background(layoutCancel, true);
+        ColorTheme.background(layoutButtonApply, false);
+        ColorTheme.background(layoutCancel, false);
 
         ColorTheme.textView(layoutSwitchValue1);
         ColorTheme.textView(layoutSeekBarValue1);
