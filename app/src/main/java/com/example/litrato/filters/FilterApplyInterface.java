@@ -10,7 +10,7 @@ import com.example.litrato.tools.Point;
  * Each filter will call a different FilterFunction static method and using this
  * interface, it is possible for MainActivity to change which one to use.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2019-01-08
  */

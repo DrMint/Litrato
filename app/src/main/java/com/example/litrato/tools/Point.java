@@ -7,7 +7,7 @@ import android.graphics.Bitmap;
  * It is possible to create a point, copy a point, translate it, and test if two points are equals.
  * It is used by ImageViewZoomScroll.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2020-31-01
  */

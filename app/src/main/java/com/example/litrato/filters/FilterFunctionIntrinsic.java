@@ -21,7 +21,7 @@ import androidx.renderscript.ScriptIntrinsicBlur;
  * That way, it is easy to switch between them by simply changing the class when calling the function.
  * This is also true for FilterFunctionDeprecated.
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2020-02-08
  */

@@ -37,7 +37,7 @@ import com.example.litrato.tools.Point;
  * All filters should have the following signature:
  * static void FilterName(final Bitmap bmp, final Context context, ... other parameters that can influence the result)
  *
- * @author Thomas Barillot
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
  * @version 1.0
  * @since   2020-02-08
  */
@@ -543,6 +543,11 @@ public class FilterFunction {
         return bmp;
     }
 
+    /** A filter to cartoon an image.
+     * @param bmp the image
+     * @param contour
+     * @param posterize
+     */
 
     public static void cartoon(final Bitmap bmp, final int contour, final int posterize) {
 
@@ -596,7 +601,7 @@ public class FilterFunction {
 
     /**
      *
-     * @param bmp
+     * @param bmp the bitmap
      * @param texture
      * @param typeOfBlend
      * @param parameter should be between 0 and 100f
@@ -644,6 +649,14 @@ public class FilterFunction {
         applyTexture(bmp, texture, BlendType.MULTIPLY);
     }
 
+    /**
+     * A filter to apply a sticker at a certain position, choosing the size of it and its rotation.
+     * @param bmp the bitmap
+     * @param touch point where we want to put the sticker
+     * @param sticker bitmap sticker we want to put on the bitmap
+     * @param size size of sticker
+     * @param degrees angle of rotation of sticker
+     */
     public static void applySticker(final Bitmap bmp, Point touch, Bitmap sticker, float size, int degrees){
         if(touch!=null) {
             Canvas canvas = new Canvas(bmp);
@@ -657,6 +670,10 @@ public class FilterFunction {
         }
     }
 
+    /**
+     * A filter that makes a vertical symmetry of the image (mirror effect -right goes to left and left goes to right)
+     * @param bmp the bitmap
+     */
     public static void mirror(final Bitmap bmp) {
 
         Bitmap bmpCopy = ImageTools.bitmapClone(bmp);
@@ -675,6 +692,11 @@ public class FilterFunction {
         RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
+    /**
+     *
+     * @param bmp
+     * @param level
+     */
     public static void burnValues(final Bitmap bmp, float level) {
 
         level /= 50f;
@@ -696,6 +718,11 @@ public class FilterFunction {
         RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
+    /**
+     *
+     * @param bmp
+     * @param level
+     */
     public static void contrastBurn(final Bitmap bmp, float level) {
 
         level /= 100f;

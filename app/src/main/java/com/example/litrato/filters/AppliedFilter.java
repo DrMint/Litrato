@@ -7,6 +7,12 @@ import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
 import com.example.litrato.tools.PointPercentage;
 
+/** An AppliedFilter contains a filter and all the necessary information to apply this specific filter to an image.
+ * Needed to create an historic of the applied filters.
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
+ * @version 1.0
+ * @since 2020-19-04
+ */
 public class AppliedFilter {
     private final Filter filter;
     private Bitmap maskBmp;

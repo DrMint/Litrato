@@ -27,6 +27,11 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * @author Thomas Barillot, Rodin Duhayon, Alex Fournier, Marion de Oliveira
+ * @version 1.0
+ * @since 2020-19-04
+ */
 public class FileInputOutput {
 
     private static String lastTakenImagePath;
