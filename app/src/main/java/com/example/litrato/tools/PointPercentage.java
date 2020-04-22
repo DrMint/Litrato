@@ -3,7 +3,7 @@ package com.example.litrato.tools;
 import android.graphics.Bitmap;
 
 /**
- * A point is an object with two integers.
+ * A point is an object with two floats.
  * It is possible to create a point, copy a point, translate it, and test if two points are equals.
  * It is used by ImageViewZoomScroll.
  *
