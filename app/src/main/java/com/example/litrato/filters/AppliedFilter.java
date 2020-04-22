@@ -22,6 +22,7 @@ public class AppliedFilter {
     private final boolean switch1;
     private final PointPercentage touchDown;
     private final PointPercentage touchUp;
+    private final int selectedMenuItem;
 
     /**
      * Constructor
@@ -34,7 +35,7 @@ public class AppliedFilter {
      * @param touchDown point
      * @param touchUp point
      */
-    public AppliedFilter(Filter filter, Bitmap maskBmp, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, PointPercentage touchDown, PointPercentage touchUp) {
+    public AppliedFilter(Filter filter, Bitmap maskBmp, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, PointPercentage touchDown, PointPercentage touchUp, int selectedMenuItem) {
         this.filter = filter;
         this.maskBmp = maskBmp;
         this.colorSeekHue = colorSeekHue;
@@ -43,6 +44,7 @@ public class AppliedFilter {
         this.switch1 = switch1;
         this.touchDown = touchDown;
         this.touchUp = touchUp;
+        this.selectedMenuItem = selectedMenuItem;
     }
 
     /**
@@ -50,7 +52,7 @@ public class AppliedFilter {
      * @param filter the filter
      */
     public AppliedFilter(Filter filter){
-        this(filter, null, 0, filter.seekBar1Set, filter.seekBar2Set, filter.switch1Default,  new PointPercentage(0,0), new PointPercentage(0,0));
+        this(filter, null, 0, filter.seekBar1Set, filter.seekBar2Set, filter.switch1Default,  new PointPercentage(0,0), new PointPercentage(0,0), 0);
     }
 
     /**
@@ -77,7 +79,7 @@ public class AppliedFilter {
         // This only works because we never use a maskBmp and return the filtered image in filter.apply
         if (maskBmp == null) {
 
-            return filter.apply(bmp, null, context, colorSeekHue, seekBar, seekBar2, switch1, a, b);
+            return filter.apply(bmp, null, context, colorSeekHue, seekBar, seekBar2, switch1, a, b, selectedMenuItem);
 
         } else {
 
@@ -92,7 +94,7 @@ public class AppliedFilter {
             Bitmap originalImageMasked = ImageTools.bitmapClone(bmp);
             FilterFunction.applyTexture(originalImageMasked, invertedMaskBmp, BlendType.MULTIPLY);
 
-            filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, a, b);
+            filter.apply(bmp, maskBmp, context, colorSeekHue, seekBar, seekBar2, switch1, a, b, selectedMenuItem);
 
             FilterFunction.applyTexture(bmp, maskBmp,BlendType.MULTIPLY);
             FilterFunction.applyTexture(bmp, originalImageMasked, BlendType.ADD);

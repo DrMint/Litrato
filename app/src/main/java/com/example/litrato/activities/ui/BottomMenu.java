@@ -1,11 +1,11 @@
 package com.example.litrato.activities.ui;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 
+import com.example.litrato.activities.FiltersActivity;
 import com.example.litrato.activities.MainActivity;
 import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;
@@ -44,9 +45,15 @@ public class BottomMenu {
     private static final List<DisplayedFilter> displayedFilters = new ArrayList<>();
 
     /**
+     * A list of all filters, associated with their corresponding TextView (their visual
+     * representation on the UI).
+     */
+    private final List<Bitmap> bitmaps = new ArrayList<>();
+
+    /**
      * A list of all create bottomMenus.
      */
-    private static final List<BottomMenu> bottomMenus = new ArrayList<>();
+    //private List<BottomMenu> bottomMenus;
 
     public static Typeface selected;
     public static Typeface unselected;
@@ -69,6 +76,8 @@ public class BottomMenu {
      */
     private final Category category;
 
+    private final MenuType type;
+
     /**
      * The layout element that is turned visible when the menu is opened.
      */
@@ -89,7 +98,7 @@ public class BottomMenu {
     /**
      * Is null by default. Used to set which menu is the parent.
      */
-    private final BottomMenu parent;
+    public final BottomMenu parent;
 
     private ViewGroup   toolsLineOne;
     private ViewGroup   toolsLineTwo;
@@ -103,54 +112,35 @@ public class BottomMenu {
     private int numberOfTools;
 
     @SuppressWarnings("WeakerAccess")
-    public BottomMenu(final Button button, final ViewGroup bar, final ViewGroup container, final Category category, final BottomMenu parent) {
+    public BottomMenu(final Button button, final ViewGroup bar, final ViewGroup container, final Category category, final MenuType type, final BottomMenu parent) {
         this.needRefreshMiniature = true;
         this.category = category;
         this.bar = bar;
         this.container = container;
         this.button = button;
         this.parent = parent;
+        this.type = type;
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean visible = ViewTools.isVisible(bar);
-                closeOtherMenus();
-                if (parent != null || !visible) {
-                    open();
-                } else {
-                    close();
-                }
-            }
-        });
+        if (type != MenuType.BITMAPS) {
+            button.setOnClickListener(MainActivity.getMenuButtonListener());
+        }
 
         // We leave those because if no onClickListener is set, there are permeable to touch events.
         // That means that clicking on the their background will trigger an event to the object behind.
         bar.setOnClickListener(new View.OnClickListener() {public void onClick(View v) {}});
-
-        bottomMenus.add(this);
-
     }
 
-    public BottomMenu(final Button button, final ViewGroup bar, final Category category, final BottomMenu parent) {
-        this(button, bar, bar, category, parent);
+    public BottomMenu(final Button button, final ViewGroup bar, final Category category, final MenuType type, final BottomMenu parent) {
+        this(button, bar, bar, category, type, parent);
     }
 
-    public BottomMenu(final Button button, final ViewGroup bar, final ViewGroup container, final Category category) {
-        this(button, bar, container, category, null);
-    }
-
-    public BottomMenu(final Button button, final ViewGroup bar, final Category category) {
-        this(button, bar, bar, category, null);
-    }
-
-    /**
-     * Right now this is the way we decided to used to save those element.
-     * Maybe it is possible to retrieve those from the tool's bar itself.
-     * @param toolsLineOne the first line
-     * @param toolsLineTwo the second line
-     * @param toolsLineThree the third line
-     */
+        /**
+         * Right now this is the way we decided to used to save those element.
+         * Maybe it is possible to retrieve those from the tool's bar itself.
+         * @param toolsLineOne the first line
+         * @param toolsLineTwo the second line
+         * @param toolsLineThree the third line
+         */
     public void setToolsRows(ViewGroup toolsLineOne, ViewGroup toolsLineTwo, ViewGroup toolsLineThree) {
         this.toolsLineOne = toolsLineOne;
         this.toolsLineTwo = toolsLineTwo;
@@ -206,32 +196,28 @@ public class BottomMenu {
 
     }
 
+
     /**
      * Generate the visual representation of a filter.
      * It can be a miniature with a title for the Filters and Preset,
      * or a icon and title for the Tools. Also creates the listener for it.
-     * @param filter the filter from which the TextView is generated.
-     * @param context the context to use
-     * @return a TextView
+     * @param textView the textView to initialize
      */
-    static private TextView generateATextView(final Filter filter, Context context) {
-        TextView textView;
-        textView = new TextView(context);
+     private void initializeTextView(final TextView textView) {
         textView.setClickable(true);
-        textView.setText(filter.getName());
         textView.setAllCaps(true);
         ColorTheme.textView(textView);
         textView.setTextSize(Settings.MINIATURE_AND_TOOL_TEXT_SIZE_SP);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setBackgroundColor(Color.TRANSPARENT);
 
-        if (filter.getFilterCategory() == Category.TOOL) {
+        if (this.type == MenuType.TOOLS) {
             textView.setMaxWidth(Settings.TOOL_DISPLAYED_SIZE);
             textView.setHeight(Settings.TOOL_DISPLAYED_SIZE + Settings.PADDING_BETWEEN_MINIATURE_AND_LABEL + Settings.MINIATURE_AND_TOOL_TEXT_SIZE * 3);
             TableRow.LayoutParams params = new TableRow.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT,4);
             params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
             textView.setLayoutParams(params);
-        } else {
+        } else if (this.type == MenuType.MINIATURE) {
             textView.setMaxLines(2);
             textView.setHorizontallyScrolling(false);
             textView.setMaxWidth(Settings.MINIATURE_DISPLAYED_SIZE);
@@ -239,36 +225,19 @@ public class BottomMenu {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
             params.setMargins(Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2,Settings.ITEMS_MARGIN_IN_MENU,Settings.ITEMS_MARGIN_IN_MENU * 2);
             textView.setLayoutParams(params);
-
-        }
-
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity.subActivityFilter = filter;
-                MainActivity.getMenuItemListener().onClick(v);
-            }
-        });
-
-        return textView;
-    }
-
-    /**
-     * Close all menus except itself.
-     * If it is a submenu, its parent will also be kept open.
-     */
-    private void closeOtherMenus() {
-        for (BottomMenu menu:bottomMenus) {
-            if (menu != this && menu != this.parent) {
-                menu.close();
-            }
+        } else if (this.type == MenuType.BITMAPS) {
+            textView.setMaxWidth(Settings.STICKERS_DISPLAYED_SIZE);
+            textView.setHeight(Settings.STICKERS_DISPLAYED_SIZE);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,ActionBar.LayoutParams.WRAP_CONTENT);
+            params.setMargins(5,5,5,5);
+            textView.setLayoutParams(params);
         }
     }
 
     /**
      * Close itself.
      */
-    private void close() {
+    public void close() {
         button.setTypeface(unselected);
         ColorTheme.button(button, parent != null);
         bar.setVisibility(View.GONE);
@@ -277,46 +246,92 @@ public class BottomMenu {
     /**
      * Open itself.
      */
-    private void open() {
+    public void open() {
         ColorTheme.button(this.button, true);
         button.setTypeface(selected);
         bar.setVisibility(View.VISIBLE);
 
-        for (BottomMenu menu:bottomMenus) {
-            if (menu.parent == this) {
-                menu.open();
-                break;
-            }
-        }
-
+        if (this.parent != null) parent.open();
         generateMiniatureForOpenedMenu();
     }
 
-    /**
-     * Has to be called before using the menus to populate them.
-     */
-    static public void initializeMenus(){
-
+    @SuppressWarnings("WeakerAccess")
+    public void initialize(List<?> list) {
         TextView textView;
 
-        for (BottomMenu bottomMenu:bottomMenus) {
-            for (final Filter currentFilter:Filter.filters) {
-                if (bottomMenu.category == currentFilter.getFilterCategory()) {
+        if (this.type != MenuType.BITMAPS) {
+            Filter currentFilter;
+            for (int i = 0; i < list.size(); i++) {
+                currentFilter = (Filter) list.get(i);
+                if (this.category == currentFilter.getFilterCategory()) {
 
-                    textView = BottomMenu.generateATextView(currentFilter, MainActivity.getAppContext());
+                    textView = new TextView(MainActivity.getAppContext());
+                    initializeTextView(textView);
+                    textView.setText(currentFilter.getName());
 
                     if (currentFilter.getFilterCategory() == Category.TOOL) {
-                        switch (bottomMenu.numberOfTools / 4) {
-                            case 0: bottomMenu.toolsLineOne.addView(textView); break;
-                            case 1: bottomMenu.toolsLineTwo.addView(textView); break;
-                            case 2: bottomMenu.toolsLineThree.addView(textView); break;
+                        switch (this.numberOfTools / 4) {
+                            case 0: this.toolsLineOne.addView(textView); break;
+                            case 1: this.toolsLineTwo.addView(textView); break;
+                            case 2: this.toolsLineThree.addView(textView); break;
                         }
-                        bottomMenu.numberOfTools++;
+                        this.numberOfTools++;
                     } else {
-                        bottomMenu.container.addView(textView);
+                        this.container.addView(textView);
                     }
+
+                    final Filter selectedFilter = currentFilter;
+                    textView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            MainActivity.subActivityFilter = selectedFilter;
+                            MainActivity.getMenuItemListener().onClick(v);
+                        }
+                    });
+
                     displayedFilters.add(new DisplayedFilter(textView, currentFilter));
                 }
+            }
+
+        } else {
+
+            Bitmap currentBitmap;
+            for (int i = 0; i < list.size(); i++) {
+                currentBitmap = (Bitmap) list.get(i);
+
+                textView = new TextView(MainActivity.getAppContext());
+                initializeTextView(textView);
+
+                final int bitmapIndex = i;
+
+                textView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        FiltersActivity.selectedMenuItem = bitmapIndex;
+                        FiltersActivity.getMenuItemListener().onClick(v);
+                    }
+                });
+
+                Drawable drawable = new BitmapDrawable(MainActivity.getAppContext().getResources(), currentBitmap);
+                drawable.setBounds(0, 0, Settings.STICKERS_DISPLAYED_SIZE, Settings.STICKERS_DISPLAYED_SIZE);
+
+                textView.setCompoundDrawablePadding(Settings.PADDING_BETWEEN_MINIATURE_AND_LABEL);
+                textView.setCompoundDrawables(null, drawable,null,null);
+
+                switch (this.numberOfTools % 3) {
+                    case 0:
+                        this.toolsLineOne.addView(textView);
+                        break;
+                    case 1:
+                        this.toolsLineTwo.addView(textView);
+                        break;
+                    case 2:
+                        this.toolsLineThree.addView(textView);
+                        break;
+                }
+                this.numberOfTools++;
+
+                bitmaps.add(currentBitmap);
             }
         }
     }
@@ -324,12 +339,10 @@ public class BottomMenu {
     /**
      * Close all menus
      */
-    static public void closeMenus(){
+    public static void closeMenus(List<BottomMenu> bottomMenus){
         for (BottomMenu bottomMenu:bottomMenus) {
-            if (bottomMenu.parent == null) {
-                bottomMenu.button.setTypeface(unselected);
-                ColorTheme.button(bottomMenu.button, false);
-                bottomMenu.bar.setVisibility(View.GONE);
+            if (bottomMenu.type != MenuType.BITMAPS) {
+                bottomMenu.close();
             }
         }
     }
@@ -337,17 +350,19 @@ public class BottomMenu {
     /**
      * Invalidates all miniatures, which mean the image has changed.
      */
-    static public void invalidateMiniatures() {
+    public static void invalidateMiniatures(List<BottomMenu> bottomMenus) {
         for (BottomMenu bottomMenu:bottomMenus) {
-            bottomMenu.needRefreshMiniature = true;
-            bottomMenu.generateMiniatureForOpenedMenu();
+            if (bottomMenu.type != MenuType.BITMAPS) {
+                bottomMenu.needRefreshMiniature = true;
+                bottomMenu.generateMiniatureForOpenedMenu();
+            }
         }
     }
 
     /**
      * Apply the proper color for the UI element, in accordance with the global theme.
      */
-    static void applyColorTheme() {
+    public static void applyColorTheme(List<BottomMenu> bottomMenus) {
         for (BottomMenu bottomMenu:bottomMenus) {
             ColorTheme.button(bottomMenu.button, bottomMenu.parent != null);
             bottomMenu.button.setTypeface(unselected);
@@ -356,5 +371,18 @@ public class BottomMenu {
         for (DisplayedFilter displayedFilter:displayedFilters) {
             ColorTheme.icon(displayedFilter);
         }
+    }
+
+    public static BottomMenu getMenuByItsButton(List<BottomMenu> bottomMenus, Button button) {
+        for (BottomMenu bottomMenu:bottomMenus) {
+            if (bottomMenu.button == button) {
+                return bottomMenu;
+            }
+        }
+        return null;
+    }
+
+    public boolean isOpened() {
+        return ViewTools.isVisible(this.bar);
     }
 }

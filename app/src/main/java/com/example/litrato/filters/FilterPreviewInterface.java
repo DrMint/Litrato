@@ -24,7 +24,7 @@ interface FilterPreviewInterface {
      * @param seekBar the state of seekBar1
      * @param seekBar2 the state of seekBar2
      */
-    Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp);
+    Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp, int selectedMenuItem, Filter filter);
 
 }
 

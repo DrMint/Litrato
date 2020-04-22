@@ -34,6 +34,7 @@ import com.example.litrato.R;
 import com.example.litrato.activities.tools.Settings;
 import com.example.litrato.activities.ui.ColorTheme;
 import com.example.litrato.activities.ui.ImageViewZoomScroll;
+import com.example.litrato.activities.ui.MenuType;
 import com.example.litrato.activities.ui.ViewTools;
 import com.example.litrato.filters.AppliedFilter;
 import com.example.litrato.filters.Filter;
@@ -44,6 +45,9 @@ import com.example.litrato.tools.ImageTools;
 import com.example.litrato.tools.Point;
 import com.example.litrato.tools.PointPercentage;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*TODO:
    Bugs:
@@ -116,6 +120,9 @@ public class MainActivity extends AppCompatActivity {
      */
     private final History history = new History();
 
+
+    private final List<BottomMenu> bottomMenus = new ArrayList<>();
+
     private ImageViewZoomScroll layoutImageView;
     private Toolbar     layoutToolbar;
 
@@ -128,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
      * This is a listener used by menuItem in BottomMenu.
      */
     static private View.OnClickListener menuItemListener;
+    static private View.OnClickListener menuButtonListener;
 
 
     @Override
@@ -155,6 +163,36 @@ public class MainActivity extends AppCompatActivity {
         ViewGroup fancyBar = findViewById(R.id.fancyMenu);
         ViewGroup blurBar = findViewById(R.id.blurMenu);
         ViewGroup contourBar = findViewById(R.id.contourMenu);
+
+
+        menuButtonListener = new View.OnClickListener()  {
+            @Override
+            public void onClick(View v) {
+                BottomMenu clickedOne = BottomMenu.getMenuByItsButton(bottomMenus, (Button) v);
+
+                // If we clicked on a opened menu button
+                if (clickedOne.isOpened()) {
+                    // If it's not a submenu, close the menu
+                    if (clickedOne.parent == null) clickedOne.close();
+                } else {
+                    // Close everything
+                    BottomMenu.closeMenus(bottomMenus);
+
+                    // Open just the one we want
+                    clickedOne.open();
+
+                    // If its a parent, opens its first child.
+                    for (BottomMenu bottomMenu:bottomMenus) {
+                        if (bottomMenu.parent == clickedOne) {
+                            bottomMenu.open();
+                            break;
+                        }
+                    }
+
+                }
+            }
+        };
+
 
         menuItemListener = new View.OnClickListener()  {
 
@@ -189,6 +227,9 @@ public class MainActivity extends AppCompatActivity {
         Filter.generateFilters(getApplicationContext());
         FilterFunction.initializeRenderScript(getApplicationContext());
 
+
+
+
         // Menu creation
         {
             Button toolsButton = findViewById(R.id.buttonTools);
@@ -207,9 +248,11 @@ public class MainActivity extends AppCompatActivity {
             BottomMenu.selected = colorButton.getTypeface();
             BottomMenu.unselected = fancyButton.getTypeface();
 
-            new BottomMenu(presetsButton, presetsBar, presetsLinearLayout, Category.PRESET);
-            BottomMenu menuTools = new BottomMenu(toolsButton, toolsBar, Category.TOOL);
-            BottomMenu menuFilters = new BottomMenu(filtersButton, filtersBar, null);
+            bottomMenus.add(new BottomMenu(presetsButton, presetsBar, presetsLinearLayout, Category.PRESET, MenuType.MINIATURE, null));
+            BottomMenu menuTools = new BottomMenu(toolsButton, toolsBar, Category.TOOL, MenuType.TOOLS, null);
+            BottomMenu menuFilters = new BottomMenu(filtersButton, filtersBar, null, MenuType.PARENT, null);
+            bottomMenus.add(menuTools);
+            bottomMenus.add(menuFilters);
 
             {
                 ViewGroup toolsLineOne = findViewById(R.id.toolsLineOne);
@@ -218,17 +261,19 @@ public class MainActivity extends AppCompatActivity {
                 menuTools.setToolsRows(toolsLineOne, toolsLineTwo, toolsLineThree);
             }
 
-            new BottomMenu(colorButton, colorBar, Category.COLOR, menuFilters);
-            new BottomMenu(fancyButton, fancyBar, Category.FANCY, menuFilters);
-            new BottomMenu(blurButton, blurBar, Category.BLUR, menuFilters);
-            new BottomMenu(contourButton, contourBar, Category.CONTOUR, menuFilters);
+            bottomMenus.add(new BottomMenu(colorButton, colorBar, Category.COLOR, MenuType.MINIATURE, menuFilters));
+            bottomMenus.add(new BottomMenu(fancyButton, fancyBar, Category.FANCY, MenuType.MINIATURE, menuFilters));
+            bottomMenus.add(new BottomMenu(blurButton, blurBar, Category.BLUR, MenuType.MINIATURE, menuFilters));
+            bottomMenus.add(new BottomMenu(contourButton, contourBar, Category.CONTOUR, MenuType.MINIATURE, menuFilters));
         }
+
+        for (BottomMenu bottomMenu:bottomMenus) bottomMenu.initialize(Filter.filters);
+
 
 
         // Initialize all the different listeners.
-        // The filters / tools / presets must already be ready
         initializeListener();
-        BottomMenu.initializeMenus();
+
 
         // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.img_default));
@@ -260,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
                 if (ViewTools.isVisible(historyBar)) {
                     closeHistory();
                 } else {
-                    BottomMenu.closeMenus();
+                    BottomMenu.closeMenus(bottomMenus);
                     historyBar.setVisibility(View.VISIBLE);
                 }
                 break;
@@ -325,7 +370,8 @@ public class MainActivity extends AppCompatActivity {
                         0,
                         false,
                         new PointPercentage(),
-                        new PointPercentage()
+                        new PointPercentage(),
+                        0
                 );
 
                 currentImage = lastUsedFilter.apply(currentImage, getApplicationContext());
@@ -344,7 +390,8 @@ public class MainActivity extends AppCompatActivity {
                         0,
                         false,
                         new PointPercentage(),
-                        new PointPercentage()
+                        new PointPercentage(),
+                        0
                 );
 
                 currentImage = lastUsedFilter.apply(currentImage, getApplicationContext());
@@ -393,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
         ColorTheme.background(historyBar, false);
         ColorTheme.textView(historyTitle);
 
-        ColorTheme.bottomMenu();
+        ColorTheme.bottomMenu(bottomMenus);
     }
 
     /**
@@ -410,9 +457,9 @@ public class MainActivity extends AppCompatActivity {
 
             case CONFIG_REQUEST:
 
-                BottomMenu.invalidateMiniatures();
+                BottomMenu.invalidateMiniatures(bottomMenus);
+                BottomMenu.closeMenus(bottomMenus);
                 closeHistory();
-                BottomMenu.closeMenus();
                 applyColorTheme();
                 break;
 
@@ -437,7 +484,7 @@ public class MainActivity extends AppCompatActivity {
                     currentImage = ImageTools.bitmapClone(result);
                     addToHistory(FiltersActivity.activityAppliedFilter);
                     refreshImageView();
-                    BottomMenu.closeMenus();
+                    BottomMenu.closeMenus(bottomMenus);
                 }
                 closeHistory();
                 break;
@@ -477,7 +524,7 @@ public class MainActivity extends AppCompatActivity {
 
         layoutImageView.setImageBitmap(currentImage);
         BottomMenu.currentImage = currentImage;
-        BottomMenu.invalidateMiniatures();
+        BottomMenu.invalidateMiniatures(bottomMenus);
     }
 
     private void initializeListener() {
@@ -543,7 +590,7 @@ public class MainActivity extends AppCompatActivity {
         // The default behavior of imageView.
         final View.OnTouchListener defaultImageViewTouchListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
-                BottomMenu.closeMenus();
+                BottomMenu.closeMenus(bottomMenus);
                 if (ViewTools.isVisible(historyBar)) closeHistory();
                 myScaleDetector.onTouchEvent(event);
                 myGestureDetector.onTouchEvent(event);
@@ -611,4 +658,5 @@ public class MainActivity extends AppCompatActivity {
 
     public static Context getAppContext() {return appContext;}
     public static View.OnClickListener getMenuItemListener() {return menuItemListener;}
+    public static View.OnClickListener getMenuButtonListener() {return menuButtonListener;}
 }

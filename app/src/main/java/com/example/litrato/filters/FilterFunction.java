@@ -667,7 +667,8 @@ public class FilterFunction {
     public static void applySticker(final Bitmap bmp, Point touch, Bitmap sticker, float size, int degrees){
         if(touch!=null) {
             Canvas canvas = new Canvas(bmp);
-            Bitmap scaledSticker = ImageTools.scale(sticker, (int) (sticker.getWidth() * size / 100f), (int) (sticker.getHeight() * size / 100f));
+            size = bmp.getWidth() / 2f / sticker.getWidth() * (size / 100f);
+            Bitmap scaledSticker = ImageTools.scale(sticker, (int) (sticker.getWidth() * size), (int) (sticker.getHeight() * size));
             Point center = new Point(scaledSticker.getWidth() / 2, scaledSticker.getHeight() / 2);
             Rect dst = new Rect((touch.x - center.x), (touch.y - center.y), (touch.x - center.x + scaledSticker.getWidth()), (touch.y - center.y + scaledSticker.getHeight()));
             Rect src = new Rect(0, 0, scaledSticker.getWidth(), scaledSticker.getHeight());

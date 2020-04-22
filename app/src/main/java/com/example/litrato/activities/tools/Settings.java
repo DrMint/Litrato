@@ -55,10 +55,12 @@ public class Settings {
     public static final int PADDING_BETWEEN_MINIATURE_AND_LABEL = 25;
     public static final int MINIATURE_AND_TOOL_TEXT_SIZE_SP = 12;
     private static final int MINIATURE_DISPLAYED_SIZE_DP = 80;
+    private static final int STICKERS_DISPLAYED_SIZE_DP = 30;
     private static final int TOOL_DISPLAYED_SIZE_DP = 45;
 
     public static int MINIATURE_AND_TOOL_TEXT_SIZE;
     public static int MINIATURE_DISPLAYED_SIZE;
+    public static int STICKERS_DISPLAYED_SIZE;
     public static int TOOL_DISPLAYED_SIZE;
 
     /**
@@ -70,6 +72,7 @@ public class Settings {
         MINIATURE_DISPLAYED_SIZE = ViewTools.convertDpToPixel(MINIATURE_DISPLAYED_SIZE_DP, context);
         TOOL_DISPLAYED_SIZE = ViewTools.convertDpToPixel(TOOL_DISPLAYED_SIZE_DP, context);
         MINIATURE_AND_TOOL_TEXT_SIZE = ViewTools.convertSpToPixel(MINIATURE_AND_TOOL_TEXT_SIZE_SP , context);
+        STICKERS_DISPLAYED_SIZE = ViewTools.convertDpToPixel(STICKERS_DISPLAYED_SIZE_DP, context);
     }
 
     public static final int HISTOGRAM_BACKGROUND_TRANSPARENCY = 100;

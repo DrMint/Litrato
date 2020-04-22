@@ -30,6 +30,7 @@ import com.example.litrato.tools.ImageTools;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.MapStyleOptions;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -170,8 +171,8 @@ public class ColorTheme {
         }
     }
 
-    public static void bottomMenu() {
-        BottomMenu.applyColorTheme();
+    public static void bottomMenu(List<BottomMenu> bottomMenus) {
+        BottomMenu.applyColorTheme(bottomMenus);
     }
 
     private static ColorStateList thumbStates() {

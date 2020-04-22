@@ -11,8 +11,10 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -24,9 +26,11 @@ import android.widget.TextView;
 import com.example.litrato.activities.tools.Preference;
 import com.example.litrato.activities.tools.PreferenceManager;
 import com.example.litrato.activities.tools.Settings;
+import com.example.litrato.activities.ui.BottomMenu;
 import com.example.litrato.activities.ui.ColorTheme;
 import com.example.litrato.activities.ui.ImageViewZoomScroll;
 import com.example.litrato.R;
+import com.example.litrato.activities.ui.MenuType;
 import com.example.litrato.activities.ui.ViewTools;
 import com.example.litrato.filters.AppliedFilter;
 import com.example.litrato.filters.BlendType;
@@ -150,7 +154,7 @@ public class FiltersActivity extends AppCompatActivity {
     private TextView    layoutSwitchValue1;
     private Switch      layoutSwitch1;
     private RelativeLayout filterMenu;
-    private LinearLayout stickersMenu;
+    //private LinearLayout stickersMenu;
 
     /**
      * Where the user started touching ImageView.
@@ -161,6 +165,16 @@ public class FiltersActivity extends AppCompatActivity {
      * Where the user last touched ImageView.
      */
     private Point imageTouchCurrent;
+
+    /**
+     * Where the user last touched ImageView.
+     */
+    static public int selectedMenuItem;
+
+    /**
+     * This is a listener used by menuItem in BottomMenu.
+     */
+    static private View.OnClickListener menuItemListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,7 +199,8 @@ public class FiltersActivity extends AppCompatActivity {
         layoutSwitch1           = findViewById(R.id.switch1);
         layoutSwitchValue1      = findViewById(R.id.switchValue1);
         filterMenu              = findViewById(R.id.filtersMenu);
-        stickersMenu            = findViewById(R.id.itemMenu);
+        //stickersMenu            = findViewById(R.id.itemMenu);
+
 
         // Gets the resources from the caller activity. If something crucial is missing aborts.
         // Once resources have been gathered, they are deleted from they original location to avoid
@@ -233,6 +248,32 @@ public class FiltersActivity extends AppCompatActivity {
         layoutFilterMenuButton.setText(selectedFilter.getName());
         layoutHistogramView.setVisibility(View.GONE);
 
+        // If there are bitmaps, load them in the menu.
+        if (selectedFilter.getBitmaps() != null) {
+            ViewGroup itemMenuScrollView = findViewById(R.id.itemMenuSchrollView);
+            itemMenuScrollView.setVisibility(View.VISIBLE);
+            ViewGroup itemMenu = findViewById(R.id.itemMenu);
+
+            BottomMenu bottomMenu = new BottomMenu(null, itemMenuScrollView, itemMenu, null, MenuType.BITMAPS, null);
+
+            {
+                ViewGroup toolsLineOne = findViewById(R.id.stickersLineOne);
+                ViewGroup toolsLineTwo = findViewById(R.id.stickersLineTwo);
+                ViewGroup toolsLineThree = findViewById(R.id.stickersLineThree);
+                bottomMenu.setToolsRows(toolsLineOne, toolsLineTwo, toolsLineThree);
+            }
+
+            bottomMenu.initialize(selectedFilter.getBitmaps());
+
+            menuItemListener = new View.OnClickListener()  {
+
+                @Override
+                public void onClick(View v) {
+                    previewFilter();
+                }
+            };
+        }
+
         // Initialize all the different listeners, the interface and the masks
         initializeListener();
         initializeInterface();
@@ -257,7 +298,7 @@ public class FiltersActivity extends AppCompatActivity {
         ColorTheme.window(getApplicationContext(), getWindow());
 
         ColorTheme.background(filterMenu, true);
-        ColorTheme.background(stickersMenu,true);
+        //ColorTheme.background(stickersMenu,true);
         ColorTheme.background(layoutButtonApply, false);
         ColorTheme.background(layoutCancel, false);
 
@@ -331,7 +372,7 @@ public class FiltersActivity extends AppCompatActivity {
             layoutSeekBar2.setVisibility(View.GONE);
             layoutSwitch1.setVisibility(View.GONE);
             layoutSwitchValue1.setVisibility(View.GONE);
-            stickersMenu.setVisibility(View.GONE);
+            //stickersMenu.setVisibility(View.GONE);
 
 
             // And add anything we need.
@@ -423,7 +464,8 @@ public class FiltersActivity extends AppCompatActivity {
                     layoutSeekBar2.getProgress(),
                     layoutSwitch1.isChecked(),
                     imageTouchDown,
-                    imageTouchCurrent
+                    imageTouchCurrent,
+                    selectedMenuItem
             );
         } else {
             result = selectedFilter.preview(
@@ -435,7 +477,8 @@ public class FiltersActivity extends AppCompatActivity {
                     layoutSeekBar2.getProgress(),
                     layoutSwitch1.isChecked(),
                     imageTouchDown,
-                    imageTouchCurrent
+                    imageTouchCurrent,
+                    selectedMenuItem
             );
         }
 
@@ -694,7 +737,8 @@ public class FiltersActivity extends AppCompatActivity {
                                 layoutSeekBar2.getProgress(),
                                 layoutSwitch1.isChecked(),
                                 touchDown,
-                                touchCurrent
+                                touchCurrent,
+                                selectedMenuItem
                         );
                     } else {
                         activityAppliedFilter = new AppliedFilter(
@@ -705,7 +749,8 @@ public class FiltersActivity extends AppCompatActivity {
                                 layoutSeekBar2.getProgress(),
                                 layoutSwitch1.isChecked(),
                                 touchDown,
-                                touchCurrent
+                                touchCurrent,
+                                selectedMenuItem
                         );
                     }
 
@@ -797,4 +842,5 @@ public class FiltersActivity extends AppCompatActivity {
         layoutCancel.performClick();
     }
 
+    public static View.OnClickListener getMenuItemListener() {return menuItemListener;}
 }

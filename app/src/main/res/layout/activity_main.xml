@@ -159,7 +159,7 @@
                         android:layout_height="wrap_content"
                         android:focusable="true"
                         android:orientation="horizontal"
-                        android:visibility="visible" />
+                        android:visibility="gone" />
 
                     <LinearLayout
                         android:id="@+id/fancyMenu"
