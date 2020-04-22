@@ -191,7 +191,7 @@ public class Filter {
 
     /**
      * Create new filters which are presets (a combination of multiple FilterFunction for most of them).
-     * @param context
+     * @param context the context
      */
     private static void createPresets(Context context){
 
@@ -382,22 +382,12 @@ public class Filter {
             }
         });
         filters.add(newPresets);
-
-        newPresets = new Filter("Black & White", Category.PRESET);
-        newPresets.setFilterPreviewFunction(new FilterPreviewInterface() {
-            @Override
-            public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp, int selectedMenuItem, Filter filter) {
-                FilterFunction.saturation(bmp, 0);
-                return null;
-            }
-        });
-        filters.add(newPresets);
     }
 
 
     /**
      * Create new filters which are the tools. For example : rotation, crop, luminosity, contrast.
-     * @param context
+     * @param context the context
      */
     private static void createTools(Context context){
         Filter newTools;
@@ -590,7 +580,7 @@ public class Filter {
 
     /**
      * Create new filters. Here are the filters used in the four categories : Color, Fancy, Blur and Contour.
-     * @param context
+     * @param context the context
      */
     private static void createFilters(Context context) {
         Filter newFilter;
@@ -780,7 +770,7 @@ public class Filter {
 
     /**
      * Create the filter which draws on a mask (brush).
-     * @param context
+     * @param context the context
      */
     private static void createSpecial(Context context) {
 
