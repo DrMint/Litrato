@@ -297,7 +297,7 @@ public class FilterFunction {
     /**
      * A filter to change only the hue of an image (saturation =0)
      * @param bmp the image
-     * @param hue choosed hue value
+     * @param hue chosen hue value
      */
     public static void changeHue(final Bitmap bmp, final int hue) {
         colorize(bmp, hue,0, false);
@@ -552,7 +552,7 @@ public class FilterFunction {
 
     /** A filter to cartoon an image.
      * @param bmp the image
-     * @param blackLevel
+     * @param blackLevel value of black shadings
      * @param posterize number of luminance values
      */
 
@@ -611,7 +611,7 @@ public class FilterFunction {
     }
 
     /**
-     *
+     * A function that blends two bitmaps between them with a certain type of blend and a parameter for this blend.
      * @param bmp the image
      * @param texture another bitmap to blend with the previous
      * @param typeOfBlend type of blend between the two bitmaps
@@ -704,10 +704,12 @@ public class FilterFunction {
         RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
-    /**
-     *
+    /**Increase the luminance range.
+     * If level is positive, values near 0 are not modified while high luminance values are "burned" outside the 0-255 range.
+     * Any value outside 0-255 are brought back into the closest extremum (which is why it is call burning).
+     * If level is negative, it's the lowest values that get burned and the highest are kept unchanged.
      * @param bmp the image
-     * @param level
+     * @param level burn intensity
      */
     public static void burnValues(final Bitmap bmp, float level) {
 
@@ -730,10 +732,9 @@ public class FilterFunction {
         RenderScriptTools.cleanRenderScript(script, input, output);
     }
 
-    /**
-     *
+    /** A filter that increases or decreases contrasts without caring if pixels are burned in the process.
      * @param bmp the image
-     * @param level
+     * @param level burn intensity
      */
     public static void contrastBurn(final Bitmap bmp, float level) {
 

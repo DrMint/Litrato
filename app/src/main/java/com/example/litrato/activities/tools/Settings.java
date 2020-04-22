@@ -66,7 +66,7 @@ public class Settings {
     /**
      * Convert the SP and DP values into Pixels.
      * I.e. MINIATURE_DISPLAYED_SIZE_DP's pixel value is stored in MINIATURE_DISPLAYED_SIZE.
-     * @param context
+     * @param context the context
      */
     public static void setDPValuesInPixel(Context context) {
         MINIATURE_DISPLAYED_SIZE = ViewTools.convertDpToPixel(MINIATURE_DISPLAYED_SIZE_DP, context);

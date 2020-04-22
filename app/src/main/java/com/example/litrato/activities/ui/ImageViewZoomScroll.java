@@ -208,8 +208,8 @@ public class ImageViewZoomScroll {
      * Returns the pixel value of the image at this point touch on the screen.
      * This means that the value is converted to bmp coordinates in this function and
      * should not be applied beforehand.
-     * @param p
-     * @return
+     * @param p coordinate of the pixel
+     * @return value of the pixel
      */
     public int getPixelAt(Point p) {
         p = imageViewTouchPointToBmpCoordinates(p);
