@@ -26,7 +26,12 @@ import static android.graphics.Color.red;
 
 public class ImageTools {
 
-
+    /**
+     * A function to rescale a bitmap and make it fit into a square of side maxsize but keeping its ratio.
+     * @param bmp the image
+     * @param maxSize the maxsize of the width or the height
+     * @return the resized image
+     */
     @SuppressWarnings("SameParameterValue")
     public static Bitmap scaleToBeContainedInSquare(Bitmap bmp, int maxSize) {
         if (bmp.getHeight() >  bmp.getWidth()) {
@@ -36,10 +41,23 @@ public class ImageTools {
         }
     }
 
+    /**
+     * A function to scale a bitmap to a desired size.
+     * @param bmp the image
+     * @param width wanted width
+     * @param height wanted height
+     * @return new bitmap
+     */
     public static Bitmap scale(Bitmap bmp, int width, int height) {
         return Bitmap.createScaledBitmap(bmp, width, height, true);
     }
 
+    /**
+     * A function to make a square bitmap.
+     * @param bmp the image
+     * @param newSize wanted size
+     * @return a square bitmap
+     */
     @SuppressWarnings({"SuspiciousNameCombination", "SameParameterValue"})
     public static Bitmap toSquare(Bitmap bmp, int newSize) {
         int currentWidth = bmp.getWidth();
@@ -65,7 +83,9 @@ public class ImageTools {
     }
 
     /**
-     *  Generates the histogram and displays it in "histogram"
+     * Generates the histogram and displays it in "histogram"
+     * @param bmp the image
+     * @return its histogram
      */
     public static Bitmap generateHistogram(Bitmap bmp) {
 
@@ -144,12 +164,25 @@ public class ImageTools {
         return hist;
     }
 
-
+    /**
+     * Draw a filled rectangle on a bitmap.
+     * @param bmp the image
+     * @param a position of a corner of the rectangle
+     * @param b position of the opposite corner
+     * @param color the color of the rectangle
+     */
     public static void drawRectangle(final Bitmap bmp, Point a, Point b, int color) {
         drawRectangle(bmp, a, b, color, -1);
     }
 
-
+    /**
+     * Draw a rectangle on a bitmap.
+     * @param bmp the image
+     * @param a position of a corner of the rectangle
+     * @param b position of the opposite corner
+     * @param color the color of the rectangle
+     * @param thickness thickness of the rectangle border
+     */
     public static void drawRectangle(final Bitmap bmp, Point a, Point b, int color, int thickness) {
         if (a != null && b!= null) {
             if (!a.isEquals(b)) {
@@ -173,13 +206,31 @@ public class ImageTools {
         drawRectangle(bmp, new Point(0,0), new Point(bmp.getWidth(), bmp.getHeight()), color);
     }
 
+    /**
+     * Return a clone of a bitmap.
+     * @param source the image to be copied
+     * @return the copied bitmap
+     */
     public static Bitmap bitmapClone(Bitmap source) {
         if (source == null) return null;
         return source.copy(source.getConfig(), true);
     }
 
+    /**
+     * Create a bitmap with the wanted width and height.
+     * @param width wanted width
+     * @param height wanted height
+     * @return the bitmap
+     */
     public static Bitmap bitmapCreate(int width, int height) {return Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);}
 
+    /**
+     * Draw a circle on a bitmap
+     * @param bmp the image
+     * @param center position of the center of the circle
+     * @param radius radius of the circle
+     * @param color color of the circle
+     */
     public static void drawCircle(final Bitmap bmp, Point center, int radius, int color) {
         if (center != null && radius > 0) {
             final Paint paint = new Paint();
@@ -222,12 +273,23 @@ public class ImageTools {
 
     }
 
+    /**
+     * Give the hue value from a color.
+     * @param color color we want the hue
+     * @return its hue
+     */
     public static int getHueFromColor(int color){
         float[] hsv = new float[3];
         Color.RGBToHSV(red(color), green(color), blue(color), hsv);
         return (int) hsv[0];
     }
 
+    /**
+     * Return the icon at the wanted index.
+     * @param context the context
+     * @param index the index
+     * @return the bitmap
+     */
     public static Drawable getThemedIcon(Context context, int index){
         Bitmap bmp = FileInputOutput.getBitmap(context.getResources(), index);
         return getThemedIcon(context, bmp);

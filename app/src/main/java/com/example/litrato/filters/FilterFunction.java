@@ -607,7 +607,7 @@ public class FilterFunction {
     }
 
     /**
-     *
+     * A function that blends two bitmaps between them with a certain type of blend and a parameter for this blend.
      * @param bmp the image
      * @param texture another bitmap to blend with the previous
      * @param typeOfBlend type of blend between the two bitmaps
