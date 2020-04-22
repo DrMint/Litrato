@@ -274,9 +274,10 @@ public class MainActivity extends AppCompatActivity {
         // Initialize all the different listeners.
         initializeListener();
 
-
         // Selects the default image in the resource folder and set it
         setBitmap(FileInputOutput.getBitmap(getResources(), R.drawable.img_default));
+
+
 
     }
 
@@ -521,7 +522,6 @@ public class MainActivity extends AppCompatActivity {
      * Displays currentImage on the imageView
      */
     private void refreshImageView() {
-
         layoutImageView.setImageBitmap(currentImage);
         BottomMenu.currentImage = currentImage;
         BottomMenu.invalidateMiniatures(bottomMenus);

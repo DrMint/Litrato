@@ -564,7 +564,9 @@ public class FilterFunction {
         // First layer
         laplacian(bmp, 4);
         invert(bmp);
-        threshold(bmp, 0.8f);
+        threshold(bmp, 200);
+
+
 
         // Second layer
         posterize(bmpCopy, posterize, false);
@@ -581,6 +583,8 @@ public class FilterFunction {
 
         output.copyTo(bmp);
         RenderScriptTools.cleanRenderScript(script, input, output);
+
+
 
     }
 

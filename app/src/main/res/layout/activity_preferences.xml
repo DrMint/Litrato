@@ -81,7 +81,7 @@
 
     <Spinner
         android:id="@+id/importedBmpSpinner"
-        android:layout_width="100dp"
+        android:layout_width="130dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -147,7 +147,7 @@
 
     <Spinner
         android:id="@+id/miniatureSpinner"
-        android:layout_width="100dp"
+        android:layout_width="130dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
