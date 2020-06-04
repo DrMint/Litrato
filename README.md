@@ -11,7 +11,7 @@ Filters and effects:
 - More advanced filters that use convolution or blending two or more images.
 - Almost all filters are using RenderScript, which accelerates the calculations.
 
-UI:
+User interface:
 - The UI is simple and intuitive, with menus, separate interfaces, and the preview of each filter.
 - Dark and light theme.
 - Zoom and scroll: it is possible to zoom on the image using two fingers or with a double tap, and then move around with one finger.
