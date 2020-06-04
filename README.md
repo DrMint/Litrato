@@ -420,54 +420,35 @@ The last column is the ratio between the processing time for 1 Mpx and 3.6 Mpx. 
 | Mask apply              |    |     |     26    |     62    |    96    | 238 | 155 |
 | Histogram               |    |     |     70    |     72    |    79    | 103 | 110 |
 
-Those results show that the program still needs some improvements and optimizations. It makes it clear that filters using RenderScript are way faster than the others. The filters that use convolution kernels are expectedly slower than the rest. The Average blur filter is extremely slow at high kernel size. It is clear that the Gaussian blur being a separable filter makes a huge difference in performance when compared with the Average blur filter. Also, the Add noise filter is particularly slow despite using RenderScript. This is because it’s generating up to three random numbers for each pixel. It would be much faster—but more complicated—to superpose a pre-fetched noisy layer on top of the image.
+
+**RS** means that the function uses RenderScript. **HSV** means it uses RGB->HSV->RGB convertions. The durations are in milliseconds. The last two columns are the ratio between 0.185 Mpx and 0.750 Mpx, and the ratio between 0.750 Mpx and 3.00 Mpx respectively. Those values would be 400\% if the performance scaled linearly. Also, it is clear that there is a constant time spent on initializing the filter, copying the image, displaying the result, which isn't always dependant on the image size. This is why the first ratio is almost always lower then the second one. In conclusion, at 0.750 Mpx on this phone, for most filters, there is little intrestess in lowering the internal image resolution.
+The filters that use convolution kernels are expectantly slower than the rest. The **Average blur** filter is very slow at high kernel size. It is clear that the **Gaussian Blur** being a separable filter makes a huge difference in performance when compared with the **Average blur** filter. Also, the Add noise filter is particularly slow despite using RenderScript. This is because it’s generating up to three random numbers for each pixel. It would be much faster—but more complicated—to superpose a pre-fetched noisy layer on top of the image, simmilarly to what we do with the **Old analog** preset.
 
 Our implementation of the Gaussian blur much slower than ScriptIntrinsicBlur. Because of this, Sobel and Laplacian are also significantly slower.
 
-Furthermore, the images used in a photography app such as this one would probably be those taken by the phone. The Samsung A10 takes pictures with a resolution of 13 Mpx which would make virtually all the filter unusable in real-time. It is clear that the interface should use a smaller version of the images to priorities interactivity, and only apply the filter to the original image when saving.
+Furthermore, the images used in a photography app such as this one would probably be those taken by the phone. The Samsung A10 takes pictures with a resolution of 13 Mpx which would make virtually all the filter unusable in real-time. This is why have an interface that uses a smaller version of the images to priorities reactivity, and only applies the filters to the original non-resized image when saving.
 
 ## MEMORY USAGE
-The following test has been performed on the same phone as before. In order to better highlight some behavior, we used a 13 Mpx image.
+The following test has been performed on the same phone as before. In order to better highlight some behavior, we used a 3 Mpx image.
 
-![](https://www.r-entries.com/etuliens/img/PT/memory.jpg)
+<img src="https://www.r-entries.com/etuliens/img/Litrato/memory.jpg" width="100%">
 
-The program memory usage starts around 77 MB and after one minute of standby, it has descended to about 53 MB. When we load the 13 Mpx image, the memory consumption skyrocketed to about 183 MB. When applying some filters, we can expect different results depending on which filter we use: the highest peak (at 407 MB) was the saturation filter which runs much faster than any other. However, because we were moving the seek bar, this led to many calls of this function in a short period of time. We suspect the garbage collector to not be able to perform its task in time which leads to this jump in memory consumption. Other filters with much longer calculation time will produce the constant rises that follow. Finally, when the app is left in standby, the memory stays constant at where it started which is good.
+The program memory usage starts around 75 MB and after one minute of standby. When we load the 3 Mpx image, the memory consumption skyrocketed to about 201 MB. After a little while, the memory usage dropped to 107. The image internally is stored in RGBA-4444 which means that we use 4 bytes to store each pixel. 3 millions * 4 is equals to 12MB. In practice, loading this image resulted in about 3 times this amount. This can be explained because our program stores three copies of the image: the original image, the filtered image, and internally, the imageView stores another copy. When applying a filter (we choose Colorize), the value stay constant at about 300MB after Applying the filter and returning to the Main activity, the memory consumption stays at around 210MB. The second wave was using the Rotate tool. After all those operations, the program stays at 260MB.
+
+The orange portion is the memory allocated to "Graphics". Strangely enough, this amount seems to never go down. We would like to remind the reader that our History doesn't save each step as a bitmap, but as the "recipe" to make recreate the image from the previous state.
+
+Loading a new image reset this "Graphics" portion and also "Native", the blue portion bellow.
 
 ## BUGS AND LIMITATIONS
-Most bugs/limitations have been fixed already. A few subsisted:
 
-- When the histogram is resize, the image can get stretch because the imageView gets bigger or smaller.  
-Refreshing the image doesn't seem to work. we suspect this is because requestLayout is asynchronous, and  
-when the image refresh, it utilizes the imageView's aspect ratio before it actually changed.  
-Thus, refreshing the image will actually make the problem worse.
-
-- ScriptIntrinsicBlur isn’t able to handle blur radius above 25, this is not a limitation from this program, but from this library.
-
-- The app cannot be used in landscape mode, or else the layout gets terrible. We have lock the app in portrait mode.
-
-- On emulator, seekbars with a negative minimum value cannot go below 0, but it work just fine on most phones we tested.
-
-## New features since last release
-
-Filters:
- - [X] Added a "Cartoon" and "Sketch" filters that limits the number of colors and highlight the contour of the image.
- - [X] Added the ability to flip the image horizontally, and also to change the contrast and gamma.
- - [X] Added rotation of the image at any degrees and crop (also possible to keep the aspect ratio).
- - [X] Added 14 presets (a quick way to apply filter, without parameters).
- 
-Tools:
- - [X] Added “Color Picker”, a tool to select a hue directly from the image.
- - [X] Added "History" that gives the user the ability to revert to any prior state of the image.
- - [X] Added a setting menu where the user can tweak some parameters. Those values are saved on the phone.
- - [X] Added a menu to view most of the EXIF values of the image, such as the ISO, f-number or where the photo was taken.
- - [X] Ability to only apply a filter to a part of the image. This "mask" is drawn by the user using its finger.
- 
-UI:
- - [X] Complete overall of the user interface, with menus, separate interfaces, and the preview of each filter.
- - [X] Added dark/light theme.
- - [X] ImageViewZoomScroll has been entirely rewritten. It is now using a matrix to zoom and translate the image.
- - [X] Bug removal: when the histogram was resized, the image was stretching.
- 
-Load and save:
- - [X] It is now possible to save the image in its original resolution, and have a smaller resolution while using the app.
- - [X] Bug removal: take a picture from the camera at higher resolution than 187px by 250px.
+- Landscape mode is not available. We have created a layout\_land of Filter, but because of time contraint, we decided to focus on other, more important elements (History was one of them at the time).
+- Convolutions do not correct the pixel values for the border of the image. As such, we can see black borders around the image.
+- When rotating the image, we could have a Crop function that automatically keeps the largest rectangle that fit inside the image.
+- When switching between Light and Dark mode, the icons in Tools aren't recolorize by the theme. It is difficult to say what is causing it. The problem appeared quite recently while creating the BottomMenu Class. As it isn't that much of a problem, we left it as it is for now.
+- Images saved my our program seems to erase most EXIF meta-data.
+- The EXIF value for flash activation seems to not follow the ExifInterface given by Android's library. Some phones and other cameras use seems to use many different values, some of which are not even categories by the library. This result in a lot of false positive by the EXIF Viewer.
+- The Google API key has been made public on our GitHub after committing the file. It is highly discouraged by GitHub and Google Developer's Guide.
+- MainActivity is sharing its AppContext in static manner with BottomMenu Class. This can lead to memory leaks according the Android Studio.
+- We looked a little bit into AsyncTasks as it could greatly improve the speed of the app on older and newer phones.
+- The app is really slow when first launched. From what we understood, this is because RenderScript is "compiling" / "caching" its functions.
+- The app memory consumption seems way higher than its expected consumption. We have to look into that.
