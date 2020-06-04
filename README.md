@@ -41,8 +41,10 @@ Let's go back to the Filter menu, the last option at the bottom left is `Histogr
 
 ### Auto
 <img src="https://www.r-entries.com/etuliens/img/Litrato/auto.jpg" width="40%">
-Provides two ways to increase the contrast without burning values (burning refers to values getting out of the 0-255 scale).
+Provides two ways to increase the contrast without burning values (burning refers to values getting out of the 0-255 range).
 The first is by maximizing the range of luminances values of the image. The second is called Dynamic extension, and tries to make the histogram as flat as possible.
+
+- `Switch`: choose which way to increase contrast.
 
 ### Luminosity
 <img src="https://www.r-entries.com/etuliens/img/Litrato/luminosity.jpg" width="40%">
@@ -112,97 +114,89 @@ Turns everything grayscale except for a specific color. If in remove mode (using
 
 - `Color seek bar`: the color hue you wish to use.
 - `Seek bar`: how far off the color can be (in degrees).
-- `Seek bar`: chose between keeping or removing that color.
+- `Switch`: chose between keeping or removing that color.
 
-
-
-### Change hue
-![](https://www.r-entries.com/etuliens/img/PT/9.jpg)
-
-Apply one hue to the entire image but contrary to the Colorize filter, it doesn’t change the saturation of the image.
-- `Color seek bar`: the color hue you which to use.
-
-[//]: # (Add Hue shift)
-
-### Hue shift
-![](https://www.r-entries.com/etuliens/img/PT/8.jpg)
-
-Shift all hues by a certain amount. This can give interesting results when used moderately.
-- `Seek bar`: shift amount (in degrees).
-
-
-### Invert
-![](https://www.r-entries.com/etuliens/img/PT/7.jpg)
-
-The luminance and colors are inverted: whites become blacks and reds become blues.
-
-### Keep a color
-![](https://www.r-entries.com/etuliens/img/PT/10.jpg)
-
-Turns everything grayscale except for a specific color.
-- `Color seek bar`: the color you which to keep.
-- `Seek bar`: how far off the color can be before turning grey (in degrees).
-
-### Remove a color
-![](https://www.r-entries.com/etuliens/img/PT/11.jpg)
-
-Same as the Keep a color filter but only turns that color to greyscale.
-- `Color seek bar`: the color you which to remove.
-- `Seek bar`: how far off the color can be before turning grey (in degrees).
-
-### Posterize
-![](https://www.r-entries.com/etuliens/img/PT/12.jpg)
-
-Same as the Keep a color filter but only turns that color to greyscale.
-- `Seek bar`: how many possible colors should be kept in each channel (in steps between 2 and 32).
-- `Switch`: also turns the image greyscale.
-
-### Threshold
-![](https://www.r-entries.com/etuliens/img/PT/13.jpg)
-
-If the pixel’s luminosity is bellowing the threshold, turns it back. Turns it white otherwise.
-- `Seek bar`: set the threshold (between 0 and 255).
 
 ### Add noise
-![](https://www.r-entries.com/etuliens/img/PT/14.jpg)
-
+<img src="https://www.r-entries.com/etuliens/img/Litrato/addnoise.jpg" width="40%">
 Adds some random noise to the image.
+
 - `Seek bar`: the amount of noise (between 0 and 255).
 - `Switch`: turns the noise greyscale or colored.
 
-### Linear contrast stretching
-![](https://www.r-entries.com/etuliens/img/PT/17.jpg)
 
-Modifies the luminance range of an image. This can be used to increase or compress the image contrast.
-- `Seek bar`: the lower range of luminance.
-- `Second seek bar`: the higher range of luminance.
+### Posterize
+<img src="https://www.r-entries.com/etuliens/img/Litrato/posterize.jpg" width="40%">
+Reduces the number of distinct colors, also called color quantization.
 
-### Histogram equalization
-![](https://www.r-entries.com/etuliens/img/PT/16.jpg)
+- `Seek bar`: how many possible colors should be kept in each channel (in steps between 2 and 32).
+- `Switch`: also turns the image greyscale.
 
-Spread the luminance values evenly between 0 and 255. This can look surreal on some images, but it usually extends the contrast substantially.
+### Average Blur
+<img src="https://www.r-entries.com/etuliens/img/Litrato/averageblur.jpg" width="40%">
+Blurs the image by averaging equally all pixels with their neighbors.
 
-### Average blur
-![](https://www.r-entries.com/etuliens/img/PT/15.jpg)
+- `Seek bar`: blur amount (between 1 and 19 pixels).
 
-Blur the image by averaging all pixels with their neighbors. This filter is quite inefficient and the Gaussian blur should be prioritized.
-- `Seek bar`: blur amount (in pixels).
+### Gaussian Blur
+<img src="https://www.r-entries.com/etuliens/img/Litrato/gaussianblur.jpg" width="40%">
+Blurs the image by using a Gaussian function.
 
-### Gaussian blur
-![](https://www.r-entries.com/etuliens/img/PT/18.jpg)
-
-Blur the image by using a gaussian function.
-- `Seek bar`: blur amount (in pixels).
-
-[//]: # (Add directional blur)
+- `Seek bar`: blur amount (between 1 and 25 pixels).
 
 ### Laplacian
-![](https://www.r-entries.com/etuliens/img/PT/19.jpg)
-
+<img src="https://www.r-entries.com/etuliens/img/Litrato/laplacian.jpg" width="40%">
 Used to highlight all the image’s contours.
-- `Seek bar`: how much detail should be kept (in pixels).
 
-[//]: # (Add sobel)
+- `Seek bar`: how much details should be kept(between 1 and 14 pixels).
+
+
+### Directional Blur
+<img src="https://www.r-entries.com/etuliens/img/Litrato/directionalblur.jpg" width="40%">
+Blurs the image horizontally or vertically.
+
+- `Seek bar`: blur amount (between 2 and 30 pixels).
+- `Switch`: horizontal or vertical.
+
+
+### Cartoon
+<img src="https://www.r-entries.com/etuliens/img/Litrato/cartoon.jpg" width="40%">
+Applies a cartoon effect. This is achieve by reducing the number of color values and highlighting the contours.
+
+- `Seek bar`: the black value of the "shading" (everything expect the contours).
+- `Seek bar 2`: the number of colors.
+
+### Sketch
+<img src="https://www.r-entries.com/etuliens/img/Litrato/sketch.jpg" width="40%">
+Sketch effect.
+
+- `Seek bar`: how thick or narrow the contours should be.
+- `Seek bar 2`: how much colors should remain.
+
+### Crop
+<img src="https://www.r-entries.com/etuliens/img/Litrato/crop.jpg" width="40%">
+Crop the image at the desired size. The area is selected using touch.
+
+- `Switch`: how thick or narrow the contours should be.
+
+### Flip
+<img src="https://www.r-entries.com/etuliens/img/Litrato/flip.jpg" width="40%">
+Applies a horizontal flip of the image.
+
+### Rotation
+<img src="https://www.r-entries.com/etuliens/img/Litrato/rotation.jpg" width="40%">
+Applies a rotation to the image.
+
+- `Seek bar`: rotation in degrees (between -180 and 180).
+
+### Stickers
+<img src="https://www.r-entries.com/etuliens/img/Litrato/sticker.jpg" width="40%">
+Allows to put stickers on the image. Touching the screen applies a sticker at that location.
+
+- `Seek bar`: size of the sticker in percent (between 10% and 290%)
+- `Seek bar`: rotation of the sticker in degrees (between -180 and 180)
+
+
 
 ## CLASSES AND FUNCTIONS
 ### ColorTools Class
