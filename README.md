@@ -47,54 +47,74 @@ The first is by maximizing the range of luminances values of the image. The seco
 ### Luminosity
 <img src="https://www.r-entries.com/etuliens/img/Litrato/luminosity.jpg" width="40%">
 Changes how bright or dark the image is. It turns up too much, this will burn the image.
+
 - `Seek bar`: the image's brightness (between -100% and 100%).
 - `Seek bar 2`: the image's gamma value (between -100% and 100%).
 
 ### Saturation
 <img src="https://www.r-entries.com/etuliens/img/Litrato/saturation.jpg" width="40%">
 Changes the saturation of the image.
+
 - `Seek bar`: the image's saturation (between 0 and 200%)
 
-
-
-
-
-### Brightness
-![](https://www.r-entries.com/etuliens/img/PT/1.jpg)
-
-Changes how bright or dark the image is. It turns up too much, this will burn the image.
-- `Seek bar`: the image’s brightness (between -100% and 100%).
-
-### Saturation
-![](https://www.r-entries.com/etuliens/img/PT/2.jpg)
-
-Changes the saturation of the image colors.
-- `Seek bar`: the image’s saturation (between 0 and 200%).
-
 ### Temperature
-![](https://www.r-entries.com/etuliens/img/PT/3.jpg)
-
+<img src="https://www.r-entries.com/etuliens/img/Litrato/temperature.jpg" width="40%">
 Makes the image look warmer or colder.
-- `Seek bar`: the image’s temperature (between -100% and 100%).
+
+- `Seek bar`: the image’s temperature (between -100\% and 100\%).
 
 ### Tint
-![](https://www.r-entries.com/etuliens/img/PT/4.jpg)
-
+<img src="https://www.r-entries.com/etuliens/img/Litrato/tint.jpg" width="40%">
 Changes the tint of an image. Makes the images more magenta or green.
-- `Seek bar`: the image’s tint (between -100% and 100%).
+
+- `Seek bar`: the image’s tint (between -100\% and 100\%).
+
 
 ### Sharpening
-![](https://www.r-entries.com/etuliens/img/PT/5.jpg)
-
+<img src="https://www.r-entries.com/etuliens/img/Litrato/sharpness.jpg" width="40%">
 Makes the image look sharper or blurrier.
-- `Seek bar`: the image’s sharpness (between -100% and 100%).
+
+- `Seek bar`: the image’s sharpness (between -100\% and 100\%).
+
 
 ### Colorize
-![](https://www.r-entries.com/etuliens/img/PT/6.jpg)
-
+<img src="https://www.r-entries.com/etuliens/img/Litrato/colorize.jpg" width="40%">
 Apply one color and saturation to the entire image.
-- `Color seek bar`: the color you which to use.
-- `Seek bar`: the color’s saturation (between 0% and 100%).
+
+- `Color seek bar`: the color you wish to use.
+- `Seek bar`: the color’s saturation (between 0\% and 100\%).
+
+
+### Change Hue
+<img src="https://www.r-entries.com/etuliens/img/Litrato/changehue.jpg" width="40%">
+Apply one hue to the entire image but contrary to the Colorize filter, it doesn’t change the saturation of the image.
+
+- `Color seek bar`: the color hue you wish to use.
+
+
+### Hue Shift
+<img src="https://www.r-entries.com/etuliens/img/Litrato/hueshift.jpg" width="40%">
+Shift all hues by a certain amount. This can give interesting results when used moderately.
+
+- `Color seek bar`: the color hue you wish to use.
+- `Seek bar`: shift amount (between -180 and 180 degrees).
+
+### Threshold
+<img src="https://www.r-entries.com/etuliens/img/Litrato/threshold.jpg" width="40%">
+If the pixel’s luminosity is bellow the threshold, turns it back. Turns it white otherwise.
+
+- `Color seek bar`: the color hue you wish to use.
+- `Seek bar`: shift amount (between -180 and 180 degrees).
+
+### Selective Coloring
+<img src="https://www.r-entries.com/etuliens/img/Litrato/selectivecoloring.jpg" width="40%">
+Turns everything grayscale except for a specific color. If in remove mode (using the Switch), the user can reverse the effect and only remove that color instead of keeping it.
+
+- `Color seek bar`: the color hue you wish to use.
+- `Seek bar`: how far off the color can be (in degrees).
+- `Seek bar`: chose between keeping or removing that color.
+
+
 
 ### Change hue
 ![](https://www.r-entries.com/etuliens/img/PT/9.jpg)
