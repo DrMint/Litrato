@@ -198,109 +198,183 @@ Allows to put stickers on the image. Touching the screen applies a sticker at th
 
 
 
-## CLASSES AND FUNCTIONS
-### ColorTools Class
-This class implements all the functions necessary for conversions between RGB and HSV. **As our goal is to eventually remove all the FilterFunctions that doesn't utilize RenderScript, and HSV <> RBG conversions are done directly in Renderscript, this Class will soon be deprecated**. HSV is used by several filters, and because of that, it has been refined a little bit since the first version. First of all, each value (the hue, the saturation, and the luminosity) can now be converted separately. This has improved the performance substantially in some functions such as colorize (-40% in run-time when using rgb2v instead of rgb2hsv). Furthermore, we can reduce the run-time by another 10% by using integers instead of floats in rgb2s. Finally, by using some bit-level trickery such as using (color >> 16) & 0x000000FF instead of Color.red(color), we can expect another 14% improvement.
+## PACKAGES, CLASSES, AND FUNCTIONS
 
-ColorTools also implements to removeAlpha function. It simply set the alpha value of all pixels to 255. This is useful for function that uses ScriptIntrinsicConvolve3x3 as it also apply the convolution kernel over the alpha values, which result in transparent images.
+### 1 - Packages
 
-### RenderScriptTools Class
-The RenderScriptTools implements tools useful for functions that use RS. The applyConvolution3x3RS function applies any 3x3 kernel to any image. However, it uses ScriptIntrinsicConvolve3x3. The applyConvolution function uses our own RenderScript convolution and isn't limited to 3x3 kernel. Actually, the kernel can even be rectangular. The cleanRenderScript function can be called after any RS function to destroy the Script, RenderScript, and a list of Allocation for input(s) and output(s).
+At the root folder there are three packages:
 
-### ConvolutionTools Class (Deprecated)
-This class implements tools used by any filter that uses convolution without RenderScript. **It is now deprecated as all FilterFunctions now use RenderScript based convolution**. The two functions convolution1D and convolution2D are used to apply a 1D and 2D kernel on an image. This kernel can be of any size as long as it is odd. convulution1D also implements an optional correction for the pixels near the edge of the image; when the kernel tries to take the value of a pixel outside the image, it will instead take the closest one on the border of the image. convulution2DUniform can be used when the kernel has uniform weights such as with the Average filter.
+- activities: containing everything related to the activities, the tools to managed the UI, menus etc...
+- filters: all the Classes and Functions that deals with images.
+- tools: other Classes to help with any part of the app.
 
-After every convolution algorithm, we want to make sure the values are still between 0 and 255. For that, we can use the normalizeOutput function. This function will make sure that even in the worst cases, the resulting values are kept between this range.
+Each package also as a sub-package named tools. Tools are packages filled with Classes useful for the parent package they're included in.
 
-There is the convertGreyToColor function which can be to turn a array of integer to a array of android.graphics.Color which is what Bitmap uses. It is only used by functions that also uses ConvolutionTools.
+### 2 - Activities Package
 
-Finally there is the correctedPixelGet which isn’t used right now. This function corrects the pixel coordinates when the kernel is asking for a pixel outside the image. This is essentially what convolution1D is using but in a 2D context. However, I would advise against using it. Some properties can be used to correct pixel coordinates more efficiently when done directly in the loops.
+#### 2.1 - MainActivity Class
+This is the core of the app. This Class initializes a lot of variables for other classes such as calling Settings.setDPValuesInPixel, or generating the listeners such as menuButtonListener or menuItemListener. This Class and all the other Activities implements a method named `applyColorTheme()`. This method is usually called by onCreate but because this activities has an ActionBar, it needs to be called by onCreateOptionsMenu.
 
+#### 2.2 - ExifActivity Class
+An activity to view the image EXIF data. EXIF is a meta-data format used by a lot of image formats and even sounds files. It contains most notably the camera model and manufacturer, the exposure, ISO, focal length... Also the GPS coordinates where the image was taken. To display the coordinates, we used the Google Maps API. This API key can be found in res/google\_maps\_api.xml. When dark theme is enabled, the map uses raw/style\_gmap\_night.json
 
+#### 2.3 - FiltersActivity Class
+An activity used to prompt the user to tweak the filter parameter. This activity can also start a new instance of itself, most notably to create a mask.
 
-### FilterFunction Class
-This class is where all filters are born. A filter function is a static method of this class. It will always takes in parameter a Bitmap (the image to modify) and returns nothing. Most filters can also be tuned by some parameters. Lastly, those that use RenderScript will be given a Context in parameter.
+#### 2.4 - PreferencesActivity Class
+This class is where the user can view and change app's preferences.
 
+#### 2.5 - Tools Package
+#### 2.5.1 - History Class
+This Class allows to manage the history. It takes an ArrayList of AppliedFilter as attribute. When a filter is applied to an image (and confirmed by the user), it is added to the ArrayList. Then by using `goUntilFilter` we can get back the image to any prior stage. To achieve this result, this method takes the image and apply all the filters until that state is achieved. This way, we don't have to save a bitmap for each step, and you can reapply the same actions to the image in its original resolution (compared to its loaded resolution which is usually lower to increase reactivity of the UI). `removeUntil` allows to remove all states following the given state, reverting the history to that state.
 
-### FilterFunctionIntrinsic Class
-This class also implement filters, however, it uses Intrinsic functions. If a filter function has a Intrinsic equivalent (i.e. a function that uses ScriptIntrinsicConvolve3x3), then the name of the function should be the same in both classes. That way, it is easy to switch between them by simply changing the class when calling the function. This is also true for FilterFunctionDeprecated.
+#### 2.5.2 - Preference Enum
+It is used to ensure the names used are the same throughout the code.
 
+#### 2.5.3 - PreferenceManager Class
+This Class is used to save and load preferences on the phone. It also store the default values when the app is first installed. This is where the default values such as
+- `DARK_MODE`: defines if the color theme should be dark or light.
+- `IMPORTED_BMP_SIZE`: the maximum size of a loaded image. If the image is rectangular, the longest dimension will be resized to `IMPORTED_BMP_SIZE` and the otherwill be smaller than `IMPORTED_BMP_SIZE`. Default: `1000`
+- `MINIATURE_BMP_SIZE`: the size of the miniature used in the filter and preset menu.
+- `SAVE_ORIGINAL_RESOLUTION`: if true, the history is reapplied to the original image (the image as it was before reducing it to its `IMPORTED_BMP_SIZE`.)
+- `OPEN_HISTOGRAM_BY_DEFAULT`: if true, make the histogram visible by default when using a filter.
 
-### FilterFunctionDeprecated Class (Deprecated)
-This class is the legacy versions of currently used filters. Functions that uses non-RS convolution are in this class.
+#### 2.5.4 - Settings Class
+This class is where constants and magic numbers are stored. It gives easy access to some settings.
+- `MAX_ZOOM_LEVEL`: how much the user can zoom on the image. For example: 5f means we can zoom until only 1/5 of the image is displayed. Default `5f`.
+- `DOUBLE_TAP_ZOOM`: how much it zooms on the image when double tapping it. Default `3f`.
+- `OUTPUT_JPG_QUALITY`: The quality of the saved image. 100 means no compression, the lower you go, the higher the compression.
+- `SAVE_PATH`: the path to Litrato's folder. Photo are not saved there if using the Android MediaStore.
+- `SAVE_PATH_ORIGINAL`: the path to the subfolder of Litrato where the captured image are saved.
+- Layout related constant such as `ITEMS_MARGIN_IN_MENU`, `PADDING_BETWEEN_MINIATURE_AND_LABEL`...
+- `FILTER_MASK_NAME` and `FILTER_ROTATION`: because some filter are used in the code, they must have a peculiar name. To ensure this name is the same throughout the code, they are stored there.
+- `ACTIVITY_EXTRA_CALLER`: when adding extras to a StartActivity's Intent, we must used a string key to transfer information. To ensure this key is the same throughout the code, it is stored there.
 
-keepOrRemoveAColor is the filter function for the Keep a color and Remove a color filters. It takes a target hue as a parameter. Then, for each pixel, a pixel turns progressively greyer depending on the distance in degrees between its hue and the target hue. In order the accelerate the process, a lookup table (abbreviated to LUT from now on) has been used.
-Other functions also use LUTs such as linearContrastStretching, histogramEqualization, and hueShift.
+#### 2.6 - Ui Package
+Those menus are used in the bottom part of the UI, in the MainActivity and also the Stickers filter.
 
-gaussianBlur was a difficult function to write. The Gaussian blur operation “can be applied to a two-dimensional image as two independent one-dimensional calculations” (taken from Wikipedia). Thanks to this property, we will be using a one-dimensional kernel. I chose to scale the sigma with the size of the kernel. That way, the Gaussian kernel with always “look the same” but its resolution will increase with its size. In fact, the kernel will always have values between 1 and 90.
-
-Not too much to talk about the other function, except that my implementation of histogramEqualization has to call rgb2v and rgb2hsv over all the pixels. I could have used a float array to store all the values but decided to preserve some memory instead.
-
-### Filter Class
-A Filter is an object that describes which input (colorSeekBar, seekBars, switches etc...) the user has access to. Each Filter instance is created in the MainActivity when the program launches. At first, there is no link between a Filter instance and its corresponding FilterFunction. In order to create that connection, each Filter instance is given a new FilterInterface object. This interface is used to declare which FilterFunction should be called when applying the filter.
-
-A Filter instance has various instance variables:
-
-- A name which is then displayed in the spinner.
-- Does this filter use ColorSeekBar?
-- Does this filter use the first SeekBar? If so, what its minimum, set, and maximum values should be, along with the unit displayed?
-- Same thing for the second SeekBar.
-- Does this filter use the first Switch? If so, what is its default state, and what should be displayed when it is on or off.
-- An interface used to launch the right FilterFunction.
-
-### MainActivity Class
-This is the core of the app.
-Here is how a filter is declared:
-
-```java
-Filter newFilter = new Filter("Name");       // We starts by creating a new Filter object with a given name.
-newFilter.setColorSeekBar();                 // This filter will use the ColorSeekBar
-newFilter.setSeekBar1(0, 100, 100, "%");     // It will also use the first SeekBar and the minimum, set, maximum value and unit is given in parameter.
-newFilter.setSeekBar2(0, 100, 100, "%");     // It will also use the second SeekBar
-newFilter.setSwitch1(true,"Off", "On");   // It will use the switch, default state, false state displayed name, and true state displayed name
-
-// We override its apply method to redirect towards the appropriate FilterFunction.
-newFilter.setFilterFunction(new FilterInterface() {
-    @Override                               
-    public void apply(Bitmap bmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1) {
-        FilterFunctions.filterFunctionName(bmp, colorSeekHue, seekBar, seekBar2, switch1);
-    }
-});
-filters.add(newFilter);                     // Finally, we add this new Filter to filters (an array of Filter instances).
-```
-
-Then we populate the spinner with the names of filters in our array of filter. The order they are displayed in the spinner follows the order they were added.
+#### 2.6.1 - BottomMenu Class
+Those menus are used in the bottom part of the UI, in the MainActivity and also the Stickers filter.
 
 
-### ImageViewZoomScroll Class
-This class is used to add new functionality to ImageView objects: the ability to zoom and scroll on the image.
-Zoom and scroll events are handle by the MainActivity class, this class is used to calculate which portion of the image should be displayed. The more we zoom, the smaller this surface. When we scroll, we are moving this surface around.
+#### 2.6.2 - ColorTheme Class
+This class is used to change the color and style of UI elements to reflect the global style. The Dark Mode can be disabled in the Settings to change the style of the app.
 
-This surface is a rectangle defined by `newHeight`, `newWidth`, and `center`.
-If we want to change zoom level, we use the following line, we can use `setZoom(float zoom)` and we can move the image by using `translate(int x, int y)`.
+#### 2.6.3 - DisplayedFilter Class
+A displayed filter is a filter paired with its visual representation.
 
-Finally, when we want to refresh the image displayed by the our ImageView, we can use to following line of code:
-```Java
-Bitmap displayedBmp = Bitmap.createBitmap(  
-        fullSizeBmp,   
-	myImageView.getX(),   
-	myImageView.getY(),   
-	myImageView.getNewWidth(),   
-	myImageView.getNewHeight());
-```
+#### 2.6.4 - ImageViewZoomScroll Class
+This class is used to add new functionality to ImageView objects: the ability to zoom and scroll on the image. Zoom and scroll events are handle by the MainActivity class, this class is used to calculate which portion of the image should be displayed. The more we zoom, the smaller this surface. When we scroll, we are moving this surface around.
+
+This surface is a rectangle defined by `newHeight`, `newWidth`, and `center`. If we want to change zoom level, we use the following line, we can use `setZoom(float zoom)` and we can move the image by using `translate(int x, int y)`.
+
+Using those values, the Class created a transformation Matrix for the displayed image.
 
 Another very useful function in imageViewTouchPointToBmpCoordinates which convert the pixel touched on the imageView to the coordinates of that pixel in image (regardless of zoom and center position).
 
+#### 2.6.5 - ViewTools Class
+This Class contains multiple tools useful with views such as the ability to know if a View is visible, or transform DP units into pixels.
 
-### Settings Class
-This class is where constants and magic numbers are stored. It gives easy access to some settings.
-- `IMPORTED_BMP_SIZE`: the maximum size of a loaded image. If the image is rectangular, the longest dimension will be resized to `IMPORTED_BMP_SIZE` and the other will be smaller than `IMPORTED_BMP_SIZE`. Default: `1000`
-- `MAX_ZOOM_LEVEL`: how much the user can zoom on the image. For example: 5f means we can zoom until only 1/5 of the image is displayed. Default `5f`.
-- `DOUBLE_TAP_ZOOM`: how much it zooms on the image when double tapping it. Default `3f`.
-- `IMAGE_RATIO_PRECISION`: A magic number used by ImageViewZoomScroll when comparing the imageView ratio and the image ratio. Because those two values will never be exactly the same,  this value is how far off is still considered equal.
+### 3 - Filters Package
+#### 3.1 - Filter Class
 
-### Point Class
-A point is an object with two integers. It is possible to create a point, copy a point, translate it, and test if two points are equals. It is used by ImageViewZoomScroll.
+A Filter is an object that describes which input (colorSeekBar, seekBars, switches etc...) the user has access to. Each Filter instance could be created anywhere in the code, but we decided to do it outside MainActivity, which was already quite full.
+
+At first, there is no link between a Filter instance and its corresponding FilterFunction. In order to create that connection, each Filter instance is given a new FilterInterface object. This interface is used to declare which FilterFunction should be called when applying the filter.
+
+Here's an example to showcase how easily a new filter can be created. Please keep in mind that most filters doesn't use that many options, we have purposely used all of them: 
+
+
+```java
+// Create a filter with a name, a category and we can
+// declare which sub-function is available to the user.
+newFilter = new Filter("Name", Category.CATEGORY_NAME);
+newFilter.allowMasking = false;     // true by default
+newFilter.allowHistogram = false;   // true by default
+// allowScrollZoom is true by default, must be false to use the coordinates of touch events.
+newFilter.allowScrollZoom = false;  
+
+// Now, let's define which interface to use and their parameters.
+// If we don't call set..., this UI element wont be available.
+newFilter.setColorSeekBar();
+newFilter.setSeekBar1(seekBar1Min, seekBar1Current, seekBar1Max, "SeekBar 1 Label", "Unit");
+newFilter.setSeekBar2(seekBar2Min, seekBar2Current, seekBar2Max, "SeekBar 2 Label", "Unit");
+newFilter.setSwitch1(defaultBooleanValue, "Label if true", "Label if false");
+
+// Then we can specify if changing the UI element automatically refresh the image.
+newFilter.seekBar1AutoRefresh = false;
+newFilter.seekBar2AutoRefresh = false;
+newFilter.switch1AutoRefresh = false;
+
+// We can now set two different function, the first one is the one used when using the FilterActivity
+// (while tweaking the parameters). The second one is only called when the user click "Apply".
+// Filters such as Crop is using this distinction.
+newFilter.setFilterPreviewFunction(new FilterPreviewInterface() {
+    @Override
+    public Bitmap preview(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp, int selectedMenuItem, Filter filter) {
+        FilterFunction.sobel(bmp, seekBar, switch1);
+        return null;
+    }
+});
+
+// If no apply function is provided, the preview function is called instead.
+newFilter.setFilterApplyFunction(new FilterApplyInterface() {
+    @Override
+    public Bitmap apply(Bitmap bmp, Bitmap maskBmp, Context context, int colorSeekHue, float seekBar, float seekBar2, boolean switch1, Point touchDown, Point touchUp, int selectedMenuItem, Filter filter) {
+        return maskBmp;
+    }
+});
+
+// We can create any outside variable that could be used in between the Preview and Apply function.
+// Those variables needs to be final.
+```
+
+#### 3.2 - FilterFunction Class
+A filter function is a static method of this class. It will always takes in parameter a Bitmap (the image to modify). Most filters can also be tuned by some parameters. Lastly, those that use RenderScript will be given a Context in parameter.
+
+`keepOrRemoveAColor` is the filter function for the Keep a color and Remove a color filters. It takes a target hue as a parameter. Then, for each pixel, a pixel turns progressively greyer depending on the distance in degrees between its hue and the target hue. In order the accelerate the process, a lookup table (abbreviated to LUT from now on) has been used. Other functions also use LUTs such as `linearContrastStretching`, `histogramEqualization`, and `hueShift`.
+
+`gaussianBlur` was a difficult function to write. The Gaussian blur operation "can be applied to a two-dimensional image as two independent one-dimensional calculations" (taken from Wikipedia). Thanks to this property, we will be using a one-dimensional kernel. I chose to scale the sigma with the size of the kernel. That way, the Gaussian kernel with always "look the same'' but its resolution will increase with its size. In fact, the kernel will always have values between 1 and 90.
+
+#### 3.3 - FilterFunctionDeprecated Class (Deprecated)
+This class is the legacy versions of currently used filters. Functions that uses non-RS convolution are in this class.
+
+#### 3.4 - FilterFunctionIntrinsic Class
+This class is the Intrinsic versions of currently used filters. It has been left there to compare our implementations from Android's library's.
+
+#### 3.5 - AppliedFilter Class
+This Class was made to implement the history. It is essentially a Filter and all the parameters to apply it (the states of all seekBars, a mask, the state of the switch, the points touchUp and touchDown). It can be used as a recipe to exactly recreate the effect applied by the user. Then, the `apply` function allows us to apply this AppliedFilter to a bitmap.
+
+#### 3.6 - FilterApply and FilterPreview Interfaces
+This FilterApply interface is used to dynamically change the Filter instances apply method. Each filter will call a different FilterFunction static method and using this interface, it is possible for MainActivity to change which one to use.
+The FilterPreview interface is used in the same way but targets the Preview method instead.
+
+#### 3.7 - Category and BlendType Enums
+Category is used to define where one Filter object should be displayed (as a Filter, a Tool, or a Filter). The Blending type defines how two images can be blend together using the applyTexture FilterFunction.
+
+#### 3.8 - Tools Package
+
+#### 3.8.1 - ColorTools Class (Deprecated)
+This class implemented all the functions necessary for conversions between RGB and HSV. It is now deprecated as those conversions are done in RenderScript directly.
+
+#### 3.8.2 - ConvolutionTools Class (Deprecated)
+This class implemented tools used by any filter that uses convolution without RenderScript. It is now deprecated as all FilterFunctions now use RenderScript based convolution.
+
+#### 3.8.3 - RenderScriptTools Class
+The RenderScriptTools implements tools useful for functions that use RS. The applyConvolution3x3RS function applies any 3x3 kernel to any image. However, it uses ScriptIntrinsicConvolve3x3. The applyConvolution function uses our own RenderScript convolution and isn't limited to 3x3 kernel. Actually, the kernel can even be rectangular. The  cleanRenderScript function can be called after any RS function to destroy the Script, RenderScript, and a list of Allocation for input(s) and output(s).
+
+### 4 - RenderScriptTools Class
+
+#### 4.1 - FileInputOutput Class
+This class is managing input and output. Loading files, loading resources, creating folders...
+
+#### 4.2 - ImageTools Class
+This Class contains useful tools to manipulate images, here are some of them. First to create a bitmap satisfying our expectations (modifying its size or not) with `cloneBitmap`, `createScaledBitmap` or `toSquare`. Then to create the histogram of the bitmap with `generateHistogram(Bitmap bmp)`. It contains also tools to draw on a bitmap `drawCircle(final Bitmap bmp, Point center, int radius, int color)` to create a mask and `drawRectangle(final Bitmap bmp, Point a, Point b, int color, int thickness)` to show the cropping area.
+
+
+#### 4.3 - Point and PointPercentage Classes
+The Point Class allows to create a two-dimensional point (two integers) and contains multiple methods to manipulate them : we can copy a point, translate it, and test if two points are equals. Points are mainly used for when the user is interacting with the screen, for example to draw the rectangle when cropping, we need the position of the finger. Then the PointPercentage Class is basically the same but instead of having two integers to make a point, we are having two floats because they are representing the coordinates on their respective axis in percent. PointPercentage is used to apply filters to the full size image. Indeed having the coordinate of the touched pixel in percentage allows to have this touched pixel for any size of the image.
+
 
 
 ## PERFORMANCES
