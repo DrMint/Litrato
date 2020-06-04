@@ -16,35 +16,44 @@ Here a list of the features:
 
 ## INTERFACE
 
-![](https://www.r-entries.com/etuliens/img/PT/interface.jpg)
+<img src="https://www.r-entries.com/etuliens/img/Litrato/layout.jpg" width="100%">
 
-When no filter has yet been applied, the `ORIGINAL` button will display`LOAD`. Clicking on it will ask to user if he wants to load an photo from the library, or take a photo.
-When no filter has yet been applied, the `APPLY` button will also change and display `SAVE`. The user will have to grant the app the right to write on the internal storage.
+When the app is first launched, a permission request to access storage is prompted. Then a default image will be displayed. The user can then load an image from his gallery or take a picture by clicking on the top left `File` icon and modify his personal images. What was simply called "Filters" has been divided in three categories : `Presets` which are predefined filters that can be applied just be tapping on its miniature, `Tools` which include all the essential tools to modify an image, and finally `Filters`. This last one is further divided into four categories: `Color`, `Fancy`, `Blur` and `Contour`.
 
-When the user click on the histogram, it will reduce its size and make the image information disappear. Click on the histogram again will revert back to its prior state.
+At the top, there is also the `History` button with a clock icon. Using this button, the user can preview and revert to any prior state of the image using a slider. Once the user selected a prior state, he can click on the `Confirm` button to validate their choice.
 
-The user can zoom on the image using two fingers, and then move around with one finger or two fingers. Double tapping the image will zoom on it, and double tapping again will make the image fit on the screen.
+Further to the right there is the save button, quick access to 90° counterclockwise and clockwise rotations. Lastly, a dropmenu gives access to Settings and EXIF Viewer. The first one allow the user to change some parameters in the app and the second one is usuful to learn more about the loaded image, such as where it has taken, by what camera...
+
+Back to the main window, the user can zoom on the image using two fingers, and then move around with one finger or two fingers. Double tapping the image will zoom on it, and double tapping again will make the image fit on the screen. Warning : sometimes gesture navigation is disabled depending on the situation. Some functions use the touch as an input, such as `Color Picker` or `Crop`.
+
+<img src="https://www.r-entries.com/etuliens/img/Litrato/layout2.jpg" width="100%">
+
+If the user tap on one of a tool or a filter, a new window will appear prompting them to adjust the filter as they wishes. Once the user is happy with the result, they can click on the `Apply` button to validate the modification. The bar at the very bottom also shows the name of the active filter/tool. Clicking on the name can toggle on or off the "Filter menu". The number and the disposition of the controls vary according to the filter. Some use the Color Seek bar to select a tint. In this case, the `Pick a Color` tool also appear on its left. The user can use this tool to select directly on the image the tint they want the work with. At most, a filter can display two seekbars, one colorSeekBar, a switch, and a special menu (currently only used by "Stickers") to display a list of selectable bitmaps.
+
+On the left, two other buttons can appear. The first one is the `Masking` tool. Clicking on it will bring another window where the user can draw where the filter should be applied on the image. By default, the mask is entirely black, meaning that the filter will be apply nowhere. The user can choose the draw in white or black, the size of the brush, and the view opacity of the mask. This last option is purely visual and doesn't change the mask whatsoever.
+Let's go back to the Filter menu, the last option at the bottom left is `Histogram`, a button that will toggle the histogram, a visual representation of the repartition of RGB values. It is overprinted on the image to allow the user to still view what is underneath. The histogram uses logarithm scaling on the Y-axis.
 
 ## FILTERS
 
 ### Original image
 <img src="https://www.r-entries.com/etuliens/img/Litrato/default_image.jpg" width="40%">
 
+
 ### Auto
-![](https://www.r-entries.com/etuliens/img/Litrato/auto.jpg)
+<img src="https://www.r-entries.com/etuliens/img/Litrato/auto.jpg" width="40%">
 Provides two ways to increase the contrast without burning values (burning refers to values getting out of the 0-255 scale).
 The first is by maximizing the range of luminances values of the image. The second is called Dynamic extension, and tries to make the histogram as flat as possible.
 
 ### Luminosity
-![](https://www.r-entries.com/etuliens/img/Litrato/luminosity.jpg)
+<img src="https://www.r-entries.com/etuliens/img/Litrato/luminosity.jpg" width="40%">
 Changes how bright or dark the image is. It turns up too much, this will burn the image.
 - `Seek bar`: the image's brightness (between -100% and 100%).
 - `Seek bar 2`: the image's gamma value (between -100% and 100%).
 
 ### Saturation
-![](https://www.r-entries.com/etuliens/img/Litrato/saturation.jpg)
+<img src="https://www.r-entries.com/etuliens/img/Litrato/saturation.jpg" width="40%">
 Changes the saturation of the image.
-- `Seek bar`: the image's saturation (between 0 and 200\%)
+- `Seek bar`: the image's saturation (between 0 and 200%)
 
 
 
