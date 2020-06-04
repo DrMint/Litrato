@@ -3,15 +3,29 @@
 
 ## DESCRIPTION
 The goal of this project is to create an Android app capable of editing photos and saving those changes to the gallery.
-Here a list of the features:
-- Take or select an image: images can be obtained from the gallery, or directly from the camera.
-- Zoom and scroll: it is possible to zoom on it using two fingers, and then move around with one finger.
-- Numerous filters: the app allows the user to apply a vast array of filters.
-- Highly optimized: all filters are using the latest technologies (such as RenderScript) to offer the best user experience.
-- Reset and save: the user can always undo all filters applied by clicking the Original button. They can also save the image.
-- User friendly interface: the UI is simple and intuitive.
 
-[//]: # (_Features in **bold** are not yet implemented, or are not yet refined enough._)
+Filters and effects:
+- 14 presets to quickly apply a filter (without any parameters).
+- Transformations such as rotation, crop, flip...
+- Essentials tools such as luminosity, contrast, gamma, saturation...
+- More advanced filters that use convolution or blending two or more images.
+- Almost all filters are using RenderScript, which accelerates the calculations.
+
+UI:
+- The UI is simple and intuitive, with menus, separate interfaces, and the preview of each filter.
+- Dark and light theme.
+- Zoom and scroll: it is possible to zoom on the image using two fingers or with a double tap, and then move around with one finger.
+
+Tools:
+- “Color Picker”, a tool to select a hue directly from the image.
+- "History" gives the user the ability to revert to any prior state of the image.
+- A setting menu where the user can tweak some parameters. Those values are saved on the phone.
+- An menu to view most EXIF values of the image, such as the ISO, f-number or where the photo was taken.
+- Ability to only apply a filter to a part of the image. This "mask" is drawn by the user using its finger.
+
+Load and save:
+- Take or select an image: images can be obtained from the gallery, or directly from the camera.
+- It is possible to save the image in its original resolution, and have a smaller resolution while using the app.
 
 
 ## INTERFACE
@@ -452,3 +466,4 @@ Loading a new image reset this "Graphics" portion and also "Native", the blue po
 - We looked a little bit into AsyncTasks as it could greatly improve the speed of the app on older and newer phones.
 - The app is really slow when first launched. From what we understood, this is because RenderScript is "compiling" / "caching" its functions.
 - The app memory consumption seems way higher than its expected consumption. We have to look into that.
+
