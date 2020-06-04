@@ -1,3 +1,4 @@
+
 # IMAGE PROCESSING ON ANDROID
 
 ## DESCRIPTION
@@ -25,6 +26,30 @@ When the user click on the histogram, it will reduce its size and make the image
 The user can zoom on the image using two fingers, and then move around with one finger or two fingers. Double tapping the image will zoom on it, and double tapping again will make the image fit on the screen.
 
 ## FILTERS
+
+### Original image
+<img src="https://www.r-entries.com/etuliens/img/Litrato/default_image.jpg" width="40%">
+
+### Auto
+![](https://www.r-entries.com/etuliens/img/Litrato/auto.jpg)
+Provides two ways to increase the contrast without burning values (burning refers to values getting out of the 0-255 scale).
+The first is by maximizing the range of luminances values of the image. The second is called Dynamic extension, and tries to make the histogram as flat as possible.
+
+### Luminosity
+![](https://www.r-entries.com/etuliens/img/Litrato/luminosity.jpg)
+Changes how bright or dark the image is. It turns up too much, this will burn the image.
+- `Seek bar`: the image's brightness (between -100% and 100%).
+- `Seek bar 2`: the image's gamma value (between -100% and 100%).
+
+### Saturation
+![](https://www.r-entries.com/etuliens/img/Litrato/saturation.jpg)
+Changes the saturation of the image.
+- `Seek bar`: the image's saturation (between 0 and 200\%)
+
+
+
+
+
 ### Brightness
 ![](https://www.r-entries.com/etuliens/img/PT/1.jpg)
 
