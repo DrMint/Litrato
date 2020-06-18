@@ -459,7 +459,7 @@ Loading a new image reset this "Graphics" portion and also "Native", the blue po
 - Convolutions do not correct the pixel values for the border of the image. As such, we can see black borders around the image.
 - When rotating the image, we could have a Crop function that automatically keeps the largest rectangle that fit inside the image.
 - When switching between Light and Dark mode, the icons in Tools aren't recolorize by the theme. It is difficult to say what is causing it. The problem appeared quite recently while creating the BottomMenu Class. As it isn't that much of a problem, we left it as it is for now.
-- Images saved my our program seems to erase most EXIF meta-data.
+- Images saved by our program seems to erase most EXIF meta-data.
 - The EXIF value for flash activation seems to not follow the ExifInterface given by Android's library. Some phones and other cameras use seems to use many different values, some of which are not even categories by the library. This result in a lot of false positive by the EXIF Viewer.
 - The Google API key has been made public on our GitHub after committing the file. It is highly discouraged by GitHub and Google Developer's Guide.
 - MainActivity is sharing its AppContext in static manner with BottomMenu Class. This can lead to memory leaks according the Android Studio.
