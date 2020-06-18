@@ -30,7 +30,7 @@ Load and save:
 
 ## INTERFACE
 
-<img src="https://www.r-entries.com/etuliens/img/Litrato/layout.jpg" width="100%">
+<img src="https://r-entries.com/etuliens/img/Litrato/layout.jpg" width="100%">
 
 When the app is first launched, a permission request to access storage is prompted. Then a default image will be displayed. The user can then load an image from his gallery or take a picture by clicking on the top left `File` icon and modify his personal images. What was simply called "Filters" has been divided in three categories : `Presets` which are predefined filters that can be applied just be tapping on its miniature, `Tools` which include all the essential tools to modify an image, and finally `Filters`. This last one is further divided into four categories: `Color`, `Fancy`, `Blur` and `Contour`.
 
@@ -40,7 +40,7 @@ Further to the right there is the save button, quick access to 90° counterclock
 
 Back to the main window, the user can zoom on the image using two fingers, and then move around with one finger or two fingers. Double tapping the image will zoom on it, and double tapping again will make the image fit on the screen. Warning : sometimes gesture navigation is disabled depending on the situation. Some functions use the touch as an input, such as `Color Picker` or `Crop`.
 
-<img src="https://www.r-entries.com/etuliens/img/Litrato/layout2.jpg" width="100%">
+<img src="https://r-entries.com/etuliens/img/Litrato/layout2.jpg" width="100%">
 
 If the user tap on one of a tool or a filter, a new window will appear prompting them to adjust the filter as they wishes. Once the user is happy with the result, they can click on the `Apply` button to validate the modification. The bar at the very bottom also shows the name of the active filter/tool. Clicking on the name can toggle on or off the "Filter menu". The number and the disposition of the controls vary according to the filter. Some use the Color Seek bar to select a tint. In this case, the `Pick a Color` tool also appear on its left. The user can use this tool to select directly on the image the tint they want the work with. At most, a filter can display two seekbars, one colorSeekBar, a switch, and a special menu (currently only used by "Stickers") to display a list of selectable bitmaps.
 
@@ -50,51 +50,51 @@ Let's go back to the Filter menu, the last option at the bottom left is `Histogr
 ## FILTERS
 
 ### Original image
-<img src="https://www.r-entries.com/etuliens/img/Litrato/default_image.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/default_image.jpg" width="40%">
 
 
 ### Auto
-<img src="https://www.r-entries.com/etuliens/img/Litrato/auto.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/auto.jpg" width="40%">
 Provides two ways to increase the contrast without burning values (burning refers to values getting out of the 0-255 range).
 The first is by maximizing the range of luminances values of the image. The second is called Dynamic extension, and tries to make the histogram as flat as possible.
 
 - `Switch`: choose which way to increase contrast.
 
 ### Luminosity
-<img src="https://www.r-entries.com/etuliens/img/Litrato/luminosity.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/luminosity.jpg" width="40%">
 Changes how bright or dark the image is. It turns up too much, this will burn the image.
 
 - `Seek bar`: the image's brightness (between -100% and 100%).
 - `Seek bar 2`: the image's gamma value (between -100% and 100%).
 
 ### Saturation
-<img src="https://www.r-entries.com/etuliens/img/Litrato/saturation.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/saturation.jpg" width="40%">
 Changes the saturation of the image.
 
 - `Seek bar`: the image's saturation (between 0 and 200%)
 
 ### Temperature
-<img src="https://www.r-entries.com/etuliens/img/Litrato/temperature.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/temperature.jpg" width="40%">
 Makes the image look warmer or colder.
 
 - `Seek bar`: the image’s temperature (between -100\% and 100\%).
 
 ### Tint
-<img src="https://www.r-entries.com/etuliens/img/Litrato/tint.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/tint.jpg" width="40%">
 Changes the tint of an image. Makes the images more magenta or green.
 
 - `Seek bar`: the image’s tint (between -100\% and 100\%).
 
 
 ### Sharpening
-<img src="https://www.r-entries.com/etuliens/img/Litrato/sharpness.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/sharpness.jpg" width="40%">
 Makes the image look sharper or blurrier.
 
 - `Seek bar`: the image’s sharpness (between -100\% and 100\%).
 
 
 ### Colorize
-<img src="https://www.r-entries.com/etuliens/img/Litrato/colorize.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/colorize.jpg" width="40%">
 Apply one color and saturation to the entire image.
 
 - `Color seek bar`: the color you wish to use.
@@ -102,28 +102,28 @@ Apply one color and saturation to the entire image.
 
 
 ### Change Hue
-<img src="https://www.r-entries.com/etuliens/img/Litrato/changehue.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/changehue.jpg" width="40%">
 Apply one hue to the entire image but contrary to the Colorize filter, it doesn’t change the saturation of the image.
 
 - `Color seek bar`: the color hue you wish to use.
 
 
 ### Hue Shift
-<img src="https://www.r-entries.com/etuliens/img/Litrato/hueshift.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/hueshift.jpg" width="40%">
 Shift all hues by a certain amount. This can give interesting results when used moderately.
 
 - `Color seek bar`: the color hue you wish to use.
 - `Seek bar`: shift amount (between -180 and 180 degrees).
 
 ### Threshold
-<img src="https://www.r-entries.com/etuliens/img/Litrato/threshold.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/threshold.jpg" width="40%">
 If the pixel’s luminosity is bellow the threshold, turns it back. Turns it white otherwise.
 
 - `Color seek bar`: the color hue you wish to use.
 - `Seek bar`: shift amount (between -180 and 180 degrees).
 
 ### Selective Coloring
-<img src="https://www.r-entries.com/etuliens/img/Litrato/selectivecoloring.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/selectivecoloring.jpg" width="40%">
 Turns everything grayscale except for a specific color. If in remove mode (using the Switch), the user can reverse the effect and only remove that color instead of keeping it.
 
 - `Color seek bar`: the color hue you wish to use.
@@ -132,7 +132,7 @@ Turns everything grayscale except for a specific color. If in remove mode (using
 
 
 ### Add noise
-<img src="https://www.r-entries.com/etuliens/img/Litrato/addnoise.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/addnoise.jpg" width="40%">
 Adds some random noise to the image.
 
 - `Seek bar`: the amount of noise (between 0 and 255).
@@ -140,33 +140,33 @@ Adds some random noise to the image.
 
 
 ### Posterize
-<img src="https://www.r-entries.com/etuliens/img/Litrato/posterize.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/posterize.jpg" width="40%">
 Reduces the number of distinct colors, also called color quantization.
 
 - `Seek bar`: how many possible colors should be kept in each channel (in steps between 2 and 32).
 - `Switch`: also turns the image greyscale.
 
 ### Average Blur
-<img src="https://www.r-entries.com/etuliens/img/Litrato/averageblur.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/averageblur.jpg" width="40%">
 Blurs the image by averaging equally all pixels with their neighbors.
 
 - `Seek bar`: blur amount (between 1 and 19 pixels).
 
 ### Gaussian Blur
-<img src="https://www.r-entries.com/etuliens/img/Litrato/gaussianblur.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/gaussianblur.jpg" width="40%">
 Blurs the image by using a Gaussian function.
 
 - `Seek bar`: blur amount (between 1 and 25 pixels).
 
 ### Laplacian
-<img src="https://www.r-entries.com/etuliens/img/Litrato/laplacian.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/laplacian.jpg" width="40%">
 Used to highlight all the image’s contours.
 
 - `Seek bar`: how much details should be kept(between 1 and 14 pixels).
 
 
 ### Directional Blur
-<img src="https://www.r-entries.com/etuliens/img/Litrato/directionalblur.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/directionalblur.jpg" width="40%">
 Blurs the image horizontally or vertically.
 
 - `Seek bar`: blur amount (between 2 and 30 pixels).
@@ -174,37 +174,37 @@ Blurs the image horizontally or vertically.
 
 
 ### Cartoon
-<img src="https://www.r-entries.com/etuliens/img/Litrato/cartoon.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/cartoon.jpg" width="40%">
 Applies a cartoon effect. This is achieve by reducing the number of color values and highlighting the contours.
 
 - `Seek bar`: the black value of the "shading" (everything expect the contours).
 - `Seek bar 2`: the number of colors.
 
 ### Sketch
-<img src="https://www.r-entries.com/etuliens/img/Litrato/sketch.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/sketch.jpg" width="40%">
 Sketch effect.
 
 - `Seek bar`: how thick or narrow the contours should be.
 - `Seek bar 2`: how much colors should remain.
 
 ### Crop
-<img src="https://www.r-entries.com/etuliens/img/Litrato/crop.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/crop.jpg" width="40%">
 Crop the image at the desired size. The area is selected using touch.
 
 - `Switch`: how thick or narrow the contours should be.
 
 ### Flip
-<img src="https://www.r-entries.com/etuliens/img/Litrato/flip.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/flip.jpg" width="40%">
 Applies a horizontal flip of the image.
 
 ### Rotation
-<img src="https://www.r-entries.com/etuliens/img/Litrato/rotation.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/rotation.jpg" width="40%">
 Applies a rotation to the image.
 
 - `Seek bar`: rotation in degrees (between -180 and 180).
 
 ### Stickers
-<img src="https://www.r-entries.com/etuliens/img/Litrato/sticker.jpg" width="40%">
+<img src="https://r-entries.com/etuliens/img/Litrato/sticker.jpg" width="40%">
 Allows to put stickers on the image. Touching the screen applies a sticker at that location.
 
 - `Seek bar`: size of the sticker in percent (between 10% and 290%)
@@ -445,7 +445,7 @@ Furthermore, the images used in a photography app such as this one would probabl
 ## MEMORY USAGE
 The following test has been performed on the same phone as before. In order to better highlight some behavior, we used a 3 Mpx image.
 
-<img src="https://www.r-entries.com/etuliens/img/Litrato/memory.jpg" width="100%">
+<img src="https://r-entries.com/etuliens/img/Litrato/memory.jpg" width="100%">
 
 The program memory usage starts around 75 MB and after one minute of standby. When we load the 3 Mpx image, the memory consumption skyrocketed to about 201 MB. After a little while, the memory usage dropped to 107. The image internally is stored in RGBA-4444 which means that we use 4 bytes to store each pixel. 3 millions * 4 is equals to 12MB. In practice, loading this image resulted in about 3 times this amount. This can be explained because our program stores three copies of the image: the original image, the filtered image, and internally, the imageView stores another copy. When applying a filter (we choose Colorize), the value stay constant at about 300MB after Applying the filter and returning to the Main activity, the memory consumption stays at around 210MB. The second wave was using the Rotate tool. After all those operations, the program stays at 260MB.
 
