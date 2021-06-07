@@ -27,7 +27,7 @@ Load and save:
 - Take or select an image: images can be obtained from the gallery, or directly from the camera.
 - It is possible to save the image in its original resolution, and have a smaller resolution while using the app.
 
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" width="20%">](https://apt.izzysoft.de/fdroid/index/apk/com.example.retouchephoto)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" width="30%">](https://apt.izzysoft.de/fdroid/index/apk/com.example.retouchephoto)
 
 ## INTERFACE
 
